@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-finance-900 text-finance-text font-sans antialiased;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-finance-primary hover:bg-finance-primaryHover text-white font-semibold py-2 px-4 rounded transition-colors duration-200;
+  }
+  .btn-danger {
+    @apply bg-finance-danger hover:bg-finance-dangerHover text-white font-semibold py-2 px-4 rounded transition-colors duration-200;
+  }
+  .card {
+    @apply bg-finance-800 rounded-xl shadow-lg border border-finance-700 p-6;
+  }
+  .input-field {
+    @apply w-full bg-finance-900 border border-finance-700 rounded p-3 text-finance-text focus:outline-none focus:border-finance-primary focus:ring-1 focus:ring-finance-primary transition-colors;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0f172a; 
+}
+::-webkit-scrollbar-thumb {
+  background: #334155; 
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #475569; 
+}

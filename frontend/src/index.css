@@ -1,0 +1,17 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .input-field {
+    @apply w-full p-3 rounded-xl bg-finance-900 border border-finance-700 text-finance-text focus:outline-none focus:border-finance-primary transition-colors;
+  }
+
+  .btn-primary {
+    @apply px-6 py-2.5 bg-finance-primary text-black rounded-xl font-bold hover:bg-finance-primaryHover transition-colors shadow-lg shadow-finance-primary/20;
+  }
+
+  .card {
+    @apply bg-finance-800 rounded-2xl border border-finance-700 p-6;
+  }
+}
