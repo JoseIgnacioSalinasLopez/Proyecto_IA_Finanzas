@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+import { useLanguage } from '../context/LanguageContext';
 import appLogo from '../assets/logo.png';
+import { useAuth } from '../hooks/useAuth';
 
 export default function Login() {
+    const { t } = useLanguage();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
@@ -19,7 +20,7 @@ export default function Login() {
             await login(email, password);
             navigate('/');
         } catch (err) {
-            setError(err.response?.data?.message || 'Error al iniciar sesión');
+            setError(err.response?.data?.message || t('error_loading'));
         } finally {
             setLoading(false);
         }
@@ -32,7 +33,7 @@ export default function Login() {
                     <div className="flex justify-center mb-4">
                         <img src={appLogo} alt="Mente Billete Logo" className="h-20 w-auto object-contain" />
                     </div>
-                    <p className="text-finance-muted mt-4">Inicia sesión en tu cuenta</p>
+                    <p className="text-finance-muted mt-4">{t('login_title')}</p>
                 </div>
 
                 {error && (
@@ -43,7 +44,7 @@ export default function Login() {
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <label className="block text-sm font-medium text-finance-muted mb-1">Correo Electrónico</label>
+                        <label className="block text-sm font-medium text-finance-muted mb-1">{t('email_address')}</label>
                         <input
                             type="email"
                             className="input-field"
@@ -55,7 +56,7 @@ export default function Login() {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-finance-muted mb-1">Contraseña</label>
+                        <label className="block text-sm font-medium text-finance-muted mb-1">{t('change_password')}</label>
                         <input
                             type="password"
                             className="input-field"
@@ -68,7 +69,7 @@ export default function Login() {
 
                     <div className="flex justify-end text-sm">
                         <Link to="/forgot-password" className="text-finance-primary hover:text-finance-primaryHover">
-                            ¿Olvidaste tu contraseña?
+                            {t('forgot_password_q')}
                         </Link>
                     </div>
 
@@ -77,14 +78,14 @@ export default function Login() {
                         className="btn-primary w-full flex justify-center py-3"
                         disabled={loading}
                     >
-                        {loading ? 'Iniciando sesión...' : 'Ingresar'}
+                        {loading ? t('logging_in') : t('login_button')}
                     </button>
                 </form>
 
                 <p className="mt-6 text-center text-sm text-finance-muted">
-                    ¿No tienes una cuenta?{' '}
+                    {t('no_account')}{' '}
                     <Link to="/register" className="text-finance-primary hover:text-finance-primaryHover font-medium">
-                        Regístrate aquí
+                        {t('register_here')}
                     </Link>
                 </p>
             </div>

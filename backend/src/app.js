@@ -6,6 +6,9 @@ import categoryRoutes from './routes/category.routes.js';
 import transactionRoutes from './routes/transaction.routes.js';
 import statsRoutes from './routes/stats.routes.js';
 import profileRoutes from './routes/profile.routes.js';
+import goalRoutes from './routes/goal.routes.js';
+import eventRoutes from './routes/event.routes.js';
+import chatRoutes from './routes/chat.routes.js';
 
 const app = express();
 
@@ -20,6 +23,9 @@ app.use('/api/transactions', transactionRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/profile', profileRoutes);
+app.use('/api/goals', goalRoutes);
+app.use('/api/events', eventRoutes);
+app.use('/api/chat', chatRoutes);
 
 // Healthcheck Route
 app.get('/api/health', (req, res) => {

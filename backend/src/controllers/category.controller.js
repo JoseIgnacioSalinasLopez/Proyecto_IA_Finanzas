@@ -1,5 +1,17 @@
 import * as categoryService from '../services/category.service.js';
 
+export const updateCategory = async (req, res, next) => {
+    try {
+        const { name, color } = req.body;
+        if (!name) return res.status(400).json({ success: false, message: 'Name is required' });
+
+        const category = await categoryService.updateCategory(req.user.id, req.params.id, name, color);
+        res.status(200).json({ success: true, data: category });
+    } catch (error) {
+        next(error);
+    }
+};
+
 export const getCategories = async (req, res, next) => {
     try {
         const categories = await categoryService.getCategories(req.user.id);

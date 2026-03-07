@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
+import { useLanguage } from '../context/LanguageContext';
 import appLogo from '../assets/logo.png';
+import { useAuth } from '../hooks/useAuth';
 
 export default function Register() {
+    const { t } = useLanguage();
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -20,7 +21,7 @@ export default function Register() {
             await registerUser(name, email, password);
             navigate('/');
         } catch (err) {
-            setError(err.response?.data?.message || 'Error al registrarte');
+            setError(err.response?.data?.message || t('registration_error'));
         } finally {
             setLoading(false);
         }
@@ -33,7 +34,7 @@ export default function Register() {
                     <div className="flex justify-center mb-4">
                         <img src={appLogo} alt="Mente Billete Logo" className="h-20 w-auto object-contain" />
                     </div>
-                    <p className="text-finance-muted mt-4">Crea una cuenta nueva</p>
+                    <p className="text-finance-muted mt-4">{t('register_title')}</p>
                 </div>
 
                 {error && (
@@ -44,7 +45,7 @@ export default function Register() {
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div>
-                        <label className="block text-sm font-medium text-finance-muted mb-1">Nombre Completo</label>
+                        <label className="block text-sm font-medium text-finance-muted mb-1">{t('full_name')}</label>
                         <input
                             type="text"
                             className="input-field"
@@ -56,7 +57,7 @@ export default function Register() {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-finance-muted mb-1">Correo Electrónico</label>
+                        <label className="block text-sm font-medium text-finance-muted mb-1">{t('email_address')}</label>
                         <input
                             type="email"
                             className="input-field"
@@ -68,7 +69,7 @@ export default function Register() {
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-finance-muted mb-1">Contraseña</label>
+                        <label className="block text-sm font-medium text-finance-muted mb-1">{t('change_password')}</label>
                         <input
                             type="password"
                             className="input-field"
@@ -85,14 +86,14 @@ export default function Register() {
                         className="btn-primary w-full flex justify-center py-3 mt-4"
                         disabled={loading}
                     >
-                        {loading ? 'Creando cuenta...' : 'Regístrate'}
+                        {loading ? t('creating_account') : t('register_button')}
                     </button>
                 </form>
 
                 <p className="mt-6 text-center text-sm text-finance-muted">
-                    ¿Ya tienes una cuenta?{' '}
+                    {t('have_account')}{' '}
                     <Link to="/login" className="text-finance-primary hover:text-finance-primaryHover font-medium">
-                        Inicia sesión
+                        {t('login_here')}
                     </Link>
                 </p>
             </div>

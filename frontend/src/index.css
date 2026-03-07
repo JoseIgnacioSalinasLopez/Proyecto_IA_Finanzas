@@ -2,16 +2,239 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── Google Fonts ─────────────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+/* ─── Base Styles ───────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Focus Visible (Accesibilidad WCAG) ───────────────────────────── */
+:focus-visible {
+  outline: 2px solid #00D4FF;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ─── Scrollbar Personalizada ──────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0B022D;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 99px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 212, 255, 0.4);
+}
+
+/* ─── Utility Classes ──────────────────────────────────────────────── */
 @layer utilities {
   .input-field {
-    @apply w-full p-3 rounded-xl bg-finance-900 border border-finance-700 text-finance-text focus:outline-none focus:border-finance-primary transition-colors;
+    @apply w-full p-3 rounded-xl bg-finance-900 border border-finance-700 text-finance-text focus:outline-none focus:border-finance-primary transition-colors placeholder:text-finance-muted/50;
   }
 
   .btn-primary {
-    @apply px-6 py-2.5 bg-finance-primary text-black rounded-xl font-bold hover:bg-finance-primaryHover transition-colors shadow-lg shadow-finance-primary/20;
+    @apply px-6 py-2.5 bg-finance-primary text-black rounded-xl font-bold hover:bg-finance-primaryHover transition-all duration-200 shadow-lg shadow-finance-primary/20 active:scale-95;
+  }
+
+  .btn-danger {
+    @apply px-6 py-2.5 bg-red-500 text-white rounded-xl font-bold hover:bg-red-400 transition-all duration-200 shadow-lg shadow-red-500/20 active:scale-95;
+  }
+
+  .btn-ghost {
+    @apply px-4 py-2 rounded-xl font-medium text-finance-muted hover:text-finance-text hover:bg-white/5 transition-all duration-200;
   }
 
   .card {
     @apply bg-finance-800 rounded-2xl border border-finance-700 p-6;
   }
+
+  .focus-ring {
+    @apply focus-visible:outline focus-visible:outline-2 focus-visible:outline-finance-primary;
+  }
+
+  /* Skeleton Loader */
+  .skeleton {
+    @apply bg-finance-700 rounded-xl animate-pulse;
+  }
+
+  /* Texto numérico financiero */
+  .amount-text {
+    @apply font-bold tabular-nums tracking-tight;
+  }
+}
+
+/* ─── Animaciones ──────────────────────────────────────────────────── */
+
+/* Slide Up (Toast, Modales) */
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(1.5rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Fade In (Cards, Páginas) */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s ease-out forwards;
+}
+
+/* Fade In Up (Tarjetas de resumen) */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-fade-in-up-delay-1 {
+  animation: fade-in-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+}
+
+.animate-fade-in-up-delay-2 {
+  animation: fade-in-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+}
+
+.animate-fade-in-up-delay-3 {
+  animation: fade-in-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+}
+
+/* Slide In desde la izquierda (Sidebar móvil) */
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Shimmer para Skeleton */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(90deg,
+      rgba(255, 255, 255, 0.03) 0%,
+      rgba(255, 255, 255, 0.08) 50%,
+      rgba(255, 255, 255, 0.03) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+
+/* Scale in (Modal) */
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-scale-in {
+  animation: scale-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Pulse glow */
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+  }
+
+  50% {
+    box-shadow: 0 0 30px rgba(0, 212, 255, 0.6);
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Overlay backdrop */
+.modal-overlay {
+  animation: fade-in 0.2s ease-out forwards;
+}
+
+/* ─── Colores de Montos Financieros ────────────────────────────────── */
+.amount-income {
+  color: #34d399;
+}
+
+.amount-expense {
+  color: #f87171;
+}
+
+.amount-balance-pos {
+  color: #FFFFFF;
+}
+
+.amount-balance-neg {
+  color: #f87171;
 }

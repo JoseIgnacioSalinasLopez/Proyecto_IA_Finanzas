@@ -17,6 +17,8 @@ export default {
           primaryHover: 'rgba(0, 212, 255, 0.8)',
           danger: '#E600E6', /* Magenta vibrante */
           dangerHover: 'rgba(230, 0, 230, 0.8)',
+          neon: '#39FF14', /* Verde neón */
+          electric: '#00E5FF', /* Azul eléctrico */
         }
       },
       fontFamily: {
