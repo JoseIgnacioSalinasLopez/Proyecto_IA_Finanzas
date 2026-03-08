@@ -416,9 +416,9 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                     <section>
                         <div className="flex items-center gap-2 mb-4 text-white">
                             <PieChart size={14} className="text-finance-primary" />
-                            <h3 className="text-xs font-bold uppercase tracking-wider">{t('budget_allocation') || 'Apartados (Mes Actual)'}</h3>
+                            <h3 className="text-xs font-bold uppercase tracking-wider">{t('budget_allocation')}</h3>
                         </div>
-                        <div className="bg-white/5 backdrop-blur-md p-4 rounded-2xl border border-white/10 space-y-4">
+                        <div className="bg-white/5 backdrop-blur-md p-4 rounded-2xl border border-white/10 space-y-4 max-h-[300px] overflow-y-auto custom-scrollbar">
                             {budgetAnalysis?.length > 0 ? budgetAnalysis.map((b, idx) => (
                                 <div key={idx} className="relative group">
                                     <div className="flex justify-between items-end mb-2">
@@ -439,7 +439,7 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                                     </div>
                                 </div>
                             )) : (
-                                <p className="text-[10px] text-finance-muted italic text-center py-2">{t('no_budgets') || 'No tienes apartados configurados.'}</p>
+                                <p className="text-[10px] text-finance-muted italic text-center py-2">{t('no_budgets')}</p>
                             )}
                         </div>
                     </section>
@@ -631,7 +631,7 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                                 </div>
                                 <div className="flex-1">
                                     <h4 className="text-sm font-bold">{t('recurring_event')}</h4>
-                                    <p className="text-[10px] text-finance-muted uppercase font-bold">{t('monthly_reminder') || 'Recordatorio Mensual'}</p>
+                                    <p className="text-[10px] text-finance-muted uppercase font-bold">{t('monthly_reminder')}</p>
                                 </div>
                                 <button 
                                     type="button"

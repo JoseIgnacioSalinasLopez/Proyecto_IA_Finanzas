@@ -368,8 +368,16 @@ export default function ResumenFinanciero() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        const payload = { ...formData, amount: Number(formData.amount) };
         try {
+            const now = new Date();
+            const [y, m, d] = formData.date.split('-');
+            const dateWithTime = new Date(y, m - 1, d, now.getHours(), now.getMinutes(), now.getSeconds());
+            const payload = {
+                ...formData,
+                amount: parseFloat(formData.amount),
+                date: dateWithTime.toISOString()
+            };
+
             if (editingTx) {
                 await api.put(`/transactions/${editingTx.id}`, payload);
                 showToast(t('movement_updated'));
@@ -524,7 +532,7 @@ export default function ResumenFinanciero() {
 
                 {/* Gráficos */}
                 <div className="col-span-12 lg:col-span-8 card p-6 h-[320px]">
-                    <BarChart data={timelineData} title={t('income_vs_expense_day')} />
+                    <BarChart data={timelineData} title={`${t('movement_history')} — ${t('income_vs_expense_day')}`} />
                 </div>
                 <div className="col-span-12 lg:col-span-4 card p-6 h-[320px]">
                     {stats.expensesByCategory.length > 0
@@ -539,7 +547,7 @@ export default function ResumenFinanciero() {
                 </div>
 
                 {/* Tabla de Movimientos */}
-                <div className="col-span-12 lg:col-span-7 card p-5 flex flex-col bg-white/5 backdrop-blur-md">
+                <div className="col-span-12 lg:col-span-8 card p-5 flex flex-col bg-white/5 backdrop-blur-md">
                     <div className="flex flex-col gap-3 mb-4">
                         <div className="flex flex-col sm:flex-row justify-between gap-3">
                             <h3 className="text-base font-bold">{t('movement_history')}</h3>
@@ -626,7 +634,13 @@ export default function ResumenFinanciero() {
                             <tbody>
                                 {filteredTx.map(tx => (
                                     <tr key={tx.id} className="border-b border-white/5 hover:bg-white/4 transition-colors">
-                                        <td className="p-3 text-sm text-[#BCBFCD]">{new Date(tx.date).toLocaleDateString(language === 'en' ? 'en-US' : 'es-MX')}</td>
+                                        <td className="p-3 text-sm text-[#BCBFCD]">
+                                            {/* Fix date offset: parse string directly instead of using constructor */}
+                                            {(() => {
+                                                const [y, m, d] = tx.date.split('T')[0].split('-');
+                                                return language === 'en' ? `${m}/${d}/${y}` : `${d}/${m}/${y}`;
+                                            })()}
+                                        </td>
                                         <td className="p-3 text-sm text-white font-medium max-w-[160px] truncate">{tx.description || '—'}</td>
                                         <td className="p-3">
                                             <span className="px-2 py-1 rounded-md text-xs bg-black/40 border border-white/10 text-[#9EA3B0] whitespace-nowrap">
@@ -679,9 +693,59 @@ export default function ResumenFinanciero() {
                     </div>
                 </div>
 
-                {/* Gráfico de Línea */}
-                <div className="col-span-12 lg:col-span-5 card p-6 h-[450px] bg-white/5">
-                    <LineChart data={timelineData} title={t('evolution_title')} />
+                {/* Tarjeta de Resumen Mensual */}
+                <div className="col-span-12 lg:col-span-4 space-y-5">
+                    <div className="card p-6 border-finance-primary/20 bg-gradient-to-br from-finance-primary/5 to-transparent">
+                        <div className="flex items-center gap-3 mb-6">
+                            <div className="p-2 bg-finance-primary/20 rounded-xl text-finance-primary">
+                                <Calendar size={20} />
+                            </div>
+                            <h3 className="text-sm font-black uppercase tracking-[0.2em]">{t('monthly_summary_card')}</h3>
+                        </div>
+                        
+                        <div className="space-y-4">
+                            <div className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5">
+                                <span className="text-xs text-[#9EA3B0]">{t('monthly_income')}</span>
+                                <span className="font-bold text-emerald-400">
+                                    ${(stats?.summary?.totalIncome || 0).toLocaleString(language === 'en' ? 'en-US' : 'es-MX', { minimumFractionDigits: 2 })}
+                                </span>
+                            </div>
+                            
+                            <div className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5">
+                                <span className="text-xs text-[#9EA3B0]">{t('monthly_expenses')}</span>
+                                <span className="font-bold text-red-400">
+                                    ${(stats?.summary?.totalSpentThisMonth || 0).toLocaleString(language === 'en' ? 'en-US' : 'es-MX', { minimumFractionDigits: 2 })}
+                                </span>
+                            </div>
+
+                            <div className="pt-4 border-t border-white/10">
+                                <div className="flex justify-between items-center px-1">
+                                    <span className="text-xs font-bold text-white uppercase tracking-wider">{t('monthly_savings')}</span>
+                                    <span className={`text-lg font-black ${(stats?.summary?.totalIncome - stats?.summary?.totalSpentThisMonth) >= 0 ? 'text-finance-primary drop-shadow-[0_0_8px_rgba(0,212,255,0.4)]' : 'text-red-500'}`}>
+                                        ${((stats?.summary?.totalIncome || 0) - (stats?.summary?.totalSpentThisMonth || 0)).toLocaleString(language === 'en' ? 'en-US' : 'es-MX', { minimumFractionDigits: 2 })}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {/* Categoría más gastada del mes */}
+                            {stats.monthlyExpensesByCategory?.length > 0 && (
+                                <div className="mt-6 p-4 bg-black/20 rounded-2xl border border-white/5">
+                                    <p className="text-[10px] text-[#9EA3B0] uppercase font-bold tracking-[0.15em] mb-2">{t('most_spent_category')}</p>
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: stats.monthlyExpensesByCategory.sort((a,b) => b.amount - a.amount)[0].color }} />
+                                            <span className="text-sm font-bold truncate max-w-[120px]">
+                                                {stats.monthlyExpensesByCategory.sort((a,b) => b.amount - a.amount)[0].name}
+                                            </span>
+                                        </div>
+                                        <span className="text-sm font-black text-white">
+                                            ${stats.monthlyExpensesByCategory.sort((a,b) => b.amount - a.amount)[0].amount.toLocaleString(language === 'en' ? 'en-US' : 'es-MX')}
+                                        </span>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
             </div>
 

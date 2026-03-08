@@ -55,9 +55,14 @@ export default function QuickAddModal() {
 
         try {
             setLoading(true);
+            const now = new Date();
+            const [y, m, d] = form.date.split('-');
+            const dateWithTime = new Date(y, m - 1, d, now.getHours(), now.getMinutes(), now.getSeconds());
+            
             await api.post('/transactions', {
                 ...form,
-                amount: parseFloat(form.amount)
+                amount: parseFloat(form.amount),
+                date: dateWithTime.toISOString()
             });
             setToast({ message: t('movement_registered'), type: 'success' });
             setTimeout(() => {

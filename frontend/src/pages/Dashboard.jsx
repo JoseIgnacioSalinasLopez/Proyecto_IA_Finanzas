@@ -51,14 +51,54 @@ export default function Dashboard() {
                 api.get('/transactions'),
             ]);
             setStats(statsRes.data.data);
-            const sortedTx = transRes.data.data.sort((a, b) => new Date(b.date) - new Date(a.date));
-            setRecentTransactions(sortedTx.slice(0, 6));
+            const sortedTx = transRes.data.data.sort((a, b) => {
+                const dateA = new Date(a.date);
+                const dateB = new Date(b.date);
+                if (dateB - dateA !== 0) return dateB - dateA;
+                // Fallback to created_at if dates are same (today)
+                return new Date(b.created_at || b.date) - new Date(a.created_at || a.date);
+            });
+            setRecentTransactions(sortedTx.slice(0, 8));
         } catch (error) {
             console.error('Error fetching dashboard data', error);
         } finally {
             setLoading(false);
         }
     }, []);
+
+    const groupTransactionsByDate = (transactions) => {
+        const groups = {
+            today: [],
+            yesterday: [],
+            earlier: []
+        };
+
+        const now = new Date();
+        const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        const startOfYesterday = startOfToday - (24 * 60 * 60 * 1000);
+
+        transactions.forEach(tx => {
+            const d = new Date(tx.date);
+            // Si es medianoche UTC (manual), ajustamos a mediodía local para que la comparación de 'startOfDay' sea estable
+            let txTime = d.getTime();
+            if (tx.date.includes('T00:00:00')) {
+                txTime = new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 12, 0, 0).getTime();
+            }
+
+            const txDateObj = new Date(txTime);
+            const txStartOfDay = new Date(txDateObj.getFullYear(), txDateObj.getMonth(), txDateObj.getDate()).getTime();
+
+            if (txStartOfDay === startOfToday) {
+                groups.today.push(tx);
+            } else if (txStartOfDay === startOfYesterday) {
+                groups.yesterday.push(tx);
+            } else {
+                groups.earlier.push(tx);
+            }
+        });
+
+        return groups;
+    };
 
     useEffect(() => {
         fetchDashboardData();
@@ -159,22 +199,19 @@ export default function Dashboard() {
                     </div>
                 </div>
 
-                {/* Movimientos Recientes */}
-                <div className="card animate-fade-in-up h-full flex flex-col" style={{ animationDelay: '300ms' }}>
-                    <div className="flex justify-between items-center mb-5 border-b border-white/5 pb-4">
-                        <h2 className="text-sm font-bold text-finance-muted uppercase tracking-wider flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                {/* Movimientos Recientes (Elite Timeline Style) */}
+                <div className="card animate-fade-in-up h-full flex flex-col border-white/5 bg-white/5" style={{ animationDelay: '300ms' }}>
+                    <div className="flex justify-between items-center mb-6 border-b border-white/5 pb-4 px-1">
+                        <h2 className="text-sm font-black text-finance-muted uppercase tracking-[0.2em] flex items-center gap-2">
+                             <div className="w-1.5 h-6 bg-finance-primary rounded-full shadow-[0_0_8px_rgba(0,212,255,0.5)]" />
                             {t('recent_movements')}
                         </h2>
-                        <Link to="/resumen" className="text-xs text-finance-primary hover:text-finance-primaryHover transition-colors font-medium">
-                            {t('view_all')} →
-                        </Link>
                     </div>
 
-                    <div className="flex-1">
+                    <div className="flex-1 overflow-y-auto custom-scrollbar max-h-[600px] pr-2">
                         {recentTransactions.length === 0 ? (
                             <div className="text-center py-10">
-                                <p className="text-finance-muted mb-4 text-sm">{t('no_movements')}</p>
+                                <p className="text-finance-muted mb-4 text-sm italic">{t('no_movements')}</p>
                                 <button
                                     onClick={() => window.dispatchEvent(new CustomEvent('open-quick-add'))}
                                     className="btn-primary text-sm flex items-center gap-2 mx-auto"
@@ -182,34 +219,86 @@ export default function Dashboard() {
                                     <Plus size={16} /> {t('register_first')}
                                 </button>
                             </div>
-                        ) : (
-                            <div className="space-y-3">
-                                {recentTransactions.map((tx) => (
-                                    <div
-                                        key={tx.id}
-                                        className="flex justify-between items-center p-3.5 bg-white/5 rounded-xl border border-white/5 hover:border-finance-primary/20 transition-all duration-200 group"
-                                    >
-                                        <div className="flex items-center gap-3 min-w-0">
-                                            <div className={`p-2.5 rounded-lg flex-shrink-0 ${tx.type === 'income' ? 'bg-emerald-400/10 text-emerald-400' : 'bg-red-400/10 text-red-400'}`}>
-                                                {tx.type === 'income' ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
+                        ) : (() => {
+                            const groups = groupTransactionsByDate(recentTransactions);
+                            return (
+                                <div className="space-y-6 relative ml-2">
+                                    {/* Línea vertical de tiempo */}
+                                    <div className="absolute left-[11px] top-2 bottom-4 w-[1.5px] bg-gradient-to-b from-finance-primary/40 via-finance-primary/10 to-transparent" />
+
+                                    {Object.entries(groups).map(([key, txs]) => {
+                                        if (txs.length === 0) return null;
+                                        return (
+                                            <div key={key} className="space-y-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="z-10 w-[24px] h-[24px] rounded-full bg-[#0a0a0a] border border-finance-primary/30 flex items-center justify-center shadow-[0_0_10px_rgba(0,212,255,0.1)]">
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-finance-primary animate-pulse shadow-[0_0_5px_#00d4ff]" />
+                                                    </div>
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-finance-primary/60 bg-finance-primary/5 px-2 py-0.5 rounded-md border border-finance-primary/10">
+                                                        {key === 'today' ? t('today_label') : key === 'yesterday' ? t('yesterday_label') : t('earlier_label')}
+                                                    </span>
+                                                </div>
+
+                                                <div className="space-y-3 ml-[12px] pl-6">
+                                                    {txs.map((tx) => (
+                                                        <div
+                                                            key={tx.id}
+                                                            className="flex justify-between items-center p-3 sm:p-4 bg-white/[0.03] rounded-2xl border border-white/5 hover:border-finance-primary/20 hover:bg-white/[0.05] transition-all duration-300 group relative"
+                                                        >
+                                                            {/* Mini conector horizontal */}
+                                                            <div className="absolute -left-6 top-1/2 w-6 h-[1px] bg-white/5" />
+                                                            
+                                                            <div className="flex items-center gap-4 min-w-0">
+                                                                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 ${tx.type === 'income' ? 'bg-emerald-500/10 text-emerald-400 shadow-[inset_0_0_12px_rgba(52,211,153,0.05)]' : 'bg-red-500/10 text-red-400 shadow-[inset_0_0_12px_rgba(248,113,113,0.05)]'}`}>
+                                                                     {tx.type === 'income' ? <ArrowUpRight size={18} /> : <ArrowDownRight size={18} />}
+                                                                 </div>
+                                                                <div className="min-w-0">
+                                                                    <p className="font-bold text-sm text-white group-hover:text-finance-primary transition-colors truncate">
+                                                                        {tx.description || tx.categories?.name || t('no_description')}
+                                                                    </p>
+                                                                     <div className="flex items-center gap-2 mt-1.5 font-bold">
+                                                                         {tx.categories?.name && (
+                                                                             <span 
+                                                                                 className="text-[10px] uppercase font-bold tracking-tight px-2 py-0.5 rounded-lg border shadow-sm transition-all"
+                                                                                 style={{ 
+                                                                                     color: tx.categories.color || '#9EA3B0',
+                                                                                     borderColor: tx.categories.color ? `${tx.categories.color}A0` : 'rgba(255,255,255,0.1)',
+                                                                                     backgroundColor: tx.categories.color ? `${tx.categories.color}20` : 'rgba(255,255,255,0.05)',
+                                                                                 }}
+                                                                             >
+                                                                                 {tx.categories.name}
+                                                                             </span>
+                                                                         )}
+                                                                         <span className="text-[10px] text-finance-muted/80 font-medium">
+                                                                             {new Date(tx.date).toLocaleTimeString(language === 'en' ? 'en-US' : 'es-MX', { 
+                                                                                 hour: '2-digit', 
+                                                                                 minute: '2-digit',
+                                                                                 hour12: true 
+                                                                             })}
+                                                                         </span>
+                                                                     </div>
+                                                                </div>
+                                                            </div>
+                                                            <div className="text-right ml-4">
+                                                                <p className={`font-black text-sm tracking-tight ${tx.type === 'income' ? 'text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.3)]' : 'text-red-400 drop-shadow-[0_0_8px_rgba(248,113,113,0.3)]'}`}>
+                                                                    {tx.type === 'income' ? '+' : '-'}${Number(tx.amount).toLocaleString(language === 'en' ? 'en-US' : 'es-MX', { minimumFractionDigits: 2 })}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </div>
-                                            <div className="min-w-0">
-                                                <p className="font-bold text-sm text-finance-text truncate">{tx.description || tx.categories?.name || t('no_description')}</p>
-                                                <p className="text-[11px] text-finance-muted mt-0.5">
-                                                    {tx.categories?.name && <span className="bg-white/5 px-2 py-0.5 rounded-md mr-2">{tx.categories.name}</span>}
-                                                    {new Date(tx.date).toLocaleDateString(language === 'en' ? 'en-US' : 'es-MX')}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div className="text-right ml-4">
-                                            <p className={`font-bold text-sm ${tx.type === 'income' ? 'text-emerald-400' : 'text-red-400'}`}>
-                                                {tx.type === 'income' ? '+' : '-'}${Number(tx.amount).toLocaleString(language === 'en' ? 'en-US' : 'es-MX', { minimumFractionDigits: 2 })}
-                                            </p>
-                                        </div>
+                                        );
+                                    })}
+
+                                    <div className="pt-4 text-center">
+                                        <Link to="/resumen" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-finance-primary hover:text-white transition-all bg-finance-primary/5 hover:bg-finance-primary/20 px-4 py-2 rounded-full border border-finance-primary/10">
+                                            {t('view_all')} <Plus size={12} />
+                                        </Link>
                                     </div>
-                                ))}
-                            </div>
-                        )}
+                                </div>
+                            );
+                        })()}
                     </div>
                 </div>
             </div>

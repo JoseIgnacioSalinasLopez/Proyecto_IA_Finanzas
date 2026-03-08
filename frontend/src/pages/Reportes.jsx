@@ -222,25 +222,25 @@ export default function Reportes() {
         }]
     };
 
-    // Chart Data: Line Chart
+    // Chart Data: Wealth Evolution (Cumulative)
+    let currentAcc = 0;
+    const wealthData = stats.timeline.map(d => {
+        currentAcc += (d.income - d.expense);
+        return currentAcc;
+    });
+
     const lineData = {
         labels: stats.timeline.map(d => d.date),
         datasets: [
             {
-                label: t('income_label'),
-                data: stats.timeline.map(d => d.income),
-                borderColor: '#10b981',
-                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                label: t('wealth_evolution'),
+                data: wealthData,
+                borderColor: '#00d4ff',
+                backgroundColor: 'rgba(0, 212, 255, 0.1)',
                 fill: true,
-                tension: 0.4
-            },
-            {
-                label: t('expense_label'),
-                data: stats.timeline.map(d => d.expense),
-                borderColor: '#f43f5e',
-                backgroundColor: 'rgba(244, 63, 94, 0.1)',
-                fill: true,
-                tension: 0.4
+                tension: 0.4,
+                pointRadius: 2,
+                pointHoverRadius: 5,
             }
         ]
     };
@@ -272,7 +272,7 @@ export default function Reportes() {
             {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl md:text-3xl font-bold">{t('reports')}</h1>
+                    <h1 className="text-2xl md:text-3xl font-bold">{t('strategic_analysis')}</h1>
                     <p className="text-finance-muted text-sm">{t('report_subtitle')}</p>
                 </div>
                 <div className="flex items-center gap-3">
@@ -336,7 +336,7 @@ export default function Reportes() {
 
                 {/* Main Timeline Chart */}
                 <div className="lg:col-span-2 card p-5 flex flex-col min-h-[500px] bg-white/5">
-                    <h2 className="text-sm font-bold text-finance-muted uppercase tracking-wider mb-6">{t('cash_flow_evolution')}</h2>
+                    <h2 className="text-sm font-bold text-finance-muted uppercase tracking-wider mb-6">{t('wealth_evolution')}</h2>
                     <div className="flex-1 min-h-[300px]">
                         <Line data={lineData} options={chartOptions} />
                     </div>

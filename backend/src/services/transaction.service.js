@@ -12,7 +12,8 @@ export const getTransactions = async (userId, filters = {}) => {
       )
     `)
         .eq('user_id', userId)
-        .order('date', { ascending: false });
+        .order('date', { ascending: false })
+        .order('created_at', { ascending: false });
 
     // Add optional filters dynamically
     if (filters.startDate) {
