@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import appLogo from '../assets/logo.png';
 import { useAuth } from '../hooks/useAuth';
+import { Eye, EyeOff } from 'lucide-react';
 
 export default function Register() {
     const { t } = useLanguage();
@@ -10,6 +12,7 @@ export default function Register() {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const { registerUser } = useAuth();
     const navigate = useNavigate();
 
@@ -28,8 +31,8 @@ export default function Register() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-finance-900 p-4">
-            <div className="card w-full max-w-md">
+        <div className="min-h-screen flex items-center justify-center p-4">
+            <div className="card w-full max-w-md bg-white/5">
                 <div className="text-center mb-8">
                     <div className="flex justify-center mb-4">
                         <img src={appLogo} alt="Mente Billete Logo" className="h-20 w-auto object-contain" />
@@ -70,15 +73,25 @@ export default function Register() {
 
                     <div>
                         <label className="block text-sm font-medium text-finance-muted mb-1">{t('change_password')}</label>
-                        <input
-                            type="password"
-                            className="input-field"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                            placeholder="••••••••"
-                            minLength={6}
-                        />
+                        <div className="relative">
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                className="input-field w-full pr-12"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                                placeholder="••••••••"
+                                minLength={6}
+                            />
+                            <button 
+                                type="button" 
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 text-finance-muted hover:text-white transition-colors"
+                                tabIndex="-1"
+                            >
+                                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                            </button>
+                        </div>
                     </div>
 
                     <button

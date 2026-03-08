@@ -8,17 +8,17 @@ export default {
     extend: {
       colors: {
         finance: {
-          900: '#0B022D', /* Fondo principal */
-          800: '#130B42', /* Fondo de tarjetas/widgets */
-          700: 'rgba(255, 255, 255, 0.08)', /* bordes sutiles */
+          900: '#05011a', /* Deepest Black/Blue for Page Background */
+          800: '#11111d', /* Dark Card Background as per Epic style */
+          700: 'rgba(255, 255, 255, 0.05)', /* Subtle Elite Border */
           text: '#FFFFFF',
-          muted: '#9EA3B0',
-          primary: '#00D4FF', /* Cian brillante */
+          muted: '#94a3b8',
+          primary: '#00D4FF', /* Cyan Elite */
           primaryHover: 'rgba(0, 212, 255, 0.8)',
-          danger: '#E600E6', /* Magenta vibrante */
-          dangerHover: 'rgba(230, 0, 230, 0.8)',
-          neon: '#39FF14', /* Verde neón */
-          electric: '#00E5FF', /* Azul eléctrico */
+          danger: '#8C30F5', /* Purple Elite - Replaced Magenta for consistency */
+          dangerHover: 'rgba(140, 48, 245, 0.8)',
+          neon: '#00FFFF', /* Electric Aqua */
+          electric: '#7DF9FF', /* Electric Blue */
         }
       },
       fontFamily: {

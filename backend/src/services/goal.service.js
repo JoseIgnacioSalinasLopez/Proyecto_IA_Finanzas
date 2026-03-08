@@ -1,4 +1,5 @@
 import { supabase } from '../config/supabaseClient.js';
+import { createNotification } from './notification.service.js';
 
 export const getGoals = async (userId) => {
     const { data, error } = await supabase
@@ -19,6 +20,14 @@ export const createGoal = async (userId, goalData) => {
         .single();
 
     if (error) throw new Error(error.message);
+
+    await createNotification(
+        userId, 
+        'Nueva Meta Estratégica', 
+        `Has creado la meta: ${goalData.name || 'Sin nombre'}`, 
+        'success'
+    );
+
     return data;
 };
 
@@ -32,6 +41,14 @@ export const updateGoal = async (userId, goalId, goalData) => {
         .single();
 
     if (error) throw new Error(error.message);
+
+    await createNotification(
+        userId, 
+        'Meta Actualizada', 
+        `Has actualizado el progreso de la meta: ${data.name || 'Sin nombre'}`, 
+        'info'
+    );
+
     return data;
 };
 
@@ -43,5 +60,13 @@ export const deleteGoal = async (userId, goalId) => {
         .eq('user_id', userId);
 
     if (error) throw new Error(error.message);
+
+    await createNotification(
+        userId, 
+        'Meta Eliminada', 
+        'Has eliminado una meta estratégica de tu plan', 
+        'alert'
+    );
+
     return true;
 };

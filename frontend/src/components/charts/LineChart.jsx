@@ -4,6 +4,13 @@ import { Line } from 'react-chartjs-2';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
+const hexToRgba = (hex, alpha) => {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
+
 export default function LineChart({ data, title = 'Evolución' }) {
     const chartRef = useRef(null);
 
@@ -13,8 +20,7 @@ export default function LineChart({ data, title = 'Evolución' }) {
         return {
             ...data,
             datasets: data.datasets.map((ds) => {
-                const isIncome = ds.label === 'Ingresos';
-                const color = isIncome ? '#00D4FF' : '#E600E6';
+                const color = ds.borderColor || '#00D4FF';
 
                 return {
                     ...ds,
@@ -22,12 +28,14 @@ export default function LineChart({ data, title = 'Evolución' }) {
                     backgroundColor: (context) => {
                         const chart = context.chart;
                         const { ctx, chartArea } = chart;
-                        if (!chartArea) {
-                            return 'rgba(0,0,0,0)';
-                        }
+                        if (!chartArea) return 'rgba(0,0,0,0)';
                         const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-                        gradient.addColorStop(0, isIncome ? 'rgba(0, 212, 255, 0.4)' : 'rgba(230, 0, 230, 0.4)');
-                        gradient.addColorStop(1, isIncome ? 'rgba(0, 212, 255, 0.0)' : 'rgba(230, 0, 230, 0.0)');
+                        
+                        // Intentar crear un gradiente basado en el color de borde
+                        const baseColor = typeof color === 'string' ? color : '#00D4FF';
+                        const isHex = baseColor.startsWith('#');
+                        gradient.addColorStop(0, isHex ? hexToRgba(baseColor, 0.4) : baseColor.replace(')', ', 0.4)').replace('rgb', 'rgba'));
+                        gradient.addColorStop(1, 'rgba(0,0,0,0)');
                         return gradient;
                     },
                     fill: true,
@@ -42,6 +50,7 @@ export default function LineChart({ data, title = 'Evolución' }) {
                     borderWidth: 3,
                 };
             })
+
         };
     }, [data]);
 

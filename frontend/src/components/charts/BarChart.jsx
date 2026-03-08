@@ -4,6 +4,13 @@ import { Bar } from 'react-chartjs-2';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
+const hexToRgba = (hex, alpha) => {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
+
 export default function BarChart({ data, title = 'Comparativa' }) {
     const chartRef = useRef(null);
 
@@ -13,21 +20,22 @@ export default function BarChart({ data, title = 'Comparativa' }) {
         return {
             ...data,
             datasets: data.datasets.map((ds) => {
-                const isIncome = ds.label === 'Ingresos';
-                const color = isIncome ? '#00D4FF' : '#E600E6';
+                const color = ds.backgroundColor || '#00D4FF';
 
                 return {
                     ...ds,
                     backgroundColor: (context) => {
                         const chart = context.chart;
                         const { ctx, chartArea } = chart;
-                        if (!chartArea) {
-                            return color;
-                        }
+                        if (!chartArea) return color;
                         const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
-                        gradient.addColorStop(0, isIncome ? 'rgba(0, 212, 255, 0.95)' : 'rgba(230, 0, 230, 0.95)');
-                        gradient.addColorStop(0.5, isIncome ? 'rgba(0, 212, 255, 0.7)' : 'rgba(230, 0, 230, 0.7)');
-                        gradient.addColorStop(1, isIncome ? 'rgba(0, 212, 255, 0.15)' : 'rgba(230, 0, 230, 0.15)');
+                        
+                        // Si el color es un string hex/rgb, intentar gradiente transparente
+                        const baseColor = typeof color === 'string' ? color : '#00D4FF';
+                        const isHex = baseColor.startsWith('#');
+                        gradient.addColorStop(0, isHex ? hexToRgba(baseColor, 0.95) : baseColor);
+                        gradient.addColorStop(0.5, isHex ? hexToRgba(baseColor, 0.7) : baseColor.replace(')', ', 0.7)').replace('rgb', 'rgba'));
+                        gradient.addColorStop(1, isHex ? hexToRgba(baseColor, 0.15) : baseColor.replace(')', ', 0.15)').replace('rgb', 'rgba'));
                         return gradient;
                     },
                     borderRadius: 6,
@@ -36,6 +44,7 @@ export default function BarChart({ data, title = 'Comparativa' }) {
                     categoryPercentage: 0.8,
                 };
             })
+
         };
     }, [data]);
 

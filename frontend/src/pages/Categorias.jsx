@@ -123,17 +123,17 @@ export default function Categorias() {
             {/* Buscador */}
             {categories.length > 4 && (
                 <div className="relative max-w-xs">
-                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-finance-muted" />
+                    <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-finance-muted" />
                     <input
                         type="text"
                         placeholder={t('search_categories')}
                         aria-label={t('search_categories')}
-                        className="input-field pl-9 text-sm"
+                        className="input-field pl-11 text-sm"
                         value={search}
                         onChange={e => setSearch(e.target.value)}
                     />
                     {search && (
-                        <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-finance-muted hover:text-white">
+                        <button onClick={() => setSearch('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-finance-muted hover:text-white">
                             <X size={12} />
                         </button>
                     )}
@@ -160,15 +160,15 @@ export default function Categorias() {
                         <div className="flex gap-1 flex-shrink-0">
                             <button
                                 onClick={() => openEdit(cat)}
-                                aria-label={`Editar categoría ${cat.name}`}
+                                aria-label={t('edit_category_aria')}
                                 className="p-2 rounded-lg text-finance-muted hover:text-finance-primary hover:bg-finance-primary/10 transition-all"
-                                title="Editar"
+                                title={t('edit_label')}
                             >
                                 <Pencil size={15} />
                             </button>
                             <button
                                 onClick={() => setShowDeleteConfirm(cat)}
-                                aria-label={`Eliminar categoría ${cat.name}`}
+                                aria-label={t('delete_category_aria')}
                                 className="p-2 rounded-lg text-finance-muted hover:text-red-400 hover:bg-red-400/10 transition-all"
                                 title={t('delete_label')}
                             >
@@ -199,13 +199,13 @@ export default function Categorias() {
             {/* Modal Crear/Editar */}
             {showModal && (
                 <div
-                    className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 p-4 modal-overlay"
+                    className="fixed inset-0 bg-black/60 backdrop-blur-md flex justify-center items-center z-50 p-4 modal-overlay"
                     onClick={(e) => { if (e.target === e.currentTarget) handleCloseModal(); }}
                     role="dialog"
                     aria-modal="true"
                     aria-labelledby="cat-modal-title"
                 >
-                    <div className="bg-finance-800 p-6 rounded-2xl w-full max-w-sm border border-finance-700 shadow-2xl animate-scale-in">
+                    <div className="card p-6 w-full max-w-sm border-white/10 shadow-2xl animate-scale-in">
                         <div className="flex justify-between items-center mb-5">
                             <h2 id="cat-modal-title" className="text-xl font-bold">
                                 {editingCat ? t('edit_category') : t('add_category')}
@@ -217,7 +217,7 @@ export default function Categorias() {
 
                         <form onSubmit={handleSubmit} className="space-y-4" noValidate>
                             {/* Preview */}
-                            <div className="flex items-center gap-3 p-3 bg-finance-900/60 rounded-xl border border-finance-700">
+                            <div className="flex items-center gap-3 p-3 bg-white/5 rounded-xl border border-white/5">
                                 <div className="w-10 h-10 rounded-xl ring-2 ring-white/10 flex-shrink-0"
                                     style={{ backgroundColor: formData.color }} />
                                 <span className="font-medium text-sm">{formData.name || t('preview')}</span>
@@ -234,7 +234,7 @@ export default function Categorias() {
                                     required
                                     autoFocus
                                     className="input-field"
-                                    placeholder="Ej: Food, Netflix..."
+                                    placeholder={t('example_categories')}
                                     value={formData.name}
                                     onChange={e => setFormData({ ...formData, name: e.target.value })}
                                 />
@@ -242,7 +242,7 @@ export default function Categorias() {
 
                             {/* Color */}
                             <div>
-                                <label className="block text-sm mb-2 text-finance-muted font-medium">Color</label>
+                                <label className="block text-sm mb-2 text-finance-muted font-medium">{t('color')}</label>
                                 {/* Colores predefinidos */}
                                 <div className="flex flex-wrap gap-2 mb-3">
                                     {PRESET_COLORS.map(color => (
@@ -261,7 +261,7 @@ export default function Categorias() {
                                 <div className="flex gap-2 items-center">
                                     <input
                                         type="color"
-                                        className="h-10 w-12 p-1 bg-finance-900 border border-finance-700 rounded-lg cursor-pointer flex-shrink-0"
+                                        className="h-10 w-12 p-1 bg-black/40 border border-white/10 rounded-lg cursor-pointer flex-shrink-0"
                                         value={formData.color}
                                         onChange={e => setFormData({ ...formData, color: e.target.value })}
                                         title={t('custom_color')}
@@ -293,16 +293,16 @@ export default function Categorias() {
 
             {/* Modal de Confirmación de Eliminación */}
             {showDeleteConfirm && (
-                <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center z-50 p-4 modal-overlay"
+                <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex justify-center items-center z-50 p-4 modal-overlay"
                     role="dialog" aria-modal="true">
-                    <div className="bg-finance-800 p-6 rounded-2xl w-full max-w-sm border border-red-500/20 shadow-2xl animate-scale-in">
+                    <div className="card p-6 w-full max-w-sm border-red-500/20 shadow-2xl animate-scale-in">
                         <div className="flex items-center gap-3 mb-4">
                             <div className="p-2.5 bg-red-500/15 rounded-xl">
                                 <Trash2 size={20} className="text-red-400" />
                             </div>
                             <h2 className="text-lg font-bold">{t('delete_confirm')}</h2>
                         </div>
-                        <div className="flex items-center gap-3 p-3 bg-finance-900/60 rounded-xl mb-4">
+                        <div className="flex items-center gap-3 p-3 bg-white/5 rounded-xl mb-4 border border-white/5">
                             <div className="w-8 h-8 rounded-lg flex-shrink-0" style={{ backgroundColor: showDeleteConfirm.color }} />
                             <span className="font-medium">{showDeleteConfirm.name}</span>
                         </div>

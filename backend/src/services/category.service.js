@@ -1,4 +1,5 @@
 import { supabase } from '../config/supabaseClient.js';
+import { createNotification } from './notification.service.js';
 
 export const getCategories = async (userId) => {
     const { data, error } = await supabase
@@ -18,6 +19,14 @@ export const createCategory = async (userId, name, color) => {
         .single();
 
     if (error) throw new Error(error.message);
+
+    await createNotification(
+        userId, 
+        'Nueva Categoría Creada', 
+        `Has creado la categoría: ${name}`, 
+        'success'
+    );
+
     return data;
 };
 
@@ -31,6 +40,14 @@ export const updateCategory = async (userId, categoryId, name, color) => {
         .single();
 
     if (error) throw new Error(error.message);
+
+    await createNotification(
+        userId, 
+        'Categoría Modificada', 
+        `Has actualizado la categoría a: ${name}`, 
+        'info'
+    );
+
     return data;
 };
 
@@ -42,5 +59,13 @@ export const deleteCategory = async (userId, categoryId) => {
         .eq('user_id', userId);
 
     if (error) throw new Error(error.message);
+
+    await createNotification(
+        userId, 
+        'Categoría Eliminada', 
+        'Has eliminado una categoría de tus registros', 
+        'alert'
+    );
+
     return true;
 };

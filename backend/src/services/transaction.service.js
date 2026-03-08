@@ -1,4 +1,5 @@
 import { supabase } from '../config/supabaseClient.js';
+import { createNotification } from './notification.service.js';
 
 export const getTransactions = async (userId, filters = {}) => {
     let query = supabase
@@ -47,6 +48,14 @@ export const createTransaction = async (userId, dataPayload) => {
         .single();
 
     if (error) throw new Error(error.message);
+
+    await createNotification(
+        userId, 
+        type === 'income' ? 'Nuevo Ingreso' : 'Nuevo Gasto', 
+        `Registraste un ${type === 'income' ? 'ingreso' : 'gasto'} por $${Number(amount).toLocaleString()}`, 
+        'success'
+    );
+
     return data;
 };
 
@@ -60,6 +69,14 @@ export const updateTransaction = async (userId, transactionId, dataPayload) => {
         .single();
 
     if (error) throw new Error(error.message);
+
+    await createNotification(
+        userId, 
+        'Transacción Actualizada', 
+        `Has modificado una transacción de $${Number(dataPayload.amount || data.amount).toLocaleString()}`, 
+        'info'
+    );
+
     return data;
 };
 
@@ -71,5 +88,13 @@ export const deleteTransaction = async (userId, transactionId) => {
         .eq('user_id', userId);
 
     if (error) throw new Error(error.message);
+
+    await createNotification(
+        userId, 
+        'Transacción Eliminada', 
+        'Has eliminado una transacción de tu registro', 
+        'alert'
+    );
+
     return true;
 };

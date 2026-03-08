@@ -36,8 +36,8 @@ export default function ForgotPassword() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-finance-900 p-4">
-            <div className="card w-full max-w-md animate-fade-in-up">
+        <div className="min-h-screen flex items-center justify-center p-4">
+            <div className="card w-full max-w-md animate-fade-in-up bg-white/5">
                 {/* Logo */}
                 <div className="text-center mb-8">
                     <div className="flex justify-center mb-4">

@@ -1,15 +1,13 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import api from '../services/api';
 import SummaryCard from '../components/ui/SummaryCard';
-import { ArrowDownRight, ArrowUpRight, Wallet, Plus, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowDownRight, ArrowUpRight, Wallet, Plus, X, ChevronDown, ChevronUp, Target, Calendar } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import EngineeringAssistant from '../components/ui/EngineeringAssistant';
 import { supabase } from '../lib/supabase';
 import { useAuthContext } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
 import Toast from '../components/ui/Toast';
-
-const EMPTY_FORM = { amount: '', type: 'expense', category_id: '', description: '', date: new Date().toISOString().split('T')[0] };
 
 function getGreeting(t) {
     const hour = new Date().getHours();
@@ -43,27 +41,16 @@ export default function Dashboard() {
     const { t, language } = useLanguage();
     const [stats, setStats] = useState(null);
     const [recentTransactions, setRecentTransactions] = useState([]);
-    const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [showFAB, setShowFAB] = useState(false);
-    const [fabForm, setFabForm] = useState(EMPTY_FORM);
-    const [fabLoading, setFabLoading] = useState(false);
     const [toast, setToast] = useState(null);
-    const [assistantCollapsed, setAssistantCollapsed] = useState(false);
-    const modalRef = useRef(null);
-    const firstInputRef = useRef(null);
-
-    const showToast = (msg, type = 'success') => setToast({ message: msg, type });
 
     const fetchDashboardData = useCallback(async () => {
         try {
-            const [statsRes, transRes, catRes] = await Promise.all([
+            const [statsRes, transRes] = await Promise.all([
                 api.get('/stats'),
                 api.get('/transactions'),
-                api.get('/categories'),
             ]);
             setStats(statsRes.data.data);
-            setCategories(catRes.data.data);
             const sortedTx = transRes.data.data.sort((a, b) => new Date(b.date) - new Date(a.date));
             setRecentTransactions(sortedTx.slice(0, 6));
         } catch (error) {
@@ -82,48 +69,12 @@ export default function Dashboard() {
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'goals', filter: `user_id=eq.${user.id}` }, fetchDashboardData)
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'timeline_events', filter: `user_id=eq.${user.id}` }, fetchDashboardData)
                 .subscribe();
-            return () => { supabase.removeChannel(channel); };
+
+            return () => { 
+                supabase.removeChannel(channel);
+            };
         }
     }, [user?.id, fetchDashboardData]);
-
-    // Focus trap en modal
-    useEffect(() => {
-        if (showFAB) {
-            setTimeout(() => firstInputRef.current?.focus(), 50);
-        }
-    }, [showFAB]);
-
-    // Cerrar modal con Escape
-    useEffect(() => {
-        const handleKeyDown = (e) => {
-            if (e.key === 'Escape' && showFAB) {
-                setShowFAB(false);
-                setFabForm(EMPTY_FORM);
-            }
-        };
-        document.addEventListener('keydown', handleKeyDown);
-        return () => document.removeEventListener('keydown', handleKeyDown);
-    }, [showFAB]);
-
-    const handleFABSubmit = async (e) => {
-        e.preventDefault();
-        if (Number(fabForm.amount) <= 0) {
-            showToast(t('amount_greater_than_zero'), 'error');
-            return;
-        }
-        setFabLoading(true);
-        try {
-            await api.post('/transactions', { ...fabForm, amount: Number(fabForm.amount) });
-            showToast(t('movement_registered'));
-            setShowFAB(false);
-            setFabForm(EMPTY_FORM);
-            await fetchDashboardData();
-        } catch (error) {
-            showToast(t('registration_error'), 'error');
-        } finally {
-            setFabLoading(false);
-        }
-    };
 
     if (loading) {
         return (
@@ -141,7 +92,7 @@ export default function Dashboard() {
         );
     }
 
-    const { summary } = stats || { summary: { totalIncome: 0, totalExpense: 0, balance: 0 } };
+    const { summary } = stats || { summary: { totalIncome: 0, totalExpense: 0, balance: 0, totalBudget: 0, totalSpentThisMonth: 0 } };
 
     return (
         <div className="space-y-6 relative">
@@ -162,15 +113,46 @@ export default function Dashboard() {
                 <SummaryCard title={t('monthly_expenses')} amount={summary.totalExpense} icon={<ArrowDownRight size={22} />} type="expense" delay={160} />
             </div>
 
+            {/* Resumen de Presupuesto Mensual */}
+            {summary.totalBudget > 0 && (
+                <div className="card p-5 animate-fade-in-up border-white/5 bg-white/5" style={{ animationDelay: '180ms' }}>
+                    <div className="flex justify-between items-center mb-3">
+                        <h3 className="text-xs font-bold text-finance-muted uppercase tracking-wider flex items-center gap-2">
+                            <Target size={16} className="text-finance-primary" /> {t('budgets')} {t('of_the_month')}
+                        </h3>
+                        <span className="text-xs font-bold text-finance-text">
+                            ${summary.totalSpentThisMonth.toLocaleString()} / ${summary.totalBudget.toLocaleString()}
+                        </span>
+                    </div>
+                    <div className="h-2.5 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
+                        <div 
+                            className={`h-full transition-all duration-1000 ease-out ${
+                                (summary.totalSpentThisMonth / summary.totalBudget) > 0.9 ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.3)]' : 'bg-finance-primary'
+                            }`}
+                            style={{ width: `${Math.min(100, (summary.totalSpentThisMonth / summary.totalBudget) * 100)}%` }}
+                        />
+                    </div>
+                </div>
+            )}
+
             {/* Grid 50/50: Ingeniería Financiera + Movimientos Recientes */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
                 {/* Tarjeta de Ingeniería Financiera */}
                 <div className="card p-0 overflow-hidden animate-fade-in-up h-full flex flex-col" style={{ animationDelay: '200ms' }}>
-                    <div className="w-full flex items-center justify-between p-4 md:p-5 border-b border-white/5">
-                        <span className="flex items-center gap-2 text-xs font-bold text-finance-muted uppercase tracking-wider">
-                            <span className="w-2 h-2 rounded-full bg-finance-primary animate-pulse" />
-                            {t('engineering_card')}
-                        </span>
+                    <div className="w-full p-4 md:p-5 border-b border-white/5 bg-white/[0.02]">
+                        <div className="flex items-center gap-3">
+                            <div className="p-2 bg-finance-primary/10 rounded-xl border border-finance-primary/20 text-finance-primary">
+                                <Calendar size={24} strokeWidth={2} />
+                            </div>
+                            <div className="flex flex-col">
+                                <h3 className="text-lg font-black text-white leading-none">
+                                    {t('engineering_card')}
+                                </h3>
+                                <span className="text-[10px] font-black tracking-widest text-finance-primary/80 uppercase mt-1">
+                                    {t('smart_tracking_system')}
+                                </span>
+                            </div>
+                        </div>
                     </div>
                     <div className="p-4 md:p-5 flex-1 overflow-auto">
                         <EngineeringAssistant stats={stats} onRefresh={fetchDashboardData} />
@@ -194,7 +176,7 @@ export default function Dashboard() {
                             <div className="text-center py-10">
                                 <p className="text-finance-muted mb-4 text-sm">{t('no_movements')}</p>
                                 <button
-                                    onClick={() => setShowFAB(true)}
+                                    onClick={() => window.dispatchEvent(new CustomEvent('open-quick-add'))}
                                     className="btn-primary text-sm flex items-center gap-2 mx-auto"
                                 >
                                     <Plus size={16} /> {t('register_first')}
@@ -202,10 +184,10 @@ export default function Dashboard() {
                             </div>
                         ) : (
                             <div className="space-y-3">
-                                {recentTransactions.map((tx, idx) => (
+                                {recentTransactions.map((tx) => (
                                     <div
                                         key={tx.id}
-                                        className="flex justify-between items-center p-3.5 bg-finance-900/40 rounded-xl border border-white/5 hover:border-finance-primary/20 transition-all duration-200 group"
+                                        className="flex justify-between items-center p-3.5 bg-white/5 rounded-xl border border-white/5 hover:border-finance-primary/20 transition-all duration-200 group"
                                     >
                                         <div className="flex items-center gap-3 min-w-0">
                                             <div className={`p-2.5 rounded-lg flex-shrink-0 ${tx.type === 'income' ? 'bg-emerald-400/10 text-emerald-400' : 'bg-red-400/10 text-red-400'}`}>
@@ -234,148 +216,13 @@ export default function Dashboard() {
 
             {/* FAB — Botón flotante */}
             <button
-                onClick={() => setShowFAB(true)}
+                onClick={() => window.dispatchEvent(new CustomEvent('open-quick-add'))}
                 className="fixed bottom-8 right-6 w-14 h-14 rounded-full bg-finance-primary text-black shadow-[0_0_25px_rgba(0,212,255,0.4)] flex items-center justify-center hover:scale-110 hover:shadow-[0_0_35px_rgba(0,212,255,0.6)] active:scale-95 transition-all duration-200 z-40"
                 title={t('quick_registration')}
                 aria-label={t('quick_registration')}
             >
                 <Plus size={26} strokeWidth={2.5} />
             </button>
-
-            {/* Modal de Registro Rápido */}
-            {showFAB && (
-                <div
-                    className="fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center z-50 p-4 modal-overlay"
-                    onClick={(e) => { if (e.target === e.currentTarget) { setShowFAB(false); setFabForm(EMPTY_FORM); } }}
-                    role="dialog"
-                    aria-modal="true"
-                    aria-labelledby="fab-modal-title"
-                >
-                    <div
-                        ref={modalRef}
-                        className="bg-finance-800 p-6 rounded-2xl w-full max-w-sm border border-finance-700 shadow-2xl animate-scale-in"
-                    >
-                        <div className="flex justify-between items-center mb-5">
-                            <h2 id="fab-modal-title" className="text-lg font-bold flex items-center gap-2">
-                                ⚡ {t('quick_registration')}
-                            </h2>
-                            <button
-                                onClick={() => { setShowFAB(false); setFabForm(EMPTY_FORM); }}
-                                className="text-finance-muted hover:text-white hover:bg-white/5 p-1.5 rounded-lg transition-all"
-                                aria-label={t('cancel')}
-                            >
-                                <X size={18} />
-                            </button>
-                        </div>
-
-                        <form onSubmit={handleFABSubmit} className="space-y-4" noValidate>
-                            {/* Tipo */}
-                            <div>
-                                <label className="block text-xs font-semibold text-finance-muted mb-2 uppercase tracking-wide">
-                                    {t('movement_type')}
-                                </label>
-                                <div className="flex gap-2" role="group" aria-label={t('movement_type')}>
-                                    {[['expense', t('expense_label')], ['income', t('income_label')]].map(([tKey, label]) => (
-                                        <button key={tKey} type="button"
-                                            onClick={() => setFabForm({ ...fabForm, type: tKey })}
-                                            aria-pressed={fabForm.type === tKey}
-                                            className={`flex-1 py-2.5 rounded-xl font-bold text-sm border-2 transition-all ${fabForm.type === tKey
-                                                ? tKey === 'expense'
-                                                    ? 'bg-red-500/20 border-red-500 text-red-400 shadow-[0_0_10px_rgba(239,68,68,0.2)]'
-                                                    : 'bg-emerald-500/20 border-emerald-500 text-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.2)]'
-                                                : 'bg-finance-900 border-finance-700 text-finance-muted hover:border-white/30'
-                                                }`}
-                                        >
-                                            {label}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Monto */}
-                            <div>
-                                <label htmlFor="fab-amount" className="block text-xs font-semibold text-finance-muted mb-1.5 uppercase tracking-wide">
-                                    {t('amount_label')}
-                                </label>
-                                <input
-                                    id="fab-amount"
-                                    ref={firstInputRef}
-                                    type="number" step="0.01" min="0.01" required
-                                    placeholder="0.00"
-                                    className="input-field text-xl font-bold"
-                                    value={fabForm.amount}
-                                    onChange={e => setFabForm({ ...fabForm, amount: e.target.value })}
-                                />
-                            </div>
-
-                            {/* Descripción */}
-                            <div>
-                                <label htmlFor="fab-description" className="block text-xs font-semibold text-finance-muted mb-1.5 uppercase tracking-wide">
-                                    {t('description_label')}
-                                </label>
-                                <input
-                                    id="fab-description"
-                                    type="text" required
-                                    placeholder={t('description_placeholder')}
-                                    className="input-field"
-                                    value={fabForm.description}
-                                    onChange={e => setFabForm({ ...fabForm, description: e.target.value })}
-                                />
-                            </div>
-
-                            {/* Categoría */}
-                            <div>
-                                <label htmlFor="fab-category" className="block text-xs font-semibold text-finance-muted mb-1.5 uppercase tracking-wide">
-                                    {t('category_label')}
-                                </label>
-                                <select
-                                    id="fab-category"
-                                    required className="input-field"
-                                    value={fabForm.category_id}
-                                    onChange={e => setFabForm({ ...fabForm, category_id: e.target.value })}
-                                >
-                                    <option value="" disabled>{t('select_category')}</option>
-                                    {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                                </select>
-                            </div>
-
-                            {/* Fecha */}
-                            <div>
-                                <label htmlFor="fab-date" className="block text-xs font-semibold text-finance-muted mb-1.5 uppercase tracking-wide">
-                                    {t('date_label')}
-                                </label>
-                                <input
-                                    id="fab-date"
-                                    type="date" required className="input-field"
-                                    value={fabForm.date}
-                                    onChange={e => setFabForm({ ...fabForm, date: e.target.value })}
-                                />
-                            </div>
-
-                            <div className="flex gap-3 pt-1">
-                                <button
-                                    type="button"
-                                    onClick={() => { setShowFAB(false); setFabForm(EMPTY_FORM); }}
-                                    className="btn-ghost flex-1"
-                                >
-                                    {t('cancel')}
-                                </button>
-                                <button type="submit" disabled={fabLoading}
-                                    className={`btn-primary flex-1 flex justify-center items-center gap-2 ${fabForm.type === 'expense'
-                                        ? 'bg-red-500 shadow-red-500/20 hover:bg-red-400'
-                                        : ''
-                                        }`}
-                                >
-                                    {fabLoading
-                                        ? <><div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />{t('saving')}</>
-                                        : `✓ ${t('save')}`
-                                    }
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
         </div>
     );
 }

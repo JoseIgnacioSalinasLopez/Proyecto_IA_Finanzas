@@ -3,6 +3,8 @@ import { Plus, Trash2, Target, Calendar, TrendingUp, Pencil, X, Lightbulb } from
 import api from '../services/api';
 import Toast from '../components/ui/Toast';
 import { useLanguage } from '../context/LanguageContext';
+import DatePickerElite from '../components/ui/DatePickerElite';
+
 
 function calcMonthlySavingsNeeded(goal) {
     const target = Number(goal.target_amount) || 0;
@@ -164,16 +166,18 @@ export default function Metas() {
 
                     return (
                         <div key={goal.id}
-                            className={`bg-finance-800 rounded-2xl border p-5 flex flex-col transition-all hover:-translate-y-0.5 hover:shadow-lg animate-fade-in-up ${isComplete
-                                ? 'border-emerald-500/40 shadow-[0_0_20px_rgba(52,211,153,0.08)]'
+                            className={`card p-5 flex flex-col transition-all hover:-translate-y-0.5 animate-fade-in-up bg-white/5 ${isComplete
+                                ? 'border-emerald-500/40 shadow-[0_0_20px_rgba(52,211,153,0.1)]'
                                 : isExpired
-                                    ? 'border-red-500/30'
-                                    : 'border-finance-700/30 hover:border-finance-primary/20'
+                                    ? 'border-red-500/30 shadow-[0_0_20px_rgba(239,68,68,0.05)]'
+                                    : 'border-white/5 hover:border-finance-primary/20 hover:shadow-[0_0_20px_rgba(0,212,255,0.05)]'
                                 }`}
                             style={{ animationDelay: `${idx * 60}ms` }}
                         >
                             <div className="flex justify-between items-start mb-4">
-                                <div className={`p-2.5 rounded-xl ${isComplete ? 'bg-emerald-500/10 text-emerald-400' : 'bg-finance-primary/10 text-finance-primary'}`}>
+                                <div className={`p-2.5 rounded-xl border ${isComplete 
+                                    ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20 shadow-[0_0_15px_rgba(52,211,153,0.2)]' 
+                                    : 'bg-finance-primary/15 text-finance-primary border-finance-primary/20 shadow-[0_0_15px_rgba(0,212,255,0.2)]'}`}>
                                     {isComplete ? <TrendingUp size={20} /> : <Target size={20} />}
                                 </div>
                                 <div className="flex gap-1">
@@ -212,15 +216,15 @@ export default function Metas() {
                                         {progress.toFixed(0)}%
                                     </span>
                                 </div>
-                                <div className="h-2.5 bg-finance-900 rounded-full overflow-hidden">
+                                <div className="h-2.5 bg-black/40 border border-white/5 rounded-full overflow-hidden">
                                     <div
-                                        className={`h-full rounded-full transition-all duration-700 ${isComplete ? 'bg-emerald-400' : isExpired ? 'bg-red-500' : 'bg-finance-primary'}`}
+                                        className={`h-full rounded-full transition-all duration-700 ${isComplete ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.4)]' : isExpired ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.4)]' : 'bg-finance-primary shadow-[0_0_8px_rgba(0,212,255,0.4)]'}`}
                                         style={{ width: `${progress}%` }}
                                     />
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-3 py-3 border-t border-finance-700/30 mt-auto">
+                            <div className="grid grid-cols-2 gap-3 py-3 border-t border-white/5 mt-auto">
                                 <div>
                                     <p className="text-[10px] text-finance-muted uppercase tracking-wider mb-0.5">{t('target_amount')}</p>
                                     <p className="text-sm font-bold">${target.toLocaleString(language === 'en' ? 'en-US' : 'es-MX')}</p>
@@ -232,7 +236,7 @@ export default function Metas() {
                             </div>
 
                             {!isComplete && !isExpired && monthlySavings && (
-                                <div className="flex items-start gap-2 mt-2 px-3 py-2 bg-finance-primary/5 border border-finance-primary/15 rounded-xl">
+                                <div className="flex items-start gap-2 mt-2 px-3 py-2 bg-finance-primary/5 border border-white/5 rounded-xl">
                                     <Lightbulb size={13} className="text-finance-primary flex-shrink-0 mt-0.5" />
                                     <p className="text-[11px] text-finance-muted">
                                         {t('monthly_suggested')}: <span className="text-finance-primary font-bold">${monthlySavings}/{language === 'en' ? 'mo' : 'mes'}</span>
@@ -256,8 +260,8 @@ export default function Metas() {
 
             {/* Modal Crear/Editar */}
             {showModal && (
-                <div className="fixed inset-0 bg-black/65 backdrop-blur-sm flex justify-center items-center z-50 p-4" onClick={(e) => e.target === e.currentTarget && setShowModal(false)}>
-                    <div className="bg-finance-800 p-6 rounded-2xl w-full max-w-md border border-finance-700 shadow-2xl">
+                <div className="fixed inset-0 bg-black/65 backdrop-blur-md flex justify-center items-center z-50 p-4" onClick={(e) => e.target === e.currentTarget && setShowModal(false)}>
+                    <div className="card p-6 w-full max-w-md border-white/10 animate-scale-in bg-[#11111d] overflow-visible">
                         <h2 className="text-xl font-bold mb-5">{editingGoal ? t('edit_goal') : t('add_goal')}</h2>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
@@ -276,7 +280,10 @@ export default function Metas() {
                             </div>
                             <div>
                                 <label className="block text-sm text-finance-muted mb-1.5">{t('deadline')} *</label>
-                                <input type="date" required className="input-field" value={formData.deadline} onChange={e => setFormData({ ...formData, deadline: e.target.value })} />
+                                <DatePickerElite 
+                                    value={formData.deadline} 
+                                    onChange={(val) => setFormData({ ...formData, deadline: val })} 
+                                />
                             </div>
                             <div className="flex justify-end gap-3 pt-4">
                                 <button type="button" onClick={() => setShowModal(false)} className="btn-ghost">{t('cancel')}</button>
@@ -284,13 +291,14 @@ export default function Metas() {
                             </div>
                         </form>
                     </div>
+
                 </div>
             )}
 
             {/* Modal Progreso */}
             {progressModal && (
-                <div className="fixed inset-0 bg-black/65 backdrop-blur-sm flex justify-center items-center z-50 p-4" onClick={(e) => e.target === e.currentTarget && setProgressModal(null)}>
-                    <div className="bg-finance-800 p-6 rounded-2xl w-full max-w-sm border border-finance-700">
+                <div className="fixed inset-0 bg-black/65 backdrop-blur-md flex justify-center items-center z-50 p-4" onClick={(e) => e.target === e.currentTarget && setProgressModal(null)}>
+                    <div className="card p-6 w-full max-w-sm border-white/10 animate-scale-in">
                         <h2 className="text-lg font-bold mb-4">{t('update_progress')}</h2>
                         <p className="text-sm text-finance-muted mb-4">{progressModal.goal.name}</p>
                         <input type="number" className="input-field text-xl font-bold mb-5" value={progressModal.value} onChange={e => setProgressModal({ ...progressModal, value: e.target.value })} autoFocus />
@@ -304,8 +312,8 @@ export default function Metas() {
 
             {/* Modal Eliminar */}
             {deleteConfirm && (
-                <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center z-50 p-4">
-                    <div className="bg-finance-800 p-6 rounded-2xl w-full max-w-sm border border-red-500/20">
+                <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex justify-center items-center z-50 p-4" onClick={(e) => e.target === e.currentTarget && setDeleteConfirm(null)}>
+                    <div className="card p-6 w-full max-w-sm border-red-500/20 animate-scale-in">
                         <h2 className="text-lg font-bold mb-4">{t('delete_confirm')}</h2>
                         <p className="text-sm text-finance-muted mb-5">"{deleteConfirm.name}"</p>
                         <div className="flex gap-3">

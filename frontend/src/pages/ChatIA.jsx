@@ -106,9 +106,9 @@ export default function ChatIA() {
         );
 
     return (
-        <div className="flex flex-col h-[calc(100vh-8rem)] bg-finance-900 -m-4 md:-m-6 relative rounded-t-3xl overflow-hidden shadow-2xl">
+        <div className="flex flex-col h-[calc(100vh-8rem)] -m-4 md:-m-6 relative rounded-t-3xl overflow-hidden shadow-2xl z-10">
             {/* Header */}
-            <header className="bg-finance-800 border-b border-finance-700/50 flex items-center gap-4 px-6 py-4 flex-shrink-0 z-10 shadow-lg">
+            <header className="bg-white/5 backdrop-blur-xl border-b border-white/5 flex items-center gap-4 px-6 py-4 flex-shrink-0 z-10 shadow-lg">
                 <Link to="/" className="text-finance-muted hover:text-finance-text transition-colors p-2 hover:bg-white/5 rounded-full">
                     ←
                 </Link>
@@ -134,7 +134,7 @@ export default function ChatIA() {
             </header>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6" style={{ scrollbarWidth: 'thin', scrollbarColor: '#334155 #0B022D' }}>
+            <div className="flex-1 overflow-y-auto p-6 space-y-6" style={{ scrollbarWidth: 'thin', scrollbarColor: '#00D4FF transparent' }}>
                 {messages.map((msg, idx) => (
                     <div key={idx} className={`flex w-full ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                         <div className={`flex max-w-[85%] md:max-w-[70%] gap-4 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
@@ -147,9 +147,9 @@ export default function ChatIA() {
                                     <User size={16} className="text-finance-text" />
                                 </div>
                             )}
-                            <div className={`p-4 rounded-2xl text-sm shadow-md ${msg.role === 'user'
-                                ? 'bg-[#4F46E5] text-white rounded-br-sm'
-                                : 'bg-finance-800 border border-finance-700 text-finance-text rounded-bl-sm'
+                            <div className={`p-4 rounded-2xl text-sm shadow-md backdrop-blur-md ${msg.role === 'user'
+                                ? 'bg-gradient-to-br from-[#8C30F5] to-[#4F46E5] text-white rounded-br-sm shadow-[0_0_15px_rgba(140,48,245,0.2)]'
+                                : 'bg-white/10 border border-white/5 text-finance-text rounded-bl-sm'
                                 }`}>
                                 {renderContent(msg.content)}
                             </div>
@@ -176,12 +176,12 @@ export default function ChatIA() {
             )}
 
             {/* Input */}
-            <form onSubmit={handleSubmit} className="bg-finance-800 border-t border-finance-700/50 p-4 shrink-0 shadow-[0_-10px_40px_rgba(0,0,0,0.2)]">
+            <form onSubmit={handleSubmit} className="bg-white/5 backdrop-blur-2xl border-t border-white/5 p-4 shrink-0 shadow-[0_-10px_40px_rgba(0,0,0,0.2)]">
                 <div className="max-w-4xl mx-auto flex items-center gap-3">
                     <input
                         type="text"
                         disabled={isTyping}
-                        className="flex-1 bg-finance-900 border border-finance-700 rounded-full px-6 py-3.5 text-finance-text focus:outline-none focus:border-[#4F46E5] transition-colors placeholder:text-finance-muted/50 disabled:opacity-50"
+                        className="flex-1 bg-black/40 backdrop-blur-md border border-white/10 rounded-full px-6 py-3.5 text-finance-text focus:outline-none focus:border-[#00D4FF]/50 transition-colors placeholder:text-finance-muted/50 disabled:opacity-50"
                         placeholder={isTyping ? t('typing') : t('ask_question')}
                         value={input}
                         onChange={(e) => setInput(e.target.value)}

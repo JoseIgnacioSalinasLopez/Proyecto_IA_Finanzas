@@ -6,9 +6,9 @@ export default function SummaryCard({ title, amount, icon, type, trend, delay = 
     const { t, language } = useLanguage();
     const getIconColors = () => {
         switch (type) {
-            case 'income': return 'text-emerald-400 bg-emerald-400/10 shadow-[0_0_15px_rgba(52,211,153,0.15)]';
-            case 'expense': return 'text-red-400 bg-red-400/10 shadow-[0_0_15px_rgba(248,113,113,0.15)]';
-            case 'balance': return 'text-finance-primary bg-finance-primary/10 shadow-[0_0_15px_rgba(0,212,255,0.2)]';
+            case 'income': return 'text-emerald-400 bg-emerald-400/15 shadow-[0_0_20px_rgba(52,211,153,0.3)] border border-emerald-400/20';
+            case 'expense': return 'text-red-400 bg-red-400/15 shadow-[0_0_20px_rgba(248,113,113,0.3)] border border-red-400/20';
+            case 'balance': return 'text-finance-primary bg-finance-primary/15 shadow-[0_0_20px_rgba(0,212,255,0.4)] border border-finance-primary/20';
             default: return 'text-finance-muted bg-finance-muted/10';
         }
     };

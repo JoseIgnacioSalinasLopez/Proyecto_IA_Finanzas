@@ -10,10 +10,18 @@ import {
     Zap,
     Target,
     Plus,
-    Trash2
+    Trash2,
+    Pencil,
+    ChevronLeft,
+    ChevronRight,
+    Bell,
+    Check,
+    PieChart
 } from 'lucide-react';
 import api from '../../services/api';
 import { useLanguage } from '../../context/LanguageContext';
+import DatePickerElite from './DatePickerElite';
+
 
 const PriorityBadge = ({ level }) => {
     const { t } = useLanguage();
@@ -23,9 +31,9 @@ const PriorityBadge = ({ level }) => {
         optional: "bg-blue-500/20 text-blue-500 border-blue-500/50"
     };
     const labels = {
-        critical: t('critical'),
-        important: t('important'),
-        optional: t('optional')
+        critical: t('priority_critical'),
+        important: t('priority_important'),
+        optional: t('priority_optional')
     };
 
     return (
@@ -39,40 +47,108 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
     const navigate = useNavigate();
     const { t, language } = useLanguage();
     const [showEventModal, setShowEventModal] = useState(false);
-    const [eventFormData, setEventFormData] = useState({ title: '', amount: '', date: '', priority: 'important' });
+    const [eventFormData, setEventFormData] = useState({ 
+        title: '', 
+        amount: '', 
+        date: new Date().toISOString().split('T')[0], 
+        priority: 'important',
+        is_recurring: false,
+        payment_day: '',
+        deadline_day: ''
+    });
+    const [editEventId, setEditEventId] = useState(null);
+    const [prefs, setPrefs] = useState({ hide_challenges: false, hide_forecasts: false });
+
+    // Fetch preferences
+    React.useEffect(() => {
+        const fetchPrefs = async () => {
+            try {
+                const res = await api.get('/preferences');
+                if (res.data.success && res.data.data) {
+                    setPrefs({
+                        hide_challenges: res.data.data.hide_challenges ?? false,
+                        hide_forecasts: res.data.data.hide_forecasts ?? false
+                    });
+                }
+            } catch (err) {
+                console.error('Error fetching timeline prefs:', err);
+            }
+        };
+        fetchPrefs();
+    }, []);
+    
+    // Carousel state
+    const [currentGoalIndex, setCurrentGoalIndex] = useState(0);
+    
+    // Custom Delete Confirmation state
+    const [deleteConfirmId, setDeleteConfirmId] = useState(null);
 
     if (!stats) return null;
 
     const {
         summary = { totalIncome: 0, totalExpense: 0, balance: 0, dailyBurnRate: 0, bufferTime: 0, riskLevel: 'BAJO' },
         goals = [],
-        monthlyExpensesByCategory = [],
-        manualEvents = []
+        manualEvents = [],
+        budgetAnalysis = []
     } = stats;
 
     const handleEventSubmit = async (e) => {
         e.preventDefault();
         try {
-            await api.post('/events', {
+            const payload = {
                 ...eventFormData,
-                amount: Number(eventFormData.amount || 0)
-            });
+                amount: Number(eventFormData.amount || 0),
+                payment_day: eventFormData.is_recurring ? Number(eventFormData.payment_day) : null,
+                deadline_day: eventFormData.is_recurring ? Number(eventFormData.deadline_day) : null
+            };
+
+            if (editEventId) {
+                await api.put(`/events/${editEventId}`, payload);
+            } else {
+                await api.post('/events', payload);
+            }
+
             setShowEventModal(false);
-            setEventFormData({ title: '', amount: '', date: '', priority: 'important' });
-            if (onRefresh) await onRefresh(); // Re-fetch stats to update timeline
+            setEditEventId(null);
+            setEventFormData({ 
+                title: '', 
+                amount: '', 
+                date: new Date().toISOString().split('T')[0], 
+                priority: 'important',
+                is_recurring: false,
+                payment_day: '',
+                deadline_day: ''
+            });
+            if (onRefresh) await onRefresh();
         } catch (error) {
             console.error(error);
         }
     };
 
-    const handleDeleteEvent = async (id) => {
-        if (window.confirm(t('delete_event_confirm'))) {
-            try {
-                await api.delete(`/events/${id}`);
-                if (onRefresh) await onRefresh(); // Re-fetch stats to update timeline
-            } catch (error) {
-                console.error(error);
-            }
+    const confirmDelete = async (id) => {
+        try {
+            await api.delete(`/events/${id}`);
+            setDeleteConfirmId(null);
+            if (onRefresh) await onRefresh();
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const handleEdit = (id) => {
+        const ev = manualEvents.find(e => e.id === id);
+        if (ev) {
+            setEditEventId(id);
+            setEventFormData({
+                title: ev.title || '',
+                amount: ev.amount || '',
+                date: ev.date ? new Date(ev.date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+                priority: ev.priority || 'important',
+                is_recurring: ev.is_recurring || false,
+                payment_day: ev.payment_day || '',
+                deadline_day: ev.deadline_day || ''
+            });
+            setShowEventModal(true);
         }
     };
 
@@ -80,44 +156,114 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
     const generateTimeline = () => {
         const events = [];
         const now = new Date();
-        const fifteenDaysAgo = new Date(now.getTime() - 15 * 24 * 60 * 60 * 1000);
-        const fifteenDaysAhead = new Date(now.getTime() + 15 * 24 * 60 * 60 * 1000);
+        const currentDay = now.getDate();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
+        const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+        const daysRemaining = daysInMonth - currentDay;
 
-        // A. Metas (Goals)
+        // 1. Hitos de Metas (Goal Milestones)
         goals?.forEach(goal => {
-            const deadline = new Date(goal.deadline);
-            const target = Number(goal.target_amount || 0);
-            const current = Number(goal.current_amount || 0);
+            const progress = (goal.current_amount / goal.target_amount) * 100;
+            let milestone = 0;
+            if (progress >= 75) milestone = 75;
+            else if (progress >= 50) milestone = 50;
+            else if (progress >= 25) milestone = 25;
 
-            let status = "upcoming";
-            if (deadline < now && deadline.toDateString() !== now.toDateString()) status = "expired";
-            else if (deadline.toDateString() === now.toDateString()) status = "today";
-
-            events.push({
-                id: `goal-${goal.id}`,
-                title: `${t('goal_prefix')}${goal.name}`,
-                amount: Math.max(0, target - current),
-                status,
-                priority: status === "expired" ? "critical" : "important",
-                time: status === "expired" ? t('expired_label') : (status === "today" ? t('today_label') : `${t('for_label')} ${deadline.toLocaleDateString(language === 'en' ? 'en-US' : 'es-MX')}`),
-                description: `${t('missing_amount')}$${Math.max(0, target - current).toFixed(2)}${t('to_complete')}`
-            });
+            if (milestone > 0) {
+                events.push({
+                    id: `milestone-${goal.id}-${milestone}`,
+                    title: t('goal_milestone_title'),
+                    amount: goal.current_amount,
+                    status: "today",
+                    priority: "important",
+                    time: `${milestone}%`,
+                    description: t('goal_milestone_desc').replace('{percentage}', milestone).replace('{name}', goal.name),
+                    icon: <Target size={14} className="text-finance-primary" />
+                });
+            }
         });
 
-        // B. Gastos Recurrentes Detectados
-        stats.recurrentExpenses?.forEach((desc, idx) => {
+        // 2. Retos de Ahorro (Challenges)
+        const isWeekend = now.getDay() === 0 || now.getDay() === 6;
+        if (isWeekend && !prefs.hide_challenges) {
             events.push({
-                id: `recurrent-${idx}`,
-                title: `${t('recurrent_expense_prefix')}${desc.toUpperCase()}`,
+                id: 'weekend-challenge',
+                title: t('savings_challenge_title'),
                 amount: 0,
+                status: "today",
+                priority: "optional",
+                time: t('today_label'),
+                description: t('savings_challenge_desc'),
+                icon: <Zap size={14} className="text-finance-neon" />
+            });
+        }
+
+        // 3. Recordatorios de Suscripciones (Detect keywords)
+        const subKeywords = ['netflix', 'spotify', 'disney', 'amazon', 'internet', 'teléfono', 'phone', 'cloud', 'seguro', 'gym'];
+        stats.recurrentExpenses?.forEach((desc, idx) => {
+            const lowerDesc = desc.toLowerCase();
+            if (subKeywords.some(key => lowerDesc.includes(key))) {
+                events.push({
+                    id: `sub-${idx}`,
+                    title: t('sub_reminder_title'),
+                    amount: 0,
+                    status: "upcoming",
+                    priority: "important",
+                    time: t('projected'),
+                    description: t('sub_reminder_desc').replace('{name}', desc.toUpperCase()),
+                    icon: <Bell size={14} className="text-finance-primary" />
+                });
+            }
+        });
+
+        // 4. Logros de Disciplina (Daily budget check)
+        // Simulamos racha basada en si el gasto mensual / días transcurridos es menor al burn rate
+        const dailyAvgSoFar = summary.totalExpense / (currentDay || 1);
+        if (dailyAvgSoFar < summary.dailyBurnRate && summary.totalExpense > 0) {
+            events.push({
+                id: 'discipline-streak',
+                title: t('discipline_streak_title'),
+                amount: 0,
+                status: "today",
+                priority: "optional",
+                time: t('today_label'),
+                description: t('discipline_streak_desc').replace('{days}', currentDay),
+                icon: <TrendingUp size={14} className="text-finance-neon" />
+            });
+        }
+
+        // 5. Alertas de Inversión / Ahorro
+        if (summary.balance > 5000 && summary.riskLevel === 'BAJO') {
+            const investAmount = Math.floor(summary.balance * 0.2); // Sigue 20%
+            events.push({
+                id: 'invest-alert',
+                title: t('invest_alert_title'),
+                amount: investAmount,
                 status: "upcoming",
                 priority: "optional",
-                time: t('projected'),
-                description: t('recurrent_suggestion')
+                time: t('alert'),
+                description: t('invest_alert_desc').replace('${amount}', investAmount.toLocaleString()),
+                icon: <PieChart size={14} className="text-finance-primary" />
             });
-        });
+        }
 
-        // C. Alertas Automáticas
+        // 6. Pronóstico de Saldo
+        if (!prefs.hide_forecasts) {
+            const projectedEndBalance = summary.balance + (summary.totalIncome - summary.totalExpense); 
+            events.push({
+                id: 'forecast-end',
+                title: t('balance_forecast_title'),
+                amount: projectedEndBalance,
+                status: "upcoming",
+                priority: "important",
+                time: `${t('from_label')} ${daysRemaining} ${t('days')}`,
+                description: t('balance_forecast_desc').replace('${amount}', projectedEndBalance.toLocaleString()),
+                icon: <TrendingUp size={14} className="text-finance-neon" />
+            });
+        }
+
+        // Alertas Automáticas de Balance (Original logic)
         const totalExp = Number(summary.totalExpense || 0);
         const totalInc = Number(summary.totalIncome || 0);
 
@@ -129,11 +275,12 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                 status: "today",
                 priority: "critical",
                 time: t('alert'),
-                description: t('overspend_desc')
+                description: t('overspend_desc'),
+                icon: <AlertCircle size={14} className="text-red-500" />
             });
         }
 
-        if (Number(summary.bufferTime || 0) < 30) {
+        if (Number(summary.bufferTime || 0) < 30 && summary.totalExpense > 0) {
             events.push({
                 id: 'alert-low-buffer',
                 title: t('critical_buffer'),
@@ -141,46 +288,87 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                 status: "today",
                 priority: "critical",
                 time: t('alert'),
-                description: `${t('low_buffer_desc')} (${summary.bufferTime} ${t('remaining_days_label')}).`
+                description: `${t('low_buffer_desc')} (${summary.bufferTime} ${t('remaining_days_label')}).`,
+                icon: <AlertCircle size={14} className="text-red-500" />
             });
         }
 
-        // D. Eventos Manuales
+        // Eventos Manuales y Recurrentes Personalizados
         manualEvents?.forEach(ev => {
-            const evDate = new Date(ev.date);
-            let status = "upcoming";
-            if (evDate.toDateString() === now.toDateString()) status = "today";
-            else if (evDate < now) status = "expired";
+            if (ev.is_recurring && ev.payment_day) {
+                const pDay = Number(ev.payment_day);
+                const dDay = Number(ev.deadline_day);
+                let status = "upcoming";
+                let priority = ev.priority || "important";
+                let timeDesc = `${t('next_payment')}: ${pDay}/${currentMonth + 1}`;
+                
+                if (currentDay >= pDay && currentDay <= dDay) {
+                    status = "today";
+                    timeDesc = t('deadline_approaching');
+                } else if (currentDay > dDay) {
+                    const daysOver = currentDay - dDay;
+                    status = "expired";
+                    timeDesc = `${t('not_paid_yet')} (+${daysOver} ${t('days')})`;
+                }
 
-            events.push({
-                id: ev.id,
-                title: ev.title,
-                amount: Number(ev.amount || 0),
-                status,
-                priority: ev.priority,
-                time: status === "expired" ? t('past_label') : (status === "today" ? t('today_label') : `${t('event_label')}${evDate.toLocaleDateString(language === 'en' ? 'en-US' : 'es-MX')}`),
-                description: t('manual_event_desc'),
-                isManual: true
-            });
+                events.push({
+                    id: ev.id,
+                    title: ev.title,
+                    amount: Number(ev.amount || 0),
+                    status,
+                    priority,
+                    time: timeDesc,
+                    description: `${t('payment_day')}: ${pDay} | ${t('deadline_day')}: ${dDay}`,
+                    isManual: true,
+                    isRecurring: true,
+                    icon: <Bell size={14} className="text-finance-primary" />
+                });
+            } else {
+                const evDate = new Date(ev.date);
+                let status = "upcoming";
+                if (evDate.toDateString() === now.toDateString()) status = "today";
+                else if (evDate < now) status = "expired";
+
+                events.push({
+                    id: ev.id,
+                    title: ev.title,
+                    amount: Number(ev.amount || 0),
+                    status,
+                    priority: ev.priority,
+                    time: status === "expired" ? t('past_label') : (status === "today" ? t('today_label') : `${t('event_label')}${evDate.toLocaleDateString(language === 'en' ? 'en-US' : 'es-MX')}`),
+                    description: t('manual_event_desc'),
+                    isManual: true,
+                    icon: <Calendar size={14} className="text-finance-primary" />
+                });
+            }
         });
 
         // Sort events: critical/today first, then upcoming
         return events.sort((a, b) => {
+            const statusMap = { expired: 0, today: 1, upcoming: 2 };
             const priorityMap = { critical: 0, important: 1, optional: 2 };
+            
+            if (statusMap[a.status] !== statusMap[b.status]) {
+                return statusMap[a.status] - statusMap[b.status];
+            }
             return priorityMap[a.priority] - priorityMap[b.priority];
-        }).slice(0, 10);
+        }).slice(0, 15);
     };
 
     const timelineData = generateTimeline();
+    const nextGoal = () => goals.length > 0 && setCurrentGoalIndex((currentGoalIndex + 1) % goals.length);
+    const prevGoal = () => goals.length > 0 && setCurrentGoalIndex((currentGoalIndex - 1 + goals.length) % goals.length);
 
     return (
         <div className="text-white overflow-hidden flex flex-col h-full font-sans">
-            {/* Área de Encabezado — Simplificada porque el Dashboard ya tiene el título */}
             <div className="flex justify-between items-center mb-6 pb-4 border-b border-white/5">
                 <div>
                     <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[11px] bg-finance-primary/20 text-finance-primary px-2.5 py-1 rounded-lg uppercase font-bold tracking-widest border border-finance-primary/30">
-                            {t('operational_status')}
+                        <span className="text-[11px] bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-lg uppercase font-bold tracking-widest border border-emerald-500/30">
+                            {t('system_ok')}
+                        </span>
+                        <span className="text-[10px] text-finance-muted uppercase font-mono tracking-tighter ml-2 hidden sm:inline">
+                             | {new Date().toLocaleDateString(language === 'en' ? 'en-US' : 'es-MX', { month: 'long', year: 'numeric' }).toUpperCase()}
                         </span>
                     </div>
                 </div>
@@ -190,17 +378,15 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 2xl:grid-cols-12 gap-6 flex-1">
-                {/* Columna Izquierda: Estadísticas y Metas */}
-                <div className="2xl:col-span-5 space-y-7 flex flex-col justify-start 2xl:border-r border-white/5 2xl:pr-6">
-
-                    {/* Motor de Supervivencia */}
+            <div className="grid grid-cols-1 2xl:grid-cols-12 gap-8 flex-1 overflow-hidden">
+                <div className="2xl:col-span-5 space-y-8 flex flex-col justify-start 2xl:border-r border-white/5 2xl:pr-6 overflow-y-auto custom-scrollbar">
+                    {/* Survival Engine */}
                     <section>
                         <div className="flex items-center gap-2 mb-4 text-white">
                             <Zap size={14} className="text-finance-neon" />
                             <h3 className="text-xs font-bold uppercase tracking-wider">{t('survival_engine')}</h3>
                         </div>
-                        <div className="bg-finance-900/50 p-4 rounded-xl border border-finance-700">
+                        <div className="bg-white/5 backdrop-blur-md p-4 rounded-xl border border-white/5">
                             <p className="text-[10px] text-finance-muted mb-1">{t('safe_daily_rate')}</p>
                             <div className="flex items-baseline gap-1">
                                 <span className="text-2xl font-mono font-bold text-finance-neon">
@@ -213,9 +399,9 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                                     <p className="text-[10px] text-finance-muted">{t('buffer_time_label')}</p>
                                     <p className="text-sm font-bold text-finance-neon">{summary?.bufferTime || 0} {t('days')}</p>
                                 </div>
-                                <div>
-                                    <p className="text-[10px] text-finance-muted text-right uppercase">{t('financial_health')}</p>
-                                    <p className={`text-sm font-bold text-right uppercase ${summary?.riskLevel === 'CRÍTICO' ? 'text-red-500' : summary?.riskLevel === 'MEDIO' ? 'text-orange-500' : 'text-finance-primary'}`}>
+                                <div className="text-right">
+                                    <p className="text-[10px] text-finance-muted uppercase">{t('financial_health')}</p>
+                                    <p className={`text-sm font-bold uppercase ${summary?.riskLevel === 'CRÍTICO' ? 'text-red-500' : summary?.riskLevel === 'MEDIO' ? 'text-orange-500' : 'text-finance-primary'}`}>
                                         {summary?.riskLevel === 'BAJO' ? t('risk_low') :
                                             summary?.riskLevel === 'MEDIO' ? t('risk_medium') :
                                                 summary?.riskLevel === 'CRÍTICO' ? t('risk_critical') :
@@ -226,219 +412,323 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                         </div>
                     </section>
 
-                    {/* Asignación de Presupuesto */}
+                    {/* Apartados (Mes Actual) */}
                     <section>
-                        <div className="flex justify-between items-center mb-4">
-                            <div className="flex items-center gap-2 text-white">
-                                <Target size={14} className="text-finance-primary" />
-                                <h3 className="text-[11px] font-bold uppercase tracking-wider text-finance-muted">{t('set_asides_month')}</h3>
-                            </div>
-                            <button
-                                onClick={() => navigate('/resumen')}
-                                className="text-[11px] text-finance-primary hover:text-white transition-colors flex items-center gap-1 font-bold"
-                            >
-                                <Plus size={11} /> {t('view_movements')}
-                            </button>
+                        <div className="flex items-center gap-2 mb-4 text-white">
+                            <PieChart size={14} className="text-finance-primary" />
+                            <h3 className="text-xs font-bold uppercase tracking-wider">{t('budget_allocation') || 'Apartados (Mes Actual)'}</h3>
                         </div>
-                        <div className="space-y-4">
-                            {stats.monthlyExpensesByCategory?.slice(0, 3).map((cat, idx) => (
-                                <div key={idx}>
-                                    <div className="flex justify-between text-[11px] mb-1.5 font-bold uppercase">
-                                        <span className="text-finance-muted">{cat.name}</span>
-                                        <span className="text-finance-text">${cat.amount.toLocaleString(language === 'en' ? 'en-US' : 'es-MX', { minimumFractionDigits: 2 })}</span>
+                        <div className="bg-white/5 backdrop-blur-md p-4 rounded-2xl border border-white/10 space-y-4">
+                            {budgetAnalysis?.length > 0 ? budgetAnalysis.map((b, idx) => (
+                                <div key={idx} className="relative group">
+                                    <div className="flex justify-between items-end mb-2">
+                                        <p className="text-xs font-bold uppercase tracking-wider">{b.category || t('uncategorized')}</p>
+                                        <div className="text-right">
+                                            <p className="text-sm font-mono font-black">${b.spent.toLocaleString()} <span className="text-[10px] text-finance-muted font-normal">/ ${b.limit.toLocaleString()}</span></p>
+                                        </div>
                                     </div>
-                                    <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
-                                        <div
-                                            className={`h-full ${idx === 0 ? 'bg-finance-primary shadow-[0_0_8px_rgba(0,212,255,0.4)]' : idx === 1 ? 'bg-indigo-500' : 'bg-finance-muted'}`}
-                                            style={{ width: `${Math.min((cat.amount / Math.max(summary.totalIncome, 1)) * 100 || 0, 100)}%` }}
+                                    <div className="h-1.5 bg-black/40 rounded-full overflow-hidden border border-white/5">
+                                        <div 
+                                            className={`h-full transition-all duration-1000 ${
+                                                b.percentage > 90 ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.4)]' : 
+                                                b.percentage > 70 ? 'bg-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.4)]' : 
+                                                'bg-finance-primary shadow-[0_0_10px_rgba(0,212,255,0.4)]'
+                                            }`}
+                                            style={{ width: `${b.percentage}%` }}
                                         ></div>
                                     </div>
                                 </div>
-                            ))}
-                            {!stats.monthlyExpensesByCategory?.length && (
-                                <p className="text-xs text-finance-muted italic">{t('no_expenses_month')}</p>
+                            )) : (
+                                <p className="text-[10px] text-finance-muted italic text-center py-2">{t('no_budgets') || 'No tienes apartados configurados.'}</p>
                             )}
                         </div>
                     </section>
 
-                    {/* Metas Estratégicas */}
-                    <section className="mt-auto">
+                    {/* Strategic Goals */}
+                    <section className="mt-auto pb-4">
                         <div className="flex justify-between items-center mb-4">
                             <div className="flex items-center gap-2 text-white">
                                 <TrendingUp size={14} className="text-finance-neon" />
                                 <h3 className="text-xs font-bold uppercase tracking-wider">{t('strategic_goals')}</h3>
                             </div>
-                            <button
-                                onClick={() => navigate('/metas')}
-                                className="text-[10px] text-finance-primary hover:text-white transition-colors flex items-center gap-1 font-bold"
-                            >
-                                <Plus size={10} /> {t('schedule')}
-                            </button>
+                            {goals.length > 1 && (
+                                <div className="flex items-center gap-2">
+                                    <button onClick={prevGoal} className="p-1 hover:bg-white/10 rounded-full transition-colors text-finance-muted hover:text-white">
+                                        <ChevronLeft size={16} />
+                                    </button>
+                                    <span className="text-[10px] font-mono text-finance-muted">{currentGoalIndex + 1}/{goals.length}</span>
+                                    <button onClick={nextGoal} className="p-1 hover:bg-white/10 rounded-full transition-colors text-finance-muted hover:text-white">
+                                        <ChevronRight size={16} />
+                                    </button>
+                                </div>
+                            )}
                         </div>
                         {goals?.length > 0 ? (
-                            <div className="bg-finance-900/50 p-4 rounded-xl border border-finance-700 flex items-center gap-4">
-                                <div className="w-10 h-10 bg-finance-primary/10 rounded flex items-center justify-center text-finance-primary">
-                                    <Laptop size={20} />
+                            <div className="bg-white/5 backdrop-blur-md p-4 rounded-2xl border border-white/10 flex items-center gap-4 relative overflow-hidden group">
+                                <div className="w-12 h-12 bg-gradient-to-br from-finance-primary/20 to-finance-neon/10 rounded-xl flex items-center justify-center text-finance-primary shadow-[0_0_15px_rgba(0,212,255,0.1)]">
+                                    <Target size={24} />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-bold mb-1.5 truncate">{goals[0].name}</p>
-                                    <div className="h-1.5 bg-white/5 rounded-full mb-1.5">
-                                        <div className="h-full bg-finance-primary shadow-[0_0_8px_rgba(0,212,255,0.4)]" style={{ width: `${(goals[0].current_amount / goals[0].target_amount) * 100}%` }}></div>
+                                    <p className="text-sm font-bold mb-2 truncate uppercase tracking-tight">{goals[currentGoalIndex].name}</p>
+                                    <div className="h-2 bg-black/40 rounded-full mb-2 overflow-hidden border border-white/5">
+                                        <div 
+                                            className="h-full bg-finance-primary shadow-[0_0_10px_rgba(0,212,255,0.4)] transition-all duration-1000" 
+                                            style={{ width: `${Math.min((goals[currentGoalIndex].current_amount / goals[currentGoalIndex].target_amount) * 100, 100)}%` }}
+                                        ></div>
                                     </div>
-                                    <div className="flex justify-between text-[11px] text-finance-muted font-mono">
-                                        <span>${Number(goals[0].current_amount || 0).toLocaleString(language === 'en' ? 'en-US' : 'es-MX')} / ${Number(goals[0].target_amount || 0).toLocaleString(language === 'en' ? 'en-US' : 'es-MX')}</span>
-                                        <span className="text-finance-primary font-bold">{((goals[0].current_amount / goals[0].target_amount) * 100).toFixed(0)}%</span>
-                                    </div>
-                                </div>
-                            </div>
-                        ) : (
-                            <p className="text-xs text-finance-muted italic">{t('no_active_goals')}</p>
-                        )}
-                    </section>
-                </div>
-
-                {/* Columna Derecha: Línea de Tiempo Inteligente */}
-                <div className="2xl:col-span-7 space-y-5">
-                    <div className="flex justify-between items-center mb-4">
-                        <div className="flex items-center gap-2 text-white">
-                            <Clock size={14} className="text-finance-neon" />
-                            <h3 className="text-xs font-bold uppercase tracking-wider">{t('smart_timeline')}</h3>
-                        </div>
-                        <div className="flex gap-4 flex-wrap">
-                            <button
-                                onClick={() => setShowEventModal(true)}
-                                className="bg-finance-primary/10 hover:bg-finance-primary/20 text-finance-primary text-[11px] font-bold px-3 py-1.5 rounded-lg flex items-center gap-1.5 border border-finance-primary/30 transition-all mr-2"
-                            >
-                                <Plus size={12} /> {t('add_event')}
-                            </button>
-                            <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.4)]"></div><span className="text-[11px] font-bold text-finance-muted uppercase">{t('critical')}</span></div>
-                            <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.4)]"></div><span className="text-[11px] font-bold text-finance-muted uppercase">{t('alert')}</span></div>
-                            <div className="flex items-center gap-1.5"><div className="w-2 h-2 rounded-full bg-finance-primary shadow-[0_0_8px_rgba(0,212,255,0.4)]"></div><span className="text-[11px] font-bold text-finance-muted uppercase">{t('optimize')}</span></div>
-                        </div>
-                    </div>
-
-                    <div className="relative pl-8 space-y-6 before:absolute before:left-3.5 before:top-2 before:bottom-2 before:w-px before:bg-finance-700/50">
-                        {timelineData.length > 0 ? timelineData.map((item) => (
-                            <div key={item.id} className={`relative`}>
-                                {/* Nodo de Línea de Tiempo */}
-                                <div className={`absolute -left-8 p-1 rounded-full border-2 bg-[#0B022D] z-10 
-                  ${item.status === 'expired' ? 'border-red-500 text-red-500' :
-                                        item.status === 'today' ? 'border-orange-500 text-orange-500 scale-110 shadow-[0_0_10px_rgba(249,115,22,0.3)]' :
-                                            'border-finance-primary text-finance-primary'}`}>
-                                    {item.status === 'expired' ? <AlertCircle size={14} /> : <Calendar size={14} />}
-                                </div>
-
-                                <div className={`p-3.5 rounded-xl border transition-all hover:bg-finance-900/30
-                  ${item.status === 'today' ? 'bg-orange-950/20 border-orange-500/30' : 'bg-finance-900/20 border-white/5'}`}>
-                                    <div className="flex justify-between items-start mb-1.5">
-                                        <div className="min-w-0 pr-2">
-                                            <p className={`text-[10px] font-bold uppercase mb-0.5 tracking-tight ${item.status === 'expired' ? 'text-red-500' : item.status === 'today' ? 'text-orange-500' : 'text-finance-primary'}`}>
-                                                {item.time} {item.status === 'expired' ? '⚠️' : ''}
-                                            </p>
-                                            <h4 className="text-[13px] font-bold truncate leading-tight">{item.title}</h4>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            {item.isManual && (
-                                                <button
-                                                    onClick={() => handleDeleteEvent(item.id)}
-                                                    className="text-finance-muted hover:text-red-500 transition-colors"
-                                                >
-                                                    <Trash2 size={12} />
-                                                </button>
-                                            )}
-                                            <PriorityBadge level={item.priority} />
-                                        </div>
-                                    </div>
-                                    <div className="flex justify-between items-end">
-                                        <p className="text-[10px] text-finance-muted max-w-[70%]">
-                                            {item.description}
-                                        </p>
-                                        <span className={`text-sm font-mono font-bold ${item.status === 'expired' ? 'text-red-500' : 'text-white'}`}>
-                                            {item.amount > 0 ? `$${item.amount.toFixed(2)}` : ''}
+                                    <div className="flex justify-between text-[11px] text-finance-muted font-mono font-bold">
+                                        <span>${Number(goals[currentGoalIndex].current_amount || 0).toLocaleString()} / ${Number(goals[currentGoalIndex].target_amount || 0).toLocaleString()}</span>
+                                        <span className="text-finance-primary">
+                                            {((goals[currentGoalIndex].current_amount / goals[currentGoalIndex].target_amount) * 100).toFixed(0)}%
                                         </span>
                                     </div>
                                 </div>
                             </div>
+                        ) : (
+                            <div className="p-8 border-2 border-dashed border-white/5 rounded-2xl text-center">
+                                <p className="text-xs text-finance-muted italic">{t('no_active_goals')}</p>
+                                <button onClick={() => navigate('/metas')} className="mt-3 text-[10px] text-finance-primary font-black uppercase tracking-widest hover:underline">{t('create_goal')}</button>
+                            </div>
+                        )}
+                    </section>
+                </div>
+
+                {/* Smart Timeline section remains similarly structured but with icon updates */}
+                <div className="2xl:col-span-7 flex flex-col h-full overflow-hidden">
+                    <div className="flex justify-between items-center mb-6">
+                        <div className="flex items-center gap-2 text-white">
+                            <Clock size={14} className="text-finance-neon" />
+                            <h3 className="text-xs font-bold uppercase tracking-wider">{t('smart_timeline')}</h3>
+                        </div>
+                        <button
+                            onClick={() => {
+                                setEditEventId(null);
+                                setEventFormData({ 
+                                    title: '', amount: '', date: new Date().toISOString().split('T')[0], 
+                                    priority: 'important', is_recurring: false, payment_day: '', deadline_day: ''
+                                });
+                                setShowEventModal(true);
+                            }}
+                            className="bg-finance-primary/10 hover:bg-finance-primary/20 text-finance-primary text-[11px] font-black px-4 py-2 rounded-xl flex items-center gap-2 border border-finance-primary/20 transition-all uppercase tracking-widest"
+                        >
+                            <Plus size={14} /> {t('add_event')}
+                        </button>
+                    </div>
+
+                    <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar space-y-4 max-h-[580px]">
+                        {timelineData.length > 0 ? timelineData.map((item) => (
+                            <div key={item.id} className="relative group/item px-1 flex gap-4">
+                                <div className="flex flex-col items-center">
+                                    <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center bg-black/40 z-10 transition-all duration-500
+                                        ${item.status === 'expired' ? 'border-red-500 text-red-500 shadow-[0_0_10px_rgba(239,68,68,0.3)]' : 
+                                          item.status === 'today' ? 'border-orange-500 text-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.3)]' : 
+                                          'border-finance-primary text-finance-primary shadow-[0_0_10px_rgba(0,212,255,0.2)]'}`}>
+                                        {item.icon || (item.status === 'expired' ? <AlertCircle size={14} /> : <Calendar size={14} />)}
+                                    </div>
+                                    <div className="w-[1px] flex-1 bg-white/10 my-1" />
+                                </div>
+
+                                <div className={`flex-1 p-4 rounded-2xl border transition-all duration-300 relative overflow-hidden
+                                    ${item.status === 'expired' ? 'bg-red-500/5 border-red-500/20' : 
+                                      item.status === 'today' ? 'bg-orange-500/10 border-orange-500/30' : 
+                                      'bg-white/5 border-white/5 hover:border-white/10'}`}>
+                                    
+                                    {deleteConfirmId === item.id ? (
+                                        <div className="absolute inset-0 bg-[#0a061d] z-20 flex items-center justify-between px-6 animate-fade-in">
+                                            <span className="text-xs font-bold text-red-400">{t('delete_event_confirm')}</span>
+                                            <div className="flex gap-3">
+                                                <button onClick={() => setDeleteConfirmId(null)} className="text-[10px] uppercase font-black text-finance-muted hover:text-white">{t('keep_action')}</button>
+                                                <button onClick={() => confirmDelete(item.id)} className="px-4 py-1.5 bg-red-500/20 text-red-500 rounded-lg text-[10px] font-black uppercase tracking-wider hover:bg-red-500 hover:text-white transition-all">{t('delete_action')}</button>
+                                            </div>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <div className="flex justify-between items-start mb-2">
+                                                <div className="min-w-0">
+                                                    <p className={`text-[10px] font-black uppercase tracking-tighter mb-0.5
+                                                        ${item.status === 'expired' ? 'text-red-500' : 
+                                                          item.status === 'today' ? 'text-orange-500' : 'text-finance-primary'}`}>
+                                                        {item.time}
+                                                    </p>
+                                                    <h4 className="text-sm font-bold truncate leading-tight uppercase tracking-tight">{item.title}</h4>
+                                                </div>
+                                                <div className="flex items-center gap-2 opacity-100 transition-opacity">
+                                                    {item.isManual && (
+                                                        <>
+                                                            <button onClick={() => handleEdit(item.id)} className="text-finance-muted hover:text-finance-primary p-1 opacity-50 hover:opacity-100" title={t('edit_label')}>
+                                                                <Pencil size={13} />
+                                                            </button>
+                                                            <button onClick={() => setDeleteConfirmId(item.id)} className="text-finance-muted hover:text-red-500 p-1 opacity-50 hover:opacity-100" title={t('delete_action')}>
+                                                                <Trash2 size={13} />
+                                                            </button>
+                                                        </>
+                                                    )}
+                                                    <PriorityBadge level={item.priority} />
+                                                </div>
+                                            </div>
+                                            <div className="flex justify-between items-end">
+                                                <p className="text-[11px] text-finance-muted max-w-[70%] leading-relaxed font-medium">
+                                                    {item.description}
+                                                </p>
+                                                <span className={`text-base font-mono font-black ${item.status === 'expired' ? 'text-red-500' : 'text-white'}`}>
+                                                    {item.amount > 0 ? `$${item.amount.toLocaleString()}` : ''}
+                                                </span>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
                         )) : (
-                            <p className="text-xs text-finance-muted italic">{t('no_events')}</p>
+                            <div className="py-12 text-center border-2 border-dashed border-white/5 rounded-3xl">
+                                <Clock size={40} className="mx-auto text-white/5 mb-3" />
+                                <p className="text-xs text-finance-muted italic font-medium">{t('no_events')}</p>
+                            </div>
                         )}
                     </div>
                 </div>
             </div>
 
-            {/* Información del Pie de Página */}
-            <div className="mt-8 pt-4 border-t border-white/5 flex justify-between items-center text-[10px] text-finance-muted font-mono tracking-widest">
-                <div className="flex gap-4">
-                    <span className="flex items-center gap-1"><span className="w-1 h-1 rounded-full bg-emerald-400"></span> {t('system_ok')}</span>
-                    <span className="flex items-center gap-1"><span className="w-1 h-1 rounded-full bg-emerald-400"></span> {t('db_connected')}</span>
+            <div className="mt-8 pt-6 border-t border-white/5 flex justify-between items-center text-[10px] text-finance-muted font-black tracking-widest">
+                <div className="flex gap-6">
+                    <span className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]" /> 
+                        {t('system_ok')}
+                    </span>
+                    <span className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]" /> 
+                        {t('db_connected')}
+                    </span>
                 </div>
-                <div className="hidden sm:block">© 2026 MENTEBILLETE CORE OPS</div>
+                <div className="hidden sm:block opacity-50 uppercase tracking-[0.2em]">{t('terminal_id')} 8842-CORE-OS</div>
             </div>
 
-            {/* Modal de Eventos Manuales */}
             {showEventModal && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 p-4">
-                    <div className="bg-[#130B42] p-8 rounded-2xl w-full max-w-md border border-white/10 shadow-2xl">
-                        <h2 className="text-xl font-bold mb-6 text-finance-neon">{t('schedule_manual_event')}</h2>
-                        <form onSubmit={handleEventSubmit} className="space-y-4">
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-xl flex justify-center items-center z-50 p-6 animate-fade-in">
+                    <div className="card max-w-lg w-full p-8 relative overflow-visible bg-[#0c0821] border-white/10 animate-scale-in">
+                        <div className="absolute -top-10 -right-10 p-20 bg-finance-primary/5 rounded-full blur-3xl" />
+                        
+                        <h2 className="text-2xl font-black mb-8 text-white uppercase tracking-tighter flex items-center gap-3">
+                            {editEventId ? <Pencil size={24} className="text-finance-primary" /> : <Plus size={24} className="text-finance-primary" />}
+                            {editEventId ? t('edit_event') : t('schedule_manual_event')}
+                        </h2>
+
+                        <form onSubmit={handleEventSubmit} className="space-y-6 relative z-10">
                             <div>
-                                <label className="block text-sm text-finance-muted mb-1">{t('event_title')}</label>
+                                <label className="block text-[10px] font-black text-finance-muted uppercase tracking-widest mb-2">{t('event_title')}</label>
                                 <input
                                     type="text"
                                     required
-                                    className="w-full bg-finance-900 border border-finance-700 p-3 rounded-xl focus:outline-none focus:border-finance-neon text-white text-sm"
+                                    className="input-field !bg-white/5 focus:!bg-white/10"
                                     placeholder={t('event_title_placeholder')}
                                     value={eventFormData.title}
                                     onChange={e => setEventFormData({ ...eventFormData, title: e.target.value })}
                                 />
                             </div>
+
+                            <div className="flex items-center gap-4 p-4 bg-white/5 rounded-2xl border border-white/5">
+                                <div className={`p-2 rounded-lg transition-colors ${eventFormData.is_recurring ? 'bg-finance-primary/20 text-finance-primary' : 'bg-white/5 text-finance-muted'}`}>
+                                    <Bell size={20} />
+                                </div>
+                                <div className="flex-1">
+                                    <h4 className="text-sm font-bold">{t('recurring_event')}</h4>
+                                    <p className="text-[10px] text-finance-muted uppercase font-bold">{t('monthly_reminder') || 'Recordatorio Mensual'}</p>
+                                </div>
+                                <button 
+                                    type="button"
+                                    onClick={() => setEventFormData({...eventFormData, is_recurring: !eventFormData.is_recurring})}
+                                    className={`w-12 h-6 rounded-full transition-all relative ${eventFormData.is_recurring ? 'bg-finance-primary' : 'bg-white/10'}`}
+                                >
+                                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${eventFormData.is_recurring ? 'left-7' : 'left-1'}`} />
+                                </button>
+                            </div>
+
                             <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm text-finance-muted mb-1">{t('amount_optional')}</label>
+                                    <label className="block text-[10px] font-black text-finance-muted uppercase tracking-widest mb-2">{t('amount_label')}</label>
                                     <input
                                         type="number"
-                                        className="w-full bg-finance-900 border border-finance-700 p-3 rounded-xl focus:outline-none focus:border-finance-neon text-white text-sm"
+                                        className="input-field"
+                                        placeholder="$0.00"
                                         value={eventFormData.amount}
                                         onChange={e => setEventFormData({ ...eventFormData, amount: e.target.value })}
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm text-finance-muted mb-1">{t('date_label')}</label>
-                                    <input
-                                        type="date"
-                                        required
-                                        className="w-full bg-finance-900 border border-finance-700 p-3 rounded-xl focus:outline-none focus:border-finance-neon text-white text-sm"
-                                        value={eventFormData.date}
-                                        onChange={e => setEventFormData({ ...eventFormData, date: e.target.value })}
+                                    <label className="block text-[10px] font-black text-finance-muted uppercase tracking-widest mb-2">{t('date_label')}</label>
+                                    <DatePickerElite 
+                                        value={eventFormData.date} 
+                                        onChange={(val) => setEventFormData({ ...eventFormData, date: val })} 
                                     />
                                 </div>
                             </div>
+
+                            
+                            {eventFormData.is_recurring && (
+                                <div className="grid grid-cols-2 gap-4 animate-scale-in">
+                                    <div>
+                                        <label className="block text-[10px] font-black text-finance-muted uppercase tracking-widest mb-2">{t('payment_day')}</label>
+                                        <input
+                                            type="number"
+                                            min="1" max="31"
+                                            required
+                                            className="input-field border-white/5 bg-white/5 focus:bg-white/10"
+                                            placeholder="Ej: 8"
+                                            value={eventFormData.payment_day}
+                                            onChange={e => setEventFormData({ ...eventFormData, payment_day: e.target.value })}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-black text-finance-muted uppercase tracking-widest mb-2">{t('deadline_day')}</label>
+                                        <input
+                                            type="number"
+                                            min="1" max="31"
+                                            required
+                                            className="input-field border-white/5 bg-white/5 focus:bg-white/10"
+                                            placeholder="Ej: 15"
+                                            value={eventFormData.deadline_day}
+                                            onChange={e => setEventFormData({ ...eventFormData, deadline_day: e.target.value })}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* FIX: New Priority Selection clearly visible and always present */}
                             <div>
-                                <label className="block text-sm text-finance-muted mb-1">{t('priority_label')}</label>
-                                <select
-                                    required
-                                    className="w-full bg-finance-900 border border-finance-700 p-3 rounded-xl focus:outline-none focus:border-finance-neon text-white text-sm"
-                                    value={eventFormData.priority}
-                                    onChange={e => setEventFormData({ ...eventFormData, priority: e.target.value })}
-                                >
-                                    <option value="important">{t('priority_important')}</option>
-                                    <option value="critical">{t('priority_critical')}</option>
-                                    <option value="optional">{t('priority_optional')}</option>
-                                </select>
+                                <label className="block text-[10px] font-black text-finance-muted uppercase tracking-widest mb-2">{t('priority_label')}</label>
+                                <div className="flex gap-2">
+                                    {['optional', 'important', 'critical'].map(p => (
+                                        <button
+                                            key={p}
+                                            type="button"
+                                            onClick={() => setEventFormData({...eventFormData, priority: p})}
+                                            className={`flex-1 py-3 px-2 rounded-xl border text-[10px] font-black uppercase tracking-widest transition-all
+                                                ${eventFormData.priority === p ? 
+                                                    (p === 'critical' ? 'bg-red-500 border-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.4)]' : p === 'important' ? 'bg-orange-500 border-orange-500 text-white shadow-[0_0_15px_rgba(249,115,22,0.4)]' : 'bg-finance-primary border-finance-primary text-black shadow-[0_0_15px_rgba(0,212,255,0.4)]') : 
+                                                    'bg-white/5 border-white/10 text-finance-muted hover:border-white/20'}`}
+                                        >
+                                            {t(`priority_${p}`)}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
-                            <div className="flex justify-end gap-3 mt-6">
+
+                            <div className="flex justify-end gap-4 mt-8">
                                 <button
                                     type="button"
-                                    onClick={() => setShowEventModal(false)}
-                                    className="px-4 py-2 text-finance-muted hover:text-white text-sm"
+                                    onClick={() => {
+                                        setShowEventModal(false);
+                                        setEditEventId(null);
+                                    }}
+                                    className="px-6 py-4 text-xs font-black text-finance-muted hover:text-white uppercase tracking-widest"
                                 >
                                     {t('cancel')}
                                 </button>
                                 <button
                                     type="submit"
-                                    className="bg-finance-neon text-black font-bold px-6 py-2 rounded-xl text-sm hover:brightness-110 transition-all"
+                                    className="btn-epic !px-10 flex items-center gap-3 shadow-[0_0_30px_rgba(0,212,255,0.2)]"
                                 >
-                                    {t('add_to_timeline')}
+                                    <Check size={20} />
+                                    <span>{editEventId ? t('save_changes').toUpperCase() : t('add_to_timeline').toUpperCase()}</span>
                                 </button>
                             </div>
                         </form>

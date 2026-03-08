@@ -9,6 +9,8 @@ import profileRoutes from './routes/profile.routes.js';
 import goalRoutes from './routes/goal.routes.js';
 import eventRoutes from './routes/event.routes.js';
 import chatRoutes from './routes/chat.routes.js';
+import budgetRoutes from './routes/budget.routes.js';
+import preferenceRoutes from './routes/preference.routes.js';
 
 const app = express();
 
@@ -26,6 +28,8 @@ app.use('/api/profile', profileRoutes);
 app.use('/api/goals', goalRoutes);
 app.use('/api/events', eventRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/budgets', budgetRoutes);
+app.use('/api/preferences', preferenceRoutes);
 
 // Healthcheck Route
 app.get('/api/health', (req, res) => {
@@ -34,10 +38,12 @@ app.get('/api/health', (req, res) => {
 
 // Centralized Error Handling Middlewares
 app.use((err, req, res, next) => {
-    console.error(err.stack);
+    console.error('EXPRESS ERROR CAUGHT:', err);
+    console.error('Stack:', err.stack);
     res.status(err.status || 500).json({
         success: false,
-        message: err.message || 'Internal Server Error'
+        message: err.message || 'Internal Server Error',
+        details: err.details || null
     });
 });
 

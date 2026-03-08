@@ -1,18 +1,34 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import appLogo from '../assets/logo.png';
+import fondoLogin from '../assets/fondo-login2.jpg';
 import { useAuth } from '../hooks/useAuth';
+import { ChevronRight, Mail, Lock, User, RefreshCw, Eye, EyeOff } from 'lucide-react';
 
 export default function Login() {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
+    const [isExpanded, setIsExpanded] = useState(false);
+    const [currentView, setCurrentView] = useState('login'); // 'login', 'register', 'forgot'
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [fullName, setFullName] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [registerStep, setRegisterStep] = useState(1);
+    const [registerSuccess, setRegisterSuccess] = useState(false);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-    const { login } = useAuth();
+    const { login, registerUser } = useAuth();
     const navigate = useNavigate();
 
-    const handleSubmit = async (e) => {
+    // Reset error when view changes
+    useEffect(() => {
+        setError('');
+    }, [currentView]);
+
+    const handleLogin = async (e) => {
         e.preventDefault();
         setError('');
         setLoading(true);
@@ -26,69 +42,373 @@ export default function Login() {
         }
     };
 
+    const toggleView = (view) => {
+        setCurrentView(view);
+        setRegisterStep(1);
+        setRegisterSuccess(false);
+        setError('');
+        setConfirmPassword('');
+    };
+
+    const handleNextStep = (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        if (!fullName.trim()) {
+            setError(language === 'en' ? 'Please enter your full name' : 'Por favor ingresa tu nombre completo');
+            return;
+        }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!email.trim() || !emailRegex.test(email)) {
+            setError(language === 'en' ? 'Enter a valid email address' : 'Ingresa un correo electrónico válido');
+            return;
+        }
+        setError('');
+        setRegisterStep(2);
+    };
+
+    const handleRegister = async (e) => {
+        e.preventDefault();
+        if (password.length < 6) {
+            setError(language === 'en' ? 'Password must be at least 6 characters' : 'La contraseña debe tener al menos 6 caracteres');
+            return;
+        }
+        if (password !== confirmPassword) {
+            setError(language === 'en' ? 'Passwords do not match' : 'Las contraseñas no coinciden');
+            return;
+        }
+        setError('');
+        setLoading(true);
+        try {
+            await registerUser(fullName, email, password);
+            setRegisterSuccess(true);
+            setTimeout(() => navigate('/'), 1500);
+        } catch (err) {
+            setError(err.response?.data?.message || (language === 'en' ? 'Registration error' : 'Error al registrarse'));
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const getSlideClass = () => {
+        if (currentView === 'login') return 'slide-to-login';
+        if (currentView === 'register') return 'slide-to-register';
+        return 'slide-to-forgot';
+    };
+
     return (
-        <div className="min-h-screen flex items-center justify-center bg-finance-900 p-4">
-            <div className="card w-full max-w-md">
-                <div className="text-center mb-8">
-                    <div className="flex justify-center mb-4">
-                        <img src={appLogo} alt="Mente Billete Logo" className="h-20 w-auto object-contain" />
-                    </div>
-                    <p className="text-finance-muted mt-4">{t('login_title')}</p>
-                </div>
+        <div className="min-h-screen flex items-center justify-center p-6 overflow-hidden relative bg-[#05011a]">
+            
+            {/* Capa 1: Gradiente Animado Épico (Fondo base) */}
+            <div className="absolute inset-0 epic-bg-animate z-0"></div>
 
-                {error && (
-                    <div className="bg-finance-danger/10 border border-finance-danger text-finance-danger px-4 py-3 rounded mb-6 text-sm">
-                        {error}
-                    </div>
-                )}
+            {/* Capa 2: Imagen de Fondo (La "Pintura" del fondo) */}
+            <div 
+                className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-50 transition-transform duration-1000"
+                style={{ 
+                    backgroundImage: `url(${fondoLogin})`,
+                    transform: isExpanded ? 'scale(1.05)' : 'scale(1.0)', // Se aleja/acerca sutilmente
+                    filter: 'brightness(0.7) contrast(1.1)' 
+                }}
+            ></div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium text-finance-muted mb-1">{t('email_address')}</label>
-                        <input
-                            type="email"
-                            className="input-field"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                            placeholder="tu@email.com"
-                        />
-                    </div>
+            {/* Dark Overlay for Image Background Contrast */}
+            <div className="absolute inset-0 bg-black/40 z-0"></div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-finance-muted mb-1">{t('change_password')}</label>
-                        <input
-                            type="password"
-                            className="input-field"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                            placeholder="••••••••"
-                        />
-                    </div>
-
-                    <div className="flex justify-end text-sm">
-                        <Link to="/forgot-password" className="text-finance-primary hover:text-finance-primaryHover">
-                            {t('forgot_password_q')}
-                        </Link>
-                    </div>
-
-                    <button
-                        type="submit"
-                        className="btn-primary w-full flex justify-center py-3"
-                        disabled={loading}
-                    >
-                        {loading ? t('logging_in') : t('login_button')}
-                    </button>
-                </form>
-
-                <p className="mt-6 text-center text-sm text-finance-muted">
-                    {t('no_account')}{' '}
-                    <Link to="/register" className="text-finance-primary hover:text-finance-primaryHover font-medium">
-                        {t('register_here')}
-                    </Link>
-                </p>
+            {/* Background Particles & Sparkles */}
+            <div className="absolute inset-0 z-0 pointer-events-none">
+                {[...Array(25)].map((_, i) => (
+                    <div 
+                        key={i} 
+                        className={`particle ${i % 4 === 0 ? 'particle-yellow' : 'particle-cyan'}`}
+                        style={{
+                            width: i % 4 === 0 ? '3px' : '4px',
+                            height: i % 4 === 0 ? '3px' : '4px',
+                            left: `${Math.random() * 100}%`,
+                            top: `${Math.random() * 100}%`,
+                            animationDuration: `${Math.random() * 15 + 10}s`,
+                            animationDelay: `${-Math.random() * 20}s`,
+                            opacity: Math.random() * 0.4 + 0.1,
+                            background: i % 4 === 0 ? '#FFD166' : '#00D4FF',
+                            boxShadow: i % 4 === 0 ? '0 0 8px #FFD166' : '0 0 10px #7DF9FF'
+                        }}
+                    ></div>
+                ))}
             </div>
+
+            {/* Ambient Background Glows */}
+            <div className="absolute top-1/4 -left-20 w-80 h-80 bg-epic-purple/20 blur-[100px] rounded-full"></div>
+            <div className="absolute bottom-1/4 -right-20 w-80 h-80 bg-epic-cyan/20 blur-[100px] rounded-full"></div>
+
+            {/* Card Principal Épica */}
+            <div 
+                className={`w-full max-w-[440px] epic-border-card transition-all duration-700 ease-out animate-entrance ${isExpanded ? 'scale-100 shadow-[0_20px_60px_rgba(0,0,0,0.6)]' : 'scale-95 hover:scale-100'}`}
+                onMouseEnter={() => setIsExpanded(true)}
+                onMouseLeave={() => setIsExpanded(false)}
+                onClick={() => setIsExpanded(true)}
+            >
+                <div className={`${isExpanded ? 'p-10' : 'p-2'} relative z-20 transition-all duration-500`}>
+                    {/* Encabezado Principal / Compact Holder */}
+                    <div 
+                        className={`text-center transition-all duration-700 ${!isExpanded ? 'cursor-pointer' : 'mb-6'}`}
+                        onClick={() => setIsExpanded(true)}
+                    >
+                        {!isExpanded ? (
+                            <div className="neomorp-inner group py-2 flex flex-col items-center justify-center animate-pulse-slow">
+                                <div className="flex items-center gap-4">
+                                    <div className="w-2 h-2 rounded-full bg-[#00D4FF] shadow-[0_0_10px_#00D4FF] animate-ping"></div>
+                                    <h1 className="text-xl font-black text-white uppercase tracking-[0.3em] group-hover:tracking-[0.4em] transition-all">{t('start_session')}</h1>
+                                    <div className="w-3 h-3 bg-[#8C30F5] rounded-sm rotate-45 shadow-[0_0_10px_#8C30F5]"></div>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="animate-fade-in text-center">
+                                <div className="flex justify-center mb-6 cursor-pointer transform hover:rotate-6 transition-transform">
+                                    <img src={appLogo} alt="Logo" className="h-16 w-auto drop-shadow-[0_0_20px_rgba(0,212,255,0.6)]" />
+                                </div>
+                                <h1 className="text-5xl font-black tracking-tighter leading-tight mb-3 bg-clip-text text-transparent bg-gradient-to-r from-[#8C30F5] via-[#4F46E5] to-[#2E6FF2] drop-shadow-sm">
+                                    {currentView === 'login' ? t('welcome_elite') : currentView === 'register' ? t('create_account_elite') : t('recover_elite')}
+                                </h1>
+                                <p className="text-slate-400 font-bold text-lg">
+                                    {currentView === 'login' ? t('manage_future') : t('join_elite')}
+                                </p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Contenedor Expandible */}
+                    <div className={`expandable-container ${isExpanded ? 'is-expanded' : ''}`}>
+                        <div className={`overflow-hidden ${isExpanded ? 'pt-4' : 'pt-0'} ${error ? 'animate-shake' : ''}`}>
+                            
+                            {error && (
+                                <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-xl mb-6 text-xs flex items-center gap-3">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></div>
+                                    {error}
+                                </div>
+                            )}
+                            {/* Contenedores de Formularios Aislados */}
+                            <div className={`w-full relative ${isExpanded ? 'min-h-[350px]' : 'min-h-0'}`}>
+                                
+                                {/* FORMULARIO: LOGIN */}
+                                {currentView === 'login' && (
+                                    <div className="animate-fade-in" id="login-form">
+                                        <form onSubmit={handleLogin} className="space-y-6">
+                                            <div className="floating-label-group">
+                                                <input
+                                                    type="email"
+                                                    placeholder=" "
+                                                    className="w-full bg-black/40 border border-white/5 rounded-2xl px-4 py-4 text-white focus:outline-none transition-all placeholder-transparent"
+                                                    value={email}
+                                                    onChange={(e) => setEmail(e.target.value)}
+                                                    required
+                                                />
+                                                <label className="text-slate-400">{t('email_address')}</label>
+                                            </div>
+
+                                            <div className="floating-label-group relative">
+                                                <input
+                                                    type={showPassword ? "text" : "password"}
+                                                    placeholder=" "
+                                                    className="w-full bg-black/40 border border-white/5 rounded-2xl px-4 py-4 pr-12 text-white focus:outline-none transition-all placeholder-transparent"
+                                                    value={password}
+                                                    onChange={(e) => setPassword(e.target.value)}
+                                                    required
+                                                />
+                                                <label className="text-slate-400">{t('change_password')}</label>
+                                                <button 
+                                                    type="button" 
+                                                    onClick={() => setShowPassword(!showPassword)}
+                                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
+                                                    tabIndex="-1"
+                                                >
+                                                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                                                </button>
+                                            </div>
+
+                                            <div className="flex justify-between items-center px-1">
+                                                <button 
+                                                    type="button"
+                                                    onClick={(e) => { e.stopPropagation(); toggleView('forgot'); }}
+                                                    className="text-[10px] font-bold text-slate-500 hover:text-white transition-colors tracking-widest uppercase"
+                                                >
+                                                    {t('forgot_pwd_q_elite')}
+                                                </button>
+                                                <button 
+                                                    type="button"
+                                                    onClick={(e) => { e.stopPropagation(); toggleView('register'); }}
+                                                    className="text-[10px] font-bold text-red-500 hover:text-red-400 transition-colors tracking-widest uppercase"
+                                                >
+                                                    {t('register_action')}
+                                                </button>
+                                            </div>
+
+                                            <button
+                                                type="submit"
+                                                className="btn-epic w-full uppercase tracking-[0.2em] text-sm py-4 text-[#00D4FF] font-black rounded-2xl shadow-[0_0_20px_rgba(0,212,255,0.2)]"
+                                                disabled={loading}
+                                            >
+                                                {loading ? <RefreshCw className="animate-spin mx-auto" size={18} /> : t('login_button')}
+                                            </button>
+                                        </form>
+                                    </div>
+                                )}
+
+                                {/* FORMULARIO: REGISTRO */}
+                                {currentView === 'register' && (
+                                    <div className="animate-fade-in" id="register-form">
+                                        {/* Indicador de pasos */}
+                                        <div className="flex items-center justify-center gap-2 mb-5">
+                                            <div className={`w-2 h-2 rounded-full transition-all duration-300 ${registerStep >= 1 ? 'bg-[#00D4FF] shadow-[0_0_8px_#00D4FF]' : 'bg-white/10'}`} />
+                                            <div className={`w-8 h-[1px] transition-all duration-300 ${registerStep >= 2 ? 'bg-[#00D4FF]' : 'bg-white/10'}`} />
+                                            <div className={`w-2 h-2 rounded-full transition-all duration-300 ${registerStep >= 2 ? 'bg-[#00D4FF] shadow-[0_0_8px_#00D4FF]' : 'bg-white/10'}`} />
+                                        </div>
+
+                                        {registerSuccess ? (
+                                            <div className="text-center py-6 animate-fade-in">
+                                                <div className="w-14 h-14 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-4">
+                                                    <svg className="text-emerald-400" width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                                                </div>
+                                                <p className="text-emerald-400 font-black text-sm uppercase tracking-widest">{language === 'en' ? 'Account created!' : '¡Cuenta creada!'}</p>
+                                                <p className="text-slate-500 text-xs mt-1">{language === 'en' ? 'Entering your dashboard...' : 'Ingresando a tu panel...'}</p>
+                                            </div>
+                                        ) : registerStep === 1 ? (
+                                            <div className="space-y-5">
+                                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest text-center">{language === 'en' ? 'Step 1 of 2 — Personal Info' : 'Paso 1 de 2 — Info Personal'}</p>
+                                                <div className="floating-label-group">
+                                                    <input 
+                                                        type="text" 
+                                                        placeholder=" " 
+                                                        className="w-full bg-black/40 border border-white/5 rounded-2xl px-4 py-4 text-white focus:outline-none transition-all placeholder-transparent" 
+                                                        value={fullName}
+                                                        onChange={(e) => setFullName(e.target.value)}
+                                                        onKeyDown={(e) => e.key === 'Enter' && handleNextStep(e)}
+                                                    />
+                                                    <label className="text-slate-400">{t('full_name')}</label>
+                                                </div>
+                                                <div className="floating-label-group">
+                                                    <input 
+                                                        type="email" 
+                                                        placeholder=" " 
+                                                        className="w-full bg-black/40 border border-white/5 rounded-2xl px-4 py-4 text-white focus:outline-none transition-all placeholder-transparent" 
+                                                        value={email}
+                                                        onChange={(e) => setEmail(e.target.value)}
+                                                        onKeyDown={(e) => e.key === 'Enter' && handleNextStep(e)}
+                                                    />
+                                                    <label className="text-slate-400">{t('email_address')}</label>
+                                                </div>
+                                                <button 
+                                                    type="button"
+                                                    onClick={handleNextStep}
+                                                    className="btn-epic w-full uppercase tracking-[0.2rem] text-xs py-4 text-[#00D4FF] font-black rounded-2xl flex items-center justify-center gap-2"
+                                                >
+                                                    {t('next_step')} <ChevronRight size={15} />
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <form onSubmit={handleRegister} className="space-y-5">
+                                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest text-center">{language === 'en' ? 'Step 2 of 2 — Set Password' : 'Paso 2 de 2 — Crea tu Contraseña'}</p>
+                                                <div className="floating-label-group relative">
+                                                    <input
+                                                        type={showPassword ? 'text' : 'password'}
+                                                        placeholder=" "
+                                                        className="w-full bg-black/40 border border-white/5 rounded-2xl px-4 py-4 pr-12 text-white focus:outline-none transition-all placeholder-transparent"
+                                                        value={password}
+                                                        onChange={(e) => setPassword(e.target.value)}
+                                                        required
+                                                        minLength={6}
+                                                        autoFocus
+                                                    />
+                                                    <label className="text-slate-400">{language === 'en' ? 'Password' : 'Contraseña'}</label>
+                                                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors" tabIndex="-1">
+                                                        {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                                                    </button>
+                                                </div>
+                                                <div className="floating-label-group relative">
+                                                    <input
+                                                        type={showConfirmPassword ? 'text' : 'password'}
+                                                        placeholder=" "
+                                                        className={`w-full bg-black/40 border rounded-2xl px-4 py-4 pr-12 text-white focus:outline-none transition-all placeholder-transparent ${
+                                                            confirmPassword && confirmPassword !== password 
+                                                                ? 'border-red-500/50' 
+                                                                : confirmPassword && confirmPassword === password 
+                                                                    ? 'border-emerald-500/50' 
+                                                                    : 'border-white/5'
+                                                        }`}
+                                                        value={confirmPassword}
+                                                        onChange={(e) => setConfirmPassword(e.target.value)}
+                                                        required
+                                                    />
+                                                    <label className="text-slate-400">{language === 'en' ? 'Confirm Password' : 'Confirmar Contraseña'}</label>
+                                                    <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors" tabIndex="-1">
+                                                        {showConfirmPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                                                    </button>
+                                                </div>
+                                                <div className="flex gap-2">
+                                                    <button 
+                                                        type="button"
+                                                        onClick={(e) => { e.stopPropagation(); setRegisterStep(1); setError(''); }}
+                                                        className="flex-1 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-white border border-white/5 rounded-2xl hover:border-white/20 transition-all"
+                                                    >
+                                                        {language === 'en' ? 'Back' : 'Atrás'}
+                                                    </button>
+                                                    <button 
+                                                        type="submit"
+                                                        disabled={loading}
+                                                        className="flex-[2] btn-epic py-4 text-[#00D4FF] font-black rounded-2xl uppercase tracking-[0.15em] text-xs flex items-center justify-center gap-2"
+                                                    >
+                                                        {loading ? <RefreshCw className="animate-spin" size={16} /> : (language === 'en' ? 'Create Account' : 'Crear Cuenta')}
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        )}
+
+                                        {!registerSuccess && (
+                                            <div className="mt-6 text-center pt-5 border-t border-white/5">
+                                                <button onClick={(e) => { e.stopPropagation(); toggleView('login'); }} className="text-xs text-slate-300 font-black hover:underline uppercase tracking-widest">
+                                                    {t('back_to_login_elite')}
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* FORMULARIO: RECUPERACIÓN */}
+                                {currentView === 'forgot' && (
+                                    <div className="animate-fade-in" id="recover-form">
+                                        <div className="space-y-6">
+                                            <p className="text-xs text-slate-400 text-center px-4 leading-relaxed">
+                                                {t('recover_desc_elite')}
+                                            </p>
+                                            <div className="floating-label-group">
+                                                <input 
+                                                    type="email" 
+                                                    placeholder=" " 
+                                                    className="w-full bg-black/40 border border-white/5 rounded-2xl px-4 py-4 text-white" 
+                                                    value={email}
+                                                    onChange={(e) => setEmail(e.target.value)}
+                                                />
+                                                <label className="text-slate-400">{t('email_address')}</label>
+                                            </div>
+                                            <button className="btn-epic w-full uppercase tracking-[0.2rem] text-xs py-4 text-[#00D4FF] font-black rounded-2xl">{t('send_link')}</button>
+                                        </div>
+                                        <div className="mt-8 text-center pt-6 border-t border-white/5">
+                                            <button onClick={(e) => { e.stopPropagation(); toggleView('login'); }} className="text-xs text-slate-300 font-black hover:underline uppercase tracking-widest">
+                                                {t('back_to_login_elite')}
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Hint */}
+            {!isExpanded && (
+                <p className="absolute bottom-10 text-[10px] text-epic-cyan font-black uppercase tracking-[0.5em] animate-pulse drop-shadow-[0_0_10px_rgba(0,212,255,0.8)] z-30">
+                    {t('interact')}
+                </p>
+            )}
         </div>
     );
 }
