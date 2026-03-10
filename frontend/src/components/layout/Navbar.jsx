@@ -5,6 +5,8 @@ import { useLanguage } from '../../context/LanguageContext';
 import { Menu, Bell } from 'lucide-react';
 import NotificationsDropdown from '../ui/NotificationsDropdown';
 import { supabase } from '../../lib/supabase';
+import api from '../../services/api';
+
 
 export default function Navbar({ onMenuClick }) {
     const { user } = useAuth();
@@ -19,11 +21,11 @@ export default function Navbar({ onMenuClick }) {
 
         const channel = supabase
             .channel('realtime-notifications')
-            .on('postgres_changes', { 
-                event: '*', 
-                schema: 'public', 
-                table: 'notifications', 
-                filter: `user_id=eq.${user.id}` 
+            .on('postgres_changes', {
+                event: '*',
+                schema: 'public',
+                table: 'notifications',
+                filter: `user_id=eq.${user.id}`
             }, () => {
                 fetchNotifications();
             })
@@ -35,28 +37,24 @@ export default function Navbar({ onMenuClick }) {
     }, [user?.id]);
 
     const fetchNotifications = async () => {
-        const { data, error } = await supabase
-            .from('notifications')
-            .select('*')
-            .eq('user_id', user.id)
-            .eq('is_read', false)
-            .order('created_at', { ascending: false });
-
-        if (!error && data) {
-            setNotifications(data);
+        try {
+            const res = await api.get('/notifications');
+            if (res.data.success) {
+                setNotifications(res.data.data);
+            }
+        } catch (error) {
+            console.error('Error fetching notifications:', error);
         }
     };
 
     const handleClearNotifs = async () => {
-        if (!user?.id) return;
-        
-        const { error } = await supabase
-            .from('notifications')
-            .update({ is_read: true })
-            .eq('user_id', user.id);
-
-        if (!error) {
-            setNotifications([]);
+        try {
+            const res = await api.put('/notifications/mark-read');
+            if (res.data.success) {
+                setNotifications([]);
+            }
+        } catch (error) {
+            console.error('Error clearing notifications:', error);
         }
     };
 
@@ -94,8 +92,8 @@ export default function Navbar({ onMenuClick }) {
 
 
                     {showNotifs && (
-                        <NotificationsDropdown 
-                            notifications={notifications} 
+                        <NotificationsDropdown
+                            notifications={notifications}
                             onClose={() => setShowNotifs(false)}
                             onClear={handleClearNotifs}
                         />
