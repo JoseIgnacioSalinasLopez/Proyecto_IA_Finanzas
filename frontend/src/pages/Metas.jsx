@@ -175,8 +175,8 @@ export default function Metas() {
                             style={{ animationDelay: `${idx * 60}ms` }}
                         >
                             <div className="flex justify-between items-start mb-4">
-                                <div className={`p-2.5 rounded-xl border ${isComplete 
-                                    ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20 shadow-[0_0_15px_rgba(52,211,153,0.2)]' 
+                                <div className={`p-2.5 rounded-xl border ${isComplete
+                                    ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20 shadow-[0_0_15px_rgba(52,211,153,0.2)]'
                                     : 'bg-finance-primary/15 text-finance-primary border-finance-primary/20 shadow-[0_0_15px_rgba(0,212,255,0.2)]'}`}>
                                     {isComplete ? <TrendingUp size={20} /> : <Target size={20} />}
                                 </div>
@@ -248,8 +248,8 @@ export default function Metas() {
                 })}
 
                 {goals.length === 0 && (
-                    <div className="col-span-full py-20 text-center border-2 border-dashed border-finance-700/30 rounded-3xl">
-                        <Target size={48} className="mx-auto text-finance-700 mb-4 opacity-20" />
+                    <div className="col-span-full py-20 flex flex-col items-center justify-center text-center border-2 border-dashed border-finance-700/30 rounded-3xl">
+                        <Target size={48} className="text-finance-700 mb-4 opacity-20" />
                         <p className="text-finance-muted text-lg mb-1 font-medium">{t('no_goals_yet')}</p>
                         <button onClick={openCreate} className="btn-primary mt-4">
                             {t('create_first_goal')}
@@ -280,9 +280,9 @@ export default function Metas() {
                             </div>
                             <div>
                                 <label className="block text-sm text-finance-muted mb-1.5">{t('deadline')} *</label>
-                                <DatePickerElite 
-                                    value={formData.deadline} 
-                                    onChange={(val) => setFormData({ ...formData, deadline: val })} 
+                                <DatePickerElite
+                                    value={formData.deadline}
+                                    onChange={(val) => setFormData({ ...formData, deadline: val })}
                                 />
                             </div>
                             <div className="flex justify-end gap-3 pt-4">

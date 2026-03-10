@@ -5,12 +5,12 @@ import { useLanguage } from '../../context/LanguageContext';
 import Toast from './Toast';
 import DatePickerElite from './DatePickerElite';
 
-const EMPTY_FORM = { 
-    amount: '', 
-    type: 'expense', 
-    category_id: '', 
-    description: '', 
-    date: new Date().toISOString().split('T')[0] 
+const EMPTY_FORM = {
+    amount: '',
+    type: 'expense',
+    category_id: '',
+    description: '',
+    date: new Date().toISOString().split('T')[0]
 };
 
 export default function QuickAddModal() {
@@ -58,7 +58,7 @@ export default function QuickAddModal() {
             const now = new Date();
             const [y, m, d] = form.date.split('-');
             const dateWithTime = new Date(y, m - 1, d, now.getHours(), now.getMinutes(), now.getSeconds());
-            
+
             await api.post('/transactions', {
                 ...form,
                 amount: parseFloat(form.amount),
@@ -81,7 +81,7 @@ export default function QuickAddModal() {
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 drop-shadow-2xl">
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" onClick={() => setShow(false)} />
-            
+
             <div className="relative w-full max-w-md bg-[#11111d] border border-white/10 rounded-2xl overflow-visible shadow-2xl animate-scale-up">
                 {/* Header */}
                 <div className="p-4 border-b border-white/5 flex items-center justify-between bg-black/20">
@@ -110,14 +110,13 @@ export default function QuickAddModal() {
                                 <button
                                     key={type.key}
                                     type="button"
-                                    onClick={() => setForm({ ...form, type: type.key })}
-                                    className={`flex-1 py-2.5 rounded-xl font-bold text-sm border-2 transition-all ${
-                                        form.type === type.key
-                                            ? type.color === 'red'
-                                                ? 'bg-red-500/20 border-red-500 text-red-400 shadow-[0_0_10px_rgba(239,68,68,0.2)]'
-                                                : 'bg-emerald-500/20 border-emerald-500 text-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.2)]'
-                                            : 'bg-black/20 border-white/10 text-finance-muted hover:border-white/30'
-                                    }`}
+                                    onClick={() => setForm({ ...form, type: type.key, category_id: '' })}
+                                    className={`flex-1 py-2.5 rounded-xl font-bold text-sm border-2 transition-all ${form.type === type.key
+                                        ? type.color === 'red'
+                                            ? 'bg-red-500/20 border-red-500 text-red-400 shadow-[0_0_10px_rgba(239,68,68,0.2)]'
+                                            : 'bg-emerald-500/20 border-emerald-500 text-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.2)]'
+                                        : 'bg-black/20 border-white/10 text-finance-muted hover:border-white/30'
+                                        }`}
                                 >
                                     {type.label}
                                 </button>
@@ -157,7 +156,7 @@ export default function QuickAddModal() {
                     </div>
 
                     {/* Fecha */}
-                    <DatePickerElite 
+                    <DatePickerElite
                         id="quick-date"
                         label={t('date_label')}
                         value={form.date}
@@ -176,9 +175,12 @@ export default function QuickAddModal() {
                             onChange={e => setForm({ ...form, category_id: e.target.value })}
                         >
                             <option value="" disabled>{t('select_category')}</option>
-                            {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                            {categories
+                                .filter(c => (c.type || 'expense') === form.type)
+                                .map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
                         </select>
                     </div>
+
 
                     {/* Botones */}
                     <div className="flex gap-3 pt-2">
@@ -192,9 +194,8 @@ export default function QuickAddModal() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className={`btn-primary flex-1 flex justify-center items-center gap-2 ${
-                                form.type === 'expense' ? 'bg-red-500 shadow-red-500/20 hover:bg-red-400 border-red-500/50' : ''
-                            }`}
+                            className={`btn-primary flex-1 flex justify-center items-center gap-2 ${form.type === 'expense' ? 'bg-red-500 shadow-red-500/20 hover:bg-red-400 border-red-500/50' : ''
+                                }`}
                         >
                             {loading ? (
                                 <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
@@ -207,10 +208,10 @@ export default function QuickAddModal() {
 
                 {toast && (
                     <div className="absolute bottom-4 left-4 right-4 z-[110]">
-                        <Toast 
-                            message={toast.message} 
-                            type={toast.type} 
-                            onClose={() => setToast(null)} 
+                        <Toast
+                            message={toast.message}
+                            type={toast.type}
+                            onClose={() => setToast(null)}
                         />
                     </div>
                 )}

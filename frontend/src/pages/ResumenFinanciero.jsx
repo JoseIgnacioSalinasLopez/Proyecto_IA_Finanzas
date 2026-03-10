@@ -58,7 +58,7 @@ function TransactionForm({ formData, setFormData, categories, onSubmit, onClose,
                 <div className="flex gap-3" role="group" aria-label={t('movement_type')}>
                     {['expense', 'income'].map(tKey => (
                         <button key={tKey} type="button"
-                            onClick={() => setFormData({ ...formData, type: tKey })}
+                            onClick={() => setFormData({ ...formData, type: tKey, category_id: '' })}
                             aria-pressed={formData.type === tKey}
                             className={`flex-1 py-3 rounded-xl font-bold text-sm border-2 transition-all ${formData.type === tKey
                                 ? tKey === 'expense'
@@ -85,7 +85,7 @@ function TransactionForm({ formData, setFormData, categories, onSubmit, onClose,
                         value={formData.amount}
                         onChange={e => setFormData({ ...formData, amount: e.target.value })} />
                 </div>
-                <DatePickerElite 
+                <DatePickerElite
                     id="tx-date"
                     label={t('date_label')}
                     value={formData.date}
@@ -101,9 +101,12 @@ function TransactionForm({ formData, setFormData, categories, onSubmit, onClose,
                     value={formData.category_id}
                     onChange={e => setFormData({ ...formData, category_id: e.target.value })}>
                     <option value="" disabled>{t('select_category')}</option>
-                    {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
+                    {categories
+                        .filter(cat => (cat.type || 'expense') === formData.type)
+                        .map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
                 </select>
             </div>
+
 
             {/* Descripción */}
             <div>
@@ -132,13 +135,13 @@ function TransactionForm({ formData, setFormData, categories, onSubmit, onClose,
 // ── Exportar a CSV ────────────────────────────────────────────────────
 function exportToCSV(transactions, t, language) {
     const headers = [
-        t('date_label'), 
-        t('movement_type').toUpperCase(), 
-        t('description_label').toUpperCase(), 
-        t('category_label').toUpperCase(), 
+        t('date_label'),
+        t('movement_type').toUpperCase(),
+        t('description_label').toUpperCase(),
+        t('category_label').toUpperCase(),
         t('amount_label').toUpperCase()
     ];
-    
+
     const rows = transactions.map(tx => [
         new Date(tx.date).toLocaleDateString(language === 'en' ? 'en-US' : 'es-MX'),
         (tx.type === 'income' ? t('income_label') : t('expense_label')).toUpperCase(),
@@ -172,13 +175,13 @@ function exportToPDF(transactions, stats, t, language) {
     // ── Cabecera Elite ──────────────────────────────────────────
     doc.setFillColor(11, 2, 45); // Deep Navy
     doc.rect(0, 0, pageW, 45, 'F');
-    
+
     // Grid sutil
     doc.setDrawColor(30, 36, 60);
-    for(let i=0; i<pageW; i+=10) doc.line(i, 0, i, 45);
+    for (let i = 0; i < pageW; i += 10) doc.line(i, 0, i, 45);
 
     // Acento Cian
-    doc.setFillColor(0, 212, 255); 
+    doc.setFillColor(0, 212, 255);
     doc.rect(0, 45, pageW, 2.5, 'F');
 
     // Logo
@@ -259,10 +262,10 @@ function exportToPDF(transactions, stats, t, language) {
             if (data.section === 'body') {
                 const tx = transactions[data.row.index];
                 if (!tx) return;
-                
+
                 const isIncome = tx.type === 'income';
                 const color = isIncome ? [0, 212, 255] : [230, 0, 230]; // Azul Cian y Magenta
-                
+
                 if (data.column.index === 1 || data.column.index === 4) {
                     data.cell.styles.textColor = color;
                     data.cell.styles.fontStyle = 'bold';
@@ -311,8 +314,8 @@ export default function ResumenFinanciero() {
     const showToast = (message, type = 'success') => setToast({ message, type });
     const closeToast = () => setToast(null);
 
-    useEffect(() => { 
-        fetchAllData(); 
+    useEffect(() => {
+        fetchAllData();
     }, []);
 
 
@@ -601,18 +604,18 @@ export default function ResumenFinanciero() {
                                 <div className="flex items-center gap-2">
                                     <span className="text-[10px] uppercase font-bold text-[#9EA3B0] tracking-wider">{t('from_label')}</span>
                                     <div className="w-40">
-                                        <DatePickerElite 
-                                            value={customDateStart} 
-                                            onChange={val => setCustomDateStart(val)} 
+                                        <DatePickerElite
+                                            value={customDateStart}
+                                            onChange={val => setCustomDateStart(val)}
                                         />
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <span className="text-[10px] uppercase font-bold text-[#9EA3B0] tracking-wider">{t('to_label')}</span>
                                     <div className="w-40">
-                                        <DatePickerElite 
-                                            value={customDateEnd} 
-                                            onChange={val => setCustomDateEnd(val)} 
+                                        <DatePickerElite
+                                            value={customDateEnd}
+                                            onChange={val => setCustomDateEnd(val)}
                                         />
                                     </div>
                                 </div>
@@ -702,7 +705,7 @@ export default function ResumenFinanciero() {
                             </div>
                             <h3 className="text-sm font-black uppercase tracking-[0.2em]">{t('monthly_summary_card')}</h3>
                         </div>
-                        
+
                         <div className="space-y-4">
                             <div className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5">
                                 <span className="text-xs text-[#9EA3B0]">{t('monthly_income')}</span>
@@ -710,7 +713,7 @@ export default function ResumenFinanciero() {
                                     ${(stats?.summary?.totalIncome || 0).toLocaleString(language === 'en' ? 'en-US' : 'es-MX', { minimumFractionDigits: 2 })}
                                 </span>
                             </div>
-                            
+
                             <div className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5">
                                 <span className="text-xs text-[#9EA3B0]">{t('monthly_expenses')}</span>
                                 <span className="font-bold text-red-400">
@@ -733,13 +736,13 @@ export default function ResumenFinanciero() {
                                     <p className="text-[10px] text-[#9EA3B0] uppercase font-bold tracking-[0.15em] mb-2">{t('most_spent_category')}</p>
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2">
-                                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: stats.monthlyExpensesByCategory.sort((a,b) => b.amount - a.amount)[0].color }} />
+                                            <div className="w-2 h-2 rounded-full" style={{ backgroundColor: stats.monthlyExpensesByCategory.sort((a, b) => b.amount - a.amount)[0].color }} />
                                             <span className="text-sm font-bold truncate max-w-[120px]">
-                                                {stats.monthlyExpensesByCategory.sort((a,b) => b.amount - a.amount)[0].name}
+                                                {stats.monthlyExpensesByCategory.sort((a, b) => b.amount - a.amount)[0].name}
                                             </span>
                                         </div>
                                         <span className="text-sm font-black text-white">
-                                            ${stats.monthlyExpensesByCategory.sort((a,b) => b.amount - a.amount)[0].amount.toLocaleString(language === 'en' ? 'en-US' : 'es-MX')}
+                                            ${stats.monthlyExpensesByCategory.sort((a, b) => b.amount - a.amount)[0].amount.toLocaleString(language === 'en' ? 'en-US' : 'es-MX')}
                                         </span>
                                     </div>
                                 </div>

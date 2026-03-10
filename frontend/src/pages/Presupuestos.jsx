@@ -102,7 +102,7 @@ export default function Presupuestos() {
                     </div>
                 </div>
                 <div className="h-4 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
-                    <div 
+                    <div
                         className={`h-full transition-all duration-1000 ease-out ${progressPerc > 100 ? 'bg-red-500' : progressPerc > 80 ? 'bg-orange-500' : 'bg-finance-primary'}`}
                         style={{ width: `${Math.min(100, progressPerc)}%` }}
                     />
@@ -124,28 +124,30 @@ export default function Presupuestos() {
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
                                 <label className="block text-[10px] font-bold text-finance-muted uppercase mb-1.5 ml-1">{t('category_label')}</label>
-                                <select 
+                                <select
                                     ref={categoryRef}
-                                    required 
+                                    required
                                     className="input-field"
                                     value={form.category_id}
-                                    onChange={e => setForm({...form, category_id: e.target.value})}
+                                    onChange={e => setForm({ ...form, category_id: e.target.value })}
                                 >
                                     <option value="">{t('select_placeholder')}</option>
-                                    {categories.map(c => (
-                                        <option key={c.id} value={c.id}>{c.name}</option>
-                                    ))}
+                                    {categories
+                                        .filter(c => (c.type || 'expense') === 'expense')
+                                        .map(c => (
+                                            <option key={c.id} value={c.id}>{c.name}</option>
+                                        ))}
                                 </select>
                             </div>
                             <div>
                                 <label className="block text-[10px] font-bold text-finance-muted uppercase mb-1.5 ml-1">{t('monthly_limit_label')}</label>
-                                <input 
-                                    type="number" 
+                                <input
+                                    type="number"
                                     required
                                     className="input-field"
                                     placeholder="0.00"
                                     value={form.amount_limit}
-                                    onChange={e => setForm({...form, amount_limit: e.target.value})}
+                                    onChange={e => setForm({ ...form, amount_limit: e.target.value })}
                                 />
                             </div>
                             <button type="submit" className="btn-primary w-full py-3 shadow-lg flex justify-center items-center gap-2">
@@ -163,17 +165,17 @@ export default function Presupuestos() {
 
                 {/* List of active budgets */}
                 <div className="lg:col-span-2 space-y-4">
-                     {budgets.length === 0 ? (
-                         <div className="card p-10 text-center border-dashed border-2 border-white/5 bg-transparent">
-                             <Target size={40} className="mx-auto text-white/10 mb-4" />
-                             <p className="text-finance-muted">{t('no_budgets_title')}</p>
-                             <p className="text-xs text-finance-muted/60 mt-2 italic">{t('no_budgets_subtitle')}</p>
-                         </div>
-                     ) : (
-                         budgets.map(b => {
-                             const spentInCat = stats?.budgetAnalysis?.find(ba => ba.category === b.categories?.name)?.spent || 0;
-                             const perc = (spentInCat / b.amount_limit) * 100;
-                             return (
+                    {budgets.length === 0 ? (
+                        <div className="card p-10 text-center border-dashed border-2 border-white/5 bg-transparent">
+                            <Target size={40} className="mx-auto text-white/10 mb-4" />
+                            <p className="text-finance-muted">{t('no_budgets_title')}</p>
+                            <p className="text-xs text-finance-muted/60 mt-2 italic">{t('no_budgets_subtitle')}</p>
+                        </div>
+                    ) : (
+                        budgets.map(b => {
+                            const spentInCat = stats?.budgetAnalysis?.find(ba => ba.category === b.categories?.name)?.spent || 0;
+                            const perc = (spentInCat / b.amount_limit) * 100;
+                            return (
                                 <div key={b.id} className="card p-5 group hover:border-finance-primary/30 transition-all duration-300 bg-white/5 backdrop-blur-md">
                                     <div className="flex justify-between items-start mb-4">
                                         <div className="flex items-center gap-3">
@@ -186,13 +188,13 @@ export default function Presupuestos() {
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-1">
-                                            <button 
+                                            <button
                                                 onClick={() => handleEdit(b)}
                                                 className="p-2 text-finance-muted hover:text-finance-primary hover:bg-finance-primary/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
                                             >
                                                 <Pencil size={16} />
                                             </button>
-                                             <button 
+                                            <button
                                                 onClick={() => setShowDeleteConfirm(b)}
                                                 className="p-2 text-finance-muted hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
                                             >
@@ -201,23 +203,23 @@ export default function Presupuestos() {
                                         </div>
                                     </div>
                                     <div className="space-y-2">
-                                         <div className="flex justify-between text-[11px] font-bold">
+                                        <div className="flex justify-between text-[11px] font-bold">
                                             <span className="text-finance-muted">{t('spent_prefix')}${spentInCat.toLocaleString()}</span>
                                             <span className={perc > 100 ? 'text-red-400' : perc > 80 ? 'text-orange-400' : 'text-finance-primary'}>
                                                 {perc.toFixed(1)}%
                                             </span>
                                         </div>
                                         <div className="h-2 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
-                                            <div 
+                                            <div
                                                 className={`h-full transition-all duration-700 ${perc > 100 ? 'bg-red-500' : perc > 80 ? 'bg-orange-500' : 'bg-finance-primary'}`}
                                                 style={{ width: `${Math.min(100, perc)}%` }}
                                             />
                                         </div>
                                     </div>
                                 </div>
-                             )
-                         })
-                     )}
+                            )
+                        })
+                    )}
                 </div>
             </div>
             {/* Modal de Confirmación de Eliminación */}
