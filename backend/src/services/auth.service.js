@@ -1,5 +1,6 @@
 import { supabase } from '../config/supabaseClient.js';
 import { hashPassword, matchPassword } from '../utils/hashPassword.js';
+import { seedDefaultCategories } from './category.service.js';
 
 export const registerUser = async (name, email, password) => {
     // Check if user exists
@@ -24,6 +25,9 @@ export const registerUser = async (name, email, password) => {
     if (error) {
         throw new Error('Invalid user data: ' + error.message);
     }
+
+    // Seed default categories
+    await seedDefaultCategories(user.id);
 
     return user;
 };

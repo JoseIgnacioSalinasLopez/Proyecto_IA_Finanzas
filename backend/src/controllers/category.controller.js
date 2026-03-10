@@ -23,10 +23,10 @@ export const getCategories = async (req, res, next) => {
 
 export const createCategory = async (req, res, next) => {
     try {
-        const { name, color } = req.body;
+        const { name, color, type } = req.body;
         if (!name) return res.status(400).json({ success: false, message: 'Name is required' });
 
-        const category = await categoryService.createCategory(req.user.id, name, color);
+        const category = await categoryService.createCategory(req.user.id, name, color, type);
         res.status(201).json({ success: true, data: category });
     } catch (error) {
         next(error);

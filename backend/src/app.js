@@ -11,6 +11,8 @@ import eventRoutes from './routes/event.routes.js';
 import chatRoutes from './routes/chat.routes.js';
 import budgetRoutes from './routes/budget.routes.js';
 import preferenceRoutes from './routes/preference.routes.js';
+import notificationRoutes from './routes/notification.routes.js';
+
 
 const app = express();
 
@@ -35,6 +37,8 @@ app.use('/api/events', eventRoutes);
 app.use('/api/chat', chatRoutes);
 app.use('/api/budgets', budgetRoutes);
 app.use('/api/preferences', preferenceRoutes);
+app.use('/api/notifications', notificationRoutes);
+
 
 // Healthcheck Route (Intacta)
 app.get('/api/health', (req, res) => {

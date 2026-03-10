@@ -58,7 +58,7 @@ export default function Dashboard() {
                 // Fallback to created_at if dates are same (today)
                 return new Date(b.created_at || b.date) - new Date(a.created_at || a.date);
             });
-            setRecentTransactions(sortedTx.slice(0, 8));
+            setRecentTransactions(sortedTx.slice(0, 20)); // Aumentamos el límite para ver el historial
         } catch (error) {
             console.error('Error fetching dashboard data', error);
         } finally {
@@ -69,7 +69,6 @@ export default function Dashboard() {
     const groupTransactionsByDate = (transactions) => {
         const groups = {
             today: [],
-            yesterday: [],
             earlier: []
         };
 
@@ -90,8 +89,6 @@ export default function Dashboard() {
 
             if (txStartOfDay === startOfToday) {
                 groups.today.push(tx);
-            } else if (txStartOfDay === startOfYesterday) {
-                groups.yesterday.push(tx);
             } else {
                 groups.earlier.push(tx);
             }
@@ -110,7 +107,7 @@ export default function Dashboard() {
                 .on('postgres_changes', { event: '*', schema: 'public', table: 'timeline_events', filter: `user_id=eq.${user.id}` }, fetchDashboardData)
                 .subscribe();
 
-            return () => { 
+            return () => {
                 supabase.removeChannel(channel);
             };
         }
@@ -165,10 +162,9 @@ export default function Dashboard() {
                         </span>
                     </div>
                     <div className="h-2.5 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
-                        <div 
-                            className={`h-full transition-all duration-1000 ease-out ${
-                                (summary.totalSpentThisMonth / summary.totalBudget) > 0.9 ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.3)]' : 'bg-finance-primary'
-                            }`}
+                        <div
+                            className={`h-full transition-all duration-1000 ease-out ${(summary.totalSpentThisMonth / summary.totalBudget) > 0.9 ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.3)]' : 'bg-finance-primary'
+                                }`}
                             style={{ width: `${Math.min(100, (summary.totalSpentThisMonth / summary.totalBudget) * 100)}%` }}
                         />
                     </div>
@@ -203,7 +199,7 @@ export default function Dashboard() {
                 <div className="card animate-fade-in-up h-full flex flex-col border-white/5 bg-white/5" style={{ animationDelay: '300ms' }}>
                     <div className="flex justify-between items-center mb-6 border-b border-white/5 pb-4 px-1">
                         <h2 className="text-sm font-black text-finance-muted uppercase tracking-[0.2em] flex items-center gap-2">
-                             <div className="w-1.5 h-6 bg-finance-primary rounded-full shadow-[0_0_8px_rgba(0,212,255,0.5)]" />
+                            <div className="w-1.5 h-6 bg-finance-primary rounded-full shadow-[0_0_8px_rgba(0,212,255,0.5)]" />
                             {t('recent_movements')}
                         </h2>
                     </div>
@@ -235,7 +231,7 @@ export default function Dashboard() {
                                                         <div className="w-1.5 h-1.5 rounded-full bg-finance-primary animate-pulse shadow-[0_0_5px_#00d4ff]" />
                                                     </div>
                                                     <span className="text-[10px] font-black uppercase tracking-widest text-finance-primary/60 bg-finance-primary/5 px-2 py-0.5 rounded-md border border-finance-primary/10">
-                                                        {key === 'today' ? t('today_label') : key === 'yesterday' ? t('yesterday_label') : t('earlier_label')}
+                                                        {key === 'today' ? t('today_label') : t('earlier_label')}
                                                     </span>
                                                 </div>
 
@@ -247,36 +243,36 @@ export default function Dashboard() {
                                                         >
                                                             {/* Mini conector horizontal */}
                                                             <div className="absolute -left-6 top-1/2 w-6 h-[1px] bg-white/5" />
-                                                            
+
                                                             <div className="flex items-center gap-4 min-w-0">
-                                                                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 ${tx.type === 'income' ? 'bg-emerald-500/10 text-emerald-400 shadow-[inset_0_0_12px_rgba(52,211,153,0.05)]' : 'bg-red-500/10 text-red-400 shadow-[inset_0_0_12px_rgba(248,113,113,0.05)]'}`}>
-                                                                     {tx.type === 'income' ? <ArrowUpRight size={18} /> : <ArrowDownRight size={18} />}
-                                                                 </div>
+                                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 ${tx.type === 'income' ? 'bg-emerald-500/10 text-emerald-400 shadow-[inset_0_0_12px_rgba(52,211,153,0.05)]' : 'bg-red-500/10 text-red-400 shadow-[inset_0_0_12px_rgba(248,113,113,0.05)]'}`}>
+                                                                    {tx.type === 'income' ? <ArrowUpRight size={18} /> : <ArrowDownRight size={18} />}
+                                                                </div>
                                                                 <div className="min-w-0">
                                                                     <p className="font-bold text-sm text-white group-hover:text-finance-primary transition-colors truncate">
                                                                         {tx.description || tx.categories?.name || t('no_description')}
                                                                     </p>
-                                                                     <div className="flex items-center gap-2 mt-1.5 font-bold">
-                                                                         {tx.categories?.name && (
-                                                                             <span 
-                                                                                 className="text-[10px] uppercase font-bold tracking-tight px-2 py-0.5 rounded-lg border shadow-sm transition-all"
-                                                                                 style={{ 
-                                                                                     color: tx.categories.color || '#9EA3B0',
-                                                                                     borderColor: tx.categories.color ? `${tx.categories.color}A0` : 'rgba(255,255,255,0.1)',
-                                                                                     backgroundColor: tx.categories.color ? `${tx.categories.color}20` : 'rgba(255,255,255,0.05)',
-                                                                                 }}
-                                                                             >
-                                                                                 {tx.categories.name}
-                                                                             </span>
-                                                                         )}
-                                                                         <span className="text-[10px] text-finance-muted/80 font-medium">
-                                                                             {new Date(tx.date).toLocaleTimeString(language === 'en' ? 'en-US' : 'es-MX', { 
-                                                                                 hour: '2-digit', 
-                                                                                 minute: '2-digit',
-                                                                                 hour12: true 
-                                                                             })}
-                                                                         </span>
-                                                                     </div>
+                                                                    <div className="flex items-center gap-2 mt-1.5 font-bold">
+                                                                        {tx.categories?.name && (
+                                                                            <span
+                                                                                className="text-[10px] uppercase font-bold tracking-tight px-2 py-0.5 rounded-lg border shadow-sm transition-all"
+                                                                                style={{
+                                                                                    color: tx.categories.color || '#9EA3B0',
+                                                                                    borderColor: tx.categories.color ? `${tx.categories.color}A0` : 'rgba(255,255,255,0.1)',
+                                                                                    backgroundColor: tx.categories.color ? `${tx.categories.color}20` : 'rgba(255,255,255,0.05)',
+                                                                                }}
+                                                                            >
+                                                                                {tx.categories.name}
+                                                                            </span>
+                                                                        )}
+                                                                        <span className="text-[10px] text-finance-muted/80 font-medium">
+                                                                            {new Date(tx.date).toLocaleTimeString(language === 'en' ? 'en-US' : 'es-MX', {
+                                                                                hour: '2-digit',
+                                                                                minute: '2-digit',
+                                                                                hour12: true
+                                                                            })}
+                                                                        </span>
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                             <div className="text-right ml-4">

@@ -47,10 +47,10 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
     const navigate = useNavigate();
     const { t, language } = useLanguage();
     const [showEventModal, setShowEventModal] = useState(false);
-    const [eventFormData, setEventFormData] = useState({ 
-        title: '', 
-        amount: '', 
-        date: new Date().toISOString().split('T')[0], 
+    const [eventFormData, setEventFormData] = useState({
+        title: '',
+        amount: '',
+        date: new Date().toISOString().split('T')[0],
         priority: 'important',
         is_recurring: false,
         payment_day: '',
@@ -76,10 +76,10 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
         };
         fetchPrefs();
     }, []);
-    
+
     // Carousel state
     const [currentGoalIndex, setCurrentGoalIndex] = useState(0);
-    
+
     // Custom Delete Confirmation state
     const [deleteConfirmId, setDeleteConfirmId] = useState(null);
 
@@ -110,10 +110,10 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
 
             setShowEventModal(false);
             setEditEventId(null);
-            setEventFormData({ 
-                title: '', 
-                amount: '', 
-                date: new Date().toISOString().split('T')[0], 
+            setEventFormData({
+                title: '',
+                amount: '',
+                date: new Date().toISOString().split('T')[0],
                 priority: 'important',
                 is_recurring: false,
                 payment_day: '',
@@ -184,11 +184,10 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
             }
         });
 
-        // 2. Retos de Ahorro (Challenges)
-        const isWeekend = now.getDay() === 0 || now.getDay() === 6;
-        if (isWeekend && !prefs.hide_challenges) {
+        // 2. Retos de Ahorro (Challenges) - NOW DAILY FOR TESTING
+        if (!prefs.hide_challenges) {
             events.push({
-                id: 'weekend-challenge',
+                id: 'daily-challenge',
                 title: t('savings_challenge_title'),
                 amount: 0,
                 status: "today",
@@ -200,21 +199,17 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
         }
 
         // 3. Recordatorios de Suscripciones (Detect keywords)
-        const subKeywords = ['netflix', 'spotify', 'disney', 'amazon', 'internet', 'teléfono', 'phone', 'cloud', 'seguro', 'gym'];
         stats.recurrentExpenses?.forEach((desc, idx) => {
-            const lowerDesc = desc.toLowerCase();
-            if (subKeywords.some(key => lowerDesc.includes(key))) {
-                events.push({
-                    id: `sub-${idx}`,
-                    title: t('sub_reminder_title'),
-                    amount: 0,
-                    status: "upcoming",
-                    priority: "important",
-                    time: t('projected'),
-                    description: t('sub_reminder_desc').replace('{name}', desc.toUpperCase()),
-                    icon: <Bell size={14} className="text-finance-primary" />
-                });
-            }
+            events.push({
+                id: `sub-${idx}`,
+                title: t('sub_reminder_title'),
+                amount: 0,
+                status: "upcoming",
+                priority: "important",
+                time: t('projected'),
+                description: t('sub_reminder_desc').replace('{name}', desc.toUpperCase()),
+                icon: <Bell size={14} className="text-finance-primary" />
+            });
         });
 
         // 4. Logros de Disciplina (Daily budget check)
@@ -250,7 +245,7 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
 
         // 6. Pronóstico de Saldo
         if (!prefs.hide_forecasts) {
-            const projectedEndBalance = summary.balance + (summary.totalIncome - summary.totalExpense); 
+            const projectedEndBalance = summary.balance + (summary.totalIncome - summary.totalExpense);
             events.push({
                 id: 'forecast-end',
                 title: t('balance_forecast_title'),
@@ -301,7 +296,7 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                 let status = "upcoming";
                 let priority = ev.priority || "important";
                 let timeDesc = `${t('next_payment')}: ${pDay}/${currentMonth + 1}`;
-                
+
                 if (currentDay >= pDay && currentDay <= dDay) {
                     status = "today";
                     timeDesc = t('deadline_approaching');
@@ -347,7 +342,7 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
         return events.sort((a, b) => {
             const statusMap = { expired: 0, today: 1, upcoming: 2 };
             const priorityMap = { critical: 0, important: 1, optional: 2 };
-            
+
             if (statusMap[a.status] !== statusMap[b.status]) {
                 return statusMap[a.status] - statusMap[b.status];
             }
@@ -368,7 +363,7 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                             {t('system_ok')}
                         </span>
                         <span className="text-[10px] text-finance-muted uppercase font-mono tracking-tighter ml-2 hidden sm:inline">
-                             | {new Date().toLocaleDateString(language === 'en' ? 'en-US' : 'es-MX', { month: 'long', year: 'numeric' }).toUpperCase()}
+                            | {new Date().toLocaleDateString(language === 'en' ? 'en-US' : 'es-MX', { month: 'long', year: 'numeric' }).toUpperCase()}
                         </span>
                     </div>
                 </div>
@@ -428,12 +423,11 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                                         </div>
                                     </div>
                                     <div className="h-1.5 bg-black/40 rounded-full overflow-hidden border border-white/5">
-                                        <div 
-                                            className={`h-full transition-all duration-1000 ${
-                                                b.percentage > 90 ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.4)]' : 
-                                                b.percentage > 70 ? 'bg-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.4)]' : 
-                                                'bg-finance-primary shadow-[0_0_10px_rgba(0,212,255,0.4)]'
-                                            }`}
+                                        <div
+                                            className={`h-full transition-all duration-1000 ${b.percentage > 90 ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.4)]' :
+                                                    b.percentage > 70 ? 'bg-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.4)]' :
+                                                        'bg-finance-primary shadow-[0_0_10px_rgba(0,212,255,0.4)]'
+                                                }`}
                                             style={{ width: `${b.percentage}%` }}
                                         ></div>
                                     </div>
@@ -471,8 +465,8 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                                 <div className="flex-1 min-w-0">
                                     <p className="text-sm font-bold mb-2 truncate uppercase tracking-tight">{goals[currentGoalIndex].name}</p>
                                     <div className="h-2 bg-black/40 rounded-full mb-2 overflow-hidden border border-white/5">
-                                        <div 
-                                            className="h-full bg-finance-primary shadow-[0_0_10px_rgba(0,212,255,0.4)] transition-all duration-1000" 
+                                        <div
+                                            className="h-full bg-finance-primary shadow-[0_0_10px_rgba(0,212,255,0.4)] transition-all duration-1000"
                                             style={{ width: `${Math.min((goals[currentGoalIndex].current_amount / goals[currentGoalIndex].target_amount) * 100, 100)}%` }}
                                         ></div>
                                     </div>
@@ -503,8 +497,8 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                         <button
                             onClick={() => {
                                 setEditEventId(null);
-                                setEventFormData({ 
-                                    title: '', amount: '', date: new Date().toISOString().split('T')[0], 
+                                setEventFormData({
+                                    title: '', amount: '', date: new Date().toISOString().split('T')[0],
                                     priority: 'important', is_recurring: false, payment_day: '', deadline_day: ''
                                 });
                                 setShowEventModal(true);
@@ -520,19 +514,19 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                             <div key={item.id} className="relative group/item px-1 flex gap-4">
                                 <div className="flex flex-col items-center">
                                     <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center bg-black/40 z-10 transition-all duration-500
-                                        ${item.status === 'expired' ? 'border-red-500 text-red-500 shadow-[0_0_10px_rgba(239,68,68,0.3)]' : 
-                                          item.status === 'today' ? 'border-orange-500 text-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.3)]' : 
-                                          'border-finance-primary text-finance-primary shadow-[0_0_10px_rgba(0,212,255,0.2)]'}`}>
+                                        ${item.status === 'expired' ? 'border-red-500 text-red-500 shadow-[0_0_10px_rgba(239,68,68,0.3)]' :
+                                            item.status === 'today' ? 'border-orange-500 text-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.3)]' :
+                                                'border-finance-primary text-finance-primary shadow-[0_0_10px_rgba(0,212,255,0.2)]'}`}>
                                         {item.icon || (item.status === 'expired' ? <AlertCircle size={14} /> : <Calendar size={14} />)}
                                     </div>
                                     <div className="w-[1px] flex-1 bg-white/10 my-1" />
                                 </div>
 
                                 <div className={`flex-1 p-4 rounded-2xl border transition-all duration-300 relative overflow-hidden
-                                    ${item.status === 'expired' ? 'bg-red-500/5 border-red-500/20' : 
-                                      item.status === 'today' ? 'bg-orange-500/10 border-orange-500/30' : 
-                                      'bg-white/5 border-white/5 hover:border-white/10'}`}>
-                                    
+                                    ${item.status === 'expired' ? 'bg-red-500/5 border-red-500/20' :
+                                        item.status === 'today' ? 'bg-orange-500/10 border-orange-500/30' :
+                                            'bg-white/5 border-white/5 hover:border-white/10'}`}>
+
                                     {deleteConfirmId === item.id ? (
                                         <div className="absolute inset-0 bg-[#0a061d] z-20 flex items-center justify-between px-6 animate-fade-in">
                                             <span className="text-xs font-bold text-red-400">{t('delete_event_confirm')}</span>
@@ -546,8 +540,8 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                                             <div className="flex justify-between items-start mb-2">
                                                 <div className="min-w-0">
                                                     <p className={`text-[10px] font-black uppercase tracking-tighter mb-0.5
-                                                        ${item.status === 'expired' ? 'text-red-500' : 
-                                                          item.status === 'today' ? 'text-orange-500' : 'text-finance-primary'}`}>
+                                                        ${item.status === 'expired' ? 'text-red-500' :
+                                                            item.status === 'today' ? 'text-orange-500' : 'text-finance-primary'}`}>
                                                         {item.time}
                                                     </p>
                                                     <h4 className="text-sm font-bold truncate leading-tight uppercase tracking-tight">{item.title}</h4>
@@ -591,11 +585,11 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
             <div className="mt-8 pt-6 border-t border-white/5 flex justify-between items-center text-[10px] text-finance-muted font-black tracking-widest">
                 <div className="flex gap-6">
                     <span className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]" /> 
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]" />
                         {t('system_ok')}
                     </span>
                     <span className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]" /> 
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]" />
                         {t('db_connected')}
                     </span>
                 </div>
@@ -606,7 +600,7 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                 <div className="fixed inset-0 bg-black/80 backdrop-blur-xl flex justify-center items-center z-50 p-6 animate-fade-in">
                     <div className="card max-w-lg w-full p-8 relative overflow-visible bg-[#0c0821] border-white/10 animate-scale-in">
                         <div className="absolute -top-10 -right-10 p-20 bg-finance-primary/5 rounded-full blur-3xl" />
-                        
+
                         <h2 className="text-2xl font-black mb-8 text-white uppercase tracking-tighter flex items-center gap-3">
                             {editEventId ? <Pencil size={24} className="text-finance-primary" /> : <Plus size={24} className="text-finance-primary" />}
                             {editEventId ? t('edit_event') : t('schedule_manual_event')}
@@ -633,9 +627,9 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                                     <h4 className="text-sm font-bold">{t('recurring_event')}</h4>
                                     <p className="text-[10px] text-finance-muted uppercase font-bold">{t('monthly_reminder')}</p>
                                 </div>
-                                <button 
+                                <button
                                     type="button"
-                                    onClick={() => setEventFormData({...eventFormData, is_recurring: !eventFormData.is_recurring})}
+                                    onClick={() => setEventFormData({ ...eventFormData, is_recurring: !eventFormData.is_recurring })}
                                     className={`w-12 h-6 rounded-full transition-all relative ${eventFormData.is_recurring ? 'bg-finance-primary' : 'bg-white/10'}`}
                                 >
                                     <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${eventFormData.is_recurring ? 'left-7' : 'left-1'}`} />
@@ -655,14 +649,14 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                                 </div>
                                 <div>
                                     <label className="block text-[10px] font-black text-finance-muted uppercase tracking-widest mb-2">{t('date_label')}</label>
-                                    <DatePickerElite 
-                                        value={eventFormData.date} 
-                                        onChange={(val) => setEventFormData({ ...eventFormData, date: val })} 
+                                    <DatePickerElite
+                                        value={eventFormData.date}
+                                        onChange={(val) => setEventFormData({ ...eventFormData, date: val })}
                                     />
                                 </div>
                             </div>
 
-                            
+
                             {eventFormData.is_recurring && (
                                 <div className="grid grid-cols-2 gap-4 animate-scale-in">
                                     <div>
@@ -700,10 +694,10 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                                         <button
                                             key={p}
                                             type="button"
-                                            onClick={() => setEventFormData({...eventFormData, priority: p})}
+                                            onClick={() => setEventFormData({ ...eventFormData, priority: p })}
                                             className={`flex-1 py-3 px-2 rounded-xl border text-[10px] font-black uppercase tracking-widest transition-all
-                                                ${eventFormData.priority === p ? 
-                                                    (p === 'critical' ? 'bg-red-500 border-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.4)]' : p === 'important' ? 'bg-orange-500 border-orange-500 text-white shadow-[0_0_15px_rgba(249,115,22,0.4)]' : 'bg-finance-primary border-finance-primary text-black shadow-[0_0_15px_rgba(0,212,255,0.4)]') : 
+                                                ${eventFormData.priority === p ?
+                                                    (p === 'critical' ? 'bg-red-500 border-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.4)]' : p === 'important' ? 'bg-orange-500 border-orange-500 text-white shadow-[0_0_15px_rgba(249,115,22,0.4)]' : 'bg-finance-primary border-finance-primary text-black shadow-[0_0_15px_rgba(0,212,255,0.4)]') :
                                                     'bg-white/5 border-white/10 text-finance-muted hover:border-white/20'}`}
                                         >
                                             {t(`priority_${p}`)}

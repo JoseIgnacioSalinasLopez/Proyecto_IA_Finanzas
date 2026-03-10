@@ -1,9 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 /* ─── Google Fonts ─────────────────────────────────────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
 /* ─── Base Styles ───────────────────────────────────────────────────── */
 *,
@@ -60,7 +61,7 @@ body {
   --epic-pink-glow: #FF4DFF;
   --epic-electric-blue: #7DF9FF;
   --epic-sparkle: #FFD166;
-  
+
   /* Legacy mapping for compatibility */
   --neon-cyan: var(--epic-cyan);
   --neon-purple: var(--epic-purple);
@@ -86,12 +87,12 @@ body {
   }
 
   .btn-primary {
-    @apply px-6 py-4 rounded-2xl font-black transition-all duration-300 flex items-center justify-center;
+    @apply px-6 py-4 rounded-2xl font-black transition-all duration-300 inline-flex items-center justify-center;
     background: linear-gradient(90deg, var(--epic-cyan), var(--epic-blue));
     color: #05011a;
     box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
   }
-  
+
   .btn-primary:hover {
     box-shadow: 0 0 35px rgba(0, 212, 255, 0.6);
     transform: translateY(-2px);
@@ -99,11 +100,11 @@ body {
   }
 
   .btn-danger {
-    @apply px-6 py-3.5 text-white rounded-2xl font-bold hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-300;
+    @apply px-6 py-3.5 text-white rounded-2xl font-bold hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-300 inline-flex items-center justify-center;
     background: linear-gradient(90deg, var(--epic-purple), var(--epic-deep-purple));
     box-shadow: 0 0 15px rgba(140, 48, 245, 0.3);
   }
-  
+
   .btn-danger:hover {
     box-shadow: 0 0 25px rgba(140, 48, 245, 0.5);
   }
@@ -277,6 +278,7 @@ body {
     opacity: 0;
     transform: translateY(-20px);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0);
@@ -290,12 +292,13 @@ body {
 /* ─── Epic Rotating Border ───────────────────────────────────────── */
 .epic-border-card {
   position: relative;
-  background: #11111d; /* Dark premium background as in the reference image */
+  background: #11111d;
+  /* Dark premium background as in the reference image */
   backdrop-filter: blur(20px);
   border-radius: 20px;
   overflow: hidden;
   z-index: 10;
-  box-shadow: 
+  box-shadow:
     0 25px 60px rgba(0, 0, 0, 0.8),
     0 0 20px rgba(140, 48, 245, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.05);
@@ -307,15 +310,14 @@ body {
   position: absolute;
   width: 180%;
   height: 180%;
-  background-image: conic-gradient(
-    from 0deg,
-    transparent 0deg,
-    #8C30F5 90deg,
-    transparent 180deg,
-    #00D4FF 270deg,
-    transparent 360deg
-  );
-  animation: rotate 1.5s linear infinite; /* Increased speed to 1.5s */
+  background-image: conic-gradient(from 0deg,
+      transparent 0deg,
+      #8C30F5 90deg,
+      transparent 180deg,
+      #00D4FF 270deg,
+      transparent 360deg);
+  animation: rotate 1.5s linear infinite;
+  /* Increased speed to 1.5s */
   top: -40%;
   left: -40%;
   z-index: -1;
@@ -331,8 +333,13 @@ body {
 }
 
 @keyframes rotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* ─── Sliding Sections ───────────────────────────────────────────── */
@@ -361,9 +368,17 @@ body {
   pointer-events: auto;
 }
 
-.slide-to-forgot { transform: translateX(0) !important; }
-.slide-to-login { transform: translateX(-33.3333%) !important; }
-.slide-to-register { transform: translateX(-66.6666%) !important; }
+.slide-to-forgot {
+  transform: translateX(0) !important;
+}
+
+.slide-to-login {
+  transform: translateX(-33.3333%) !important;
+}
+
+.slide-to-register {
+  transform: translateX(-66.6666%) !important;
+}
 
 /* ─── Compact Expansion ──────────────────────────────────────────── */
 .expandable-container {
@@ -373,7 +388,7 @@ body {
   opacity: 0;
   visibility: hidden;
   transform: translateY(-20px);
-  transition: 
+  transition:
     grid-template-rows 0.8s cubic-bezier(0.19, 1, 0.22, 1),
     max-height 0.8s cubic-bezier(0.19, 1, 0.22, 1),
     opacity 0.6s ease,
@@ -392,13 +407,23 @@ body {
 
 /* ─── Shake Animation ────────────────────────────────────────────── */
 @keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-8px); }
-  75% { transform: translateX(8px); }
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-8px);
+  }
+
+  75% {
+    transform: translateX(8px);
+  }
 }
 
 .animate-shake {
-  animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+  animation: shake 0.4s cubic-bezier(.36, .07, .19, .97) both;
 }
 
 /* ─── Floating Label ─────────────────────────────────────────────── */
@@ -431,8 +456,8 @@ body {
   outline: none;
 }
 
-.floating-label-group input:focus + label,
-.floating-label-group input:not(:placeholder-shown) + label {
+.floating-label-group input:focus+label,
+.floating-label-group input:not(:placeholder-shown)+label {
   top: 0;
   font-size: 0.75rem;
   color: #00D4FF;
@@ -444,7 +469,8 @@ body {
 .btn-epic {
   @apply relative overflow-hidden px-6 py-4 rounded-2xl font-black transition-all duration-300 flex items-center justify-center;
   background: linear-gradient(90deg, #00D4FF, #2E6FF2);
-  color: #05011a; /* Dark text for contrast on cyan */
+  color: #05011a;
+  /* Dark text for contrast on cyan */
   border: none;
   box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
 }
@@ -479,7 +505,13 @@ body {
 /* ─── Premium UI Effects ─────────────────────────────────────────── */
 
 @media (min-width: 769px) {
-  body, a, button, input, select, textarea {
+
+  body,
+  a,
+  button,
+  input,
+  select,
+  textarea {
     cursor: none !important;
   }
 }
@@ -488,21 +520,40 @@ body {
 .epic-bg-animate {
   background: linear-gradient(-45deg, #0F0F1A, #141432, #1B1B3A, #0F0F1A);
   background-size: 400% 400%;
-  animation: gradientBG 120s ease infinite; /* Ultra-slow for premium feel */
+  animation: gradientBG 120s ease infinite;
+  /* Ultra-slow for premium feel */
   position: relative;
   overflow: hidden;
 }
 
 @keyframes gradientBG {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 @keyframes float-particle {
-  0% { transform: translateY(0) translateX(0) scale(1); opacity: 0; }
-  20% { opacity: 1; }
-  100% { transform: translateY(-100vh) translateX(50px) scale(0.5); opacity: 0; }
+  0% {
+    transform: translateY(0) translateX(0) scale(1);
+    opacity: 0;
+  }
+
+  20% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(-100vh) translateX(50px) scale(0.5);
+    opacity: 0;
+  }
 }
 
 .particle {
@@ -512,21 +563,43 @@ body {
   animation: float-particle linear infinite;
 }
 
-.particle-cyan { background: var(--epic-cyan); box-shadow: 0 0 10px var(--epic-electric-blue); }
-.particle-yellow { background: var(--epic-sparkle); box-shadow: 0 0 8px var(--epic-sparkle); }
+.particle-cyan {
+  background: var(--epic-cyan);
+  box-shadow: 0 0 10px var(--epic-electric-blue);
+}
+
+.particle-yellow {
+  background: var(--epic-sparkle);
+  box-shadow: 0 0 8px var(--epic-sparkle);
+}
 
 @keyframes slide-in-bottom {
-  0% { transform: translateY(20px); opacity: 0; }
-  100% { transform: translateY(0); opacity: 1; }
+  0% {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 .animate-slide-in {
   animation: slide-in-bottom 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
 }
 
-.stagger-1 { animation-delay: 100ms; }
-.stagger-2 { animation-delay: 200ms; }
-.stagger-3 { animation-delay: 300ms; }
+.stagger-1 {
+  animation-delay: 100ms;
+}
+
+.stagger-2 {
+  animation-delay: 200ms;
+}
+
+.stagger-3 {
+  animation-delay: 300ms;
+}
 
 /* Interactive Cards Glow */
 .card-glow:hover {

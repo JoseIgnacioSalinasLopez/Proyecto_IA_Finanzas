@@ -104,6 +104,18 @@ export const getStats = async (userId, filters = {}) => {
         supabase.from('timeline_events').select('*').eq('user_id', userId).order('date', { ascending: true })
     ]);
 
+    // Recurrent Expenses Detection (NEW)
+    const subKeywords = ['netflix', 'spotify', 'disney', 'amazon', 'internet', 'teléfono', 'phone', 'cloud', 'seguro', 'gym', 'renta', 'luz', 'agua', 'gas'];
+    const recurrentExpenses = new Set();
+    allData.forEach(t => {
+        if (t.type === 'expense' && t.description) {
+            const desc = t.description.toLowerCase();
+            if (subKeywords.some(key => desc.includes(key))) {
+                recurrentExpenses.add(t.description);
+            }
+        }
+    });
+
     return {
         summary: {
             totalIncome,
@@ -115,6 +127,7 @@ export const getStats = async (userId, filters = {}) => {
             totalBudget: budgetAnalysis.reduce((acc, b) => acc + b.limit, 0),
             totalSpentThisMonth: Object.values(monthlyExpensesByCategory).reduce((acc, c) => acc + c.amount, 0)
         },
+        recurrentExpenses: Array.from(recurrentExpenses), // Added this line
         expensesByCategory: Object.entries(expensesByCategory).map(([name, data]) => ({ name, ...data })),
         incomeByCategory: Object.entries(incomeByCategory).map(([name, data]) => ({ name, ...data })),
         monthlyExpensesByCategory: Object.entries(monthlyExpensesByCategory).map(([name, data]) => ({ name, ...data })),
