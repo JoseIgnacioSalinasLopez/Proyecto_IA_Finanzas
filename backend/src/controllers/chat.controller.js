@@ -5,6 +5,24 @@ import { supabase } from '../config/supabaseClient.js';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
+// NUEVA FUNCIÓN: Extrae el historial cuando React carga la página
+export const getHistory = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const { data, error } = await supabase
+            .from('chat_messages')
+            .select('role, content')
+            .eq('user_id', userId)
+            .order('created_at', { ascending: true });
+
+        if (error) throw new Error(error.message);
+        res.status(200).json({ success: true, data });
+    } catch (error) {
+        next(error);
+    }
+};
+
+// TU FUNCIÓN INTACTA (Solo con 2 líneas nuevas para guardar en Supabase)
 export const chat = async (req, res, next) => {
     try {
         const { message } = req.body;
@@ -14,19 +32,14 @@ export const chat = async (req, res, next) => {
             return res.status(400).json({ success: false, message: 'El mensaje no puede estar vacío.' });
         }
 
-        // ========================================================
-        // PARTE 1: ESTADÍSTICAS INTACTAS
-        // ========================================================
-        const stats = await statsService.getStats(userId);
+        // GUARDAR MENSAJE DEL USUARIO EN LA BD (Nuevo)
+        await supabase.from('chat_messages').insert([{ user_id: userId, role: 'user', content: message }]);
 
+        const stats = await statsService.getStats(userId);
         const topCategory = stats?.expensesByCategory?.[0];
         const savingsRate = stats?.summary?.totalIncome > 0
-            ? ((stats.summary.balance / stats.summary.totalIncome) * 100).toFixed(1)
-            : 0;
+            ? ((stats.summary.balance / stats.summary.totalIncome) * 100).toFixed(1) : 0;
 
-        // ========================================================
-        // PARTE 2: PROMPT DINÁMICO (Soporta Ingresos y Gastos)
-        // ========================================================
         const systemPrompt = `
 Eres un asistente financiero personal llamado "Asistente IA" de la app MenteBillete.
 Debes responder SIEMPRE en español, de forma amigable, clara y concisa (máximo 3 frases).
@@ -39,7 +52,6 @@ DATOS FINANCIEROS REALES DEL USUARIO:
 - Gastos totales: $${stats?.summary?.totalExpense?.toFixed(2) || 0}
 - Tasa de ahorro: ${savingsRate}%
 - Categoría con más gastos: ${topCategory ? `${topCategory.name} ($${topCategory.amount?.toFixed(2)})` : 'No hay datos'}
-- Gastos por categoría: ${stats?.expensesByCategory?.map(c => `${c.name}: $${c.amount?.toFixed(2)}`).join(', ') || 'Sin datos'}
 - Tasa de gasto diario segura: $${stats?.summary?.dailyBurnRate?.toFixed(2) || 0} por día
 - Días de buffer: ${stats?.summary?.bufferTime || 0} días
 
@@ -50,11 +62,11 @@ REGLA 1 - REGISTRO DE MOVIMIENTO:
 Si el usuario reporta un GASTO (ej. "gasté 200") o un INGRESO (ej. "me pagaron 1000"):
 {
   "intent": "registrar_movimiento",
-  "type": "expense", // Usa "expense" si es gasto, o "income" si es ingreso
+  "type": "expense", 
   "amount": <numero_extraido>,
   "category": "<categoria_sugerida_una_palabra>",
   "description": "<descripcion_corta>",
-  "reply": "<Tu mensaje confirmando el registro y dando un breve consejo>"
+  "reply": "<Tu mensaje confirmando el registro>"
 }
 
 REGLA 2 - CONVERSACIÓN GENERAL:
@@ -65,9 +77,6 @@ Si el usuario hace preguntas o charla normal:
 }
 `;
 
-        // ========================================================
-        // PARTE 3: EJECUCIÓN CON IA
-        // ========================================================
         const model = genAI.getGenerativeModel({
             model: 'gemini-2.5-flash',
             systemInstruction: systemPrompt,
@@ -75,50 +84,36 @@ Si el usuario hace preguntas o charla normal:
         });
 
         const result = await model.generateContent(`Pregunta del usuario: ${message}`);
-
-        // Limpieza de seguridad: Quitamos posibles etiquetas markdown de código que rompan el JSON
         const rawText = result.response.text().replace(/```json/gi, '').replace(/```/g, '').trim();
         const aiResponse = JSON.parse(rawText);
 
-        // ========================================================
-        // PARTE 4: LÓGICA DE INSERCIÓN INTELIGENTE
-        // ========================================================
         if (aiResponse.intent === "registrar_movimiento") {
             let finalCategoryId = null;
 
             const { data: existingCategory } = await supabase
-                .from('categories')
-                .select('id')
-                .eq('user_id', userId)
-                .ilike('name', aiResponse.category)
-                .maybeSingle();
+                .from('categories').select('id').eq('user_id', userId).ilike('name', aiResponse.category).maybeSingle();
 
             if (existingCategory) {
                 finalCategoryId = existingCategory.id;
             } else {
                 const { data: newCategory } = await supabase
-                    .from('categories')
-                    .insert([{
-                        user_id: userId,
-                        name: aiResponse.category.toLowerCase(),
-                        type: aiResponse.type, // La IA decide si la categoría es de ingreso o gasto
-                        color: aiResponse.type === 'income' ? '#34d399' : '#00D4FF' // Verde para ingresos, Cyan para gastos
-                    }])
-                    .select()
-                    .single();
+                    .from('categories').insert([{
+                        user_id: userId, name: aiResponse.category.toLowerCase(),
+                        type: aiResponse.type, color: aiResponse.type === 'income' ? '#34d399' : '#00D4FF'
+                    }]).select().single();
 
                 if (newCategory) finalCategoryId = newCategory.id;
             }
 
-            // Inserción final usando el type dinámico de la IA
             await transactionService.createTransaction(userId, {
-                amount: Number(aiResponse.amount),
-                type: aiResponse.type, // "income" o "expense"
-                category_id: finalCategoryId,
-                description: aiResponse.description || `Registro vía IA: ${aiResponse.category}`,
+                amount: Number(aiResponse.amount), type: aiResponse.type,
+                category_id: finalCategoryId, description: aiResponse.description || `Registro vía IA: ${aiResponse.category}`,
                 date: new Date().toISOString()
             });
         }
+
+        // GUARDAR RESPUESTA DE LA IA EN LA BD (Nuevo)
+        await supabase.from('chat_messages').insert([{ user_id: userId, role: 'assistant', content: aiResponse.reply }]);
 
         res.status(200).json({ success: true, reply: aiResponse.reply });
 

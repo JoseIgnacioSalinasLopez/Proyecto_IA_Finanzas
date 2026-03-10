@@ -6,12 +6,8 @@ import iaLogo from '../assets/logo.png';
 import { useLanguage } from '../context/LanguageContext';
 
 const GET_SUGGESTIONS = (t) => [
-    t('suggestion_1'),
-    t('suggestion_2'),
-    t('suggestion_3'),
-    t('suggestion_4'),
-    t('suggestion_5'),
-    t('suggestion_6'),
+    t('suggestion_1'), t('suggestion_2'), t('suggestion_3'),
+    t('suggestion_4'), t('suggestion_5'), t('suggestion_6'),
 ];
 
 function TypingBubble() {
@@ -34,16 +30,31 @@ function TypingBubble() {
 export default function ChatIA() {
     const { t, language } = useLanguage();
     const [messages, setMessages] = useState([
-        {
-            role: 'assistant',
-            content: t('ai_welcome')
-        }
+        { role: 'assistant', content: t('ai_welcome') }
     ]);
     const [input, setInput] = useState('');
     const [isTyping, setIsTyping] = useState(false);
     const [hasGemini, setHasGemini] = useState(true);
     const messagesEndRef = useRef(null);
     const suggestions = GET_SUGGESTIONS(t);
+
+    // NUEVO: Cargar el historial al entrar a la página
+    useEffect(() => {
+        const loadHistory = async () => {
+            try {
+                const res = await api.get('/chat');
+                if (res.data && res.data.data.length > 0) {
+                    setMessages([
+                        { role: 'assistant', content: t('ai_welcome') },
+                        ...res.data.data
+                    ]);
+                }
+            } catch (error) {
+                console.error("Error loading chat history:", error);
+            }
+        };
+        loadHistory();
+    }, [t]);
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -53,38 +64,25 @@ export default function ChatIA() {
         const userText = text.trim();
         if (!userText) return;
 
-        // Añadimos el mensaje del usuario a la UI de inmediato
         setMessages(prev => [...prev, { role: 'user', content: userText }]);
         setInput('');
         setIsTyping(true);
 
         try {
             if (hasGemini) {
-                // Aquí llamamos al backend. El backend ahora se encarga de:
-                // 1. Hablar con Gemini.
-                // 2. Extraer el JSON.
-                // 3. Guardar en PostgreSQL si es un gasto.
-                // 4. Devolvernos un JSON con la propiedad 'reply'.
                 const res = await api.post('/chat', { message: userText });
-
-                // Mostramos la respuesta procesada
                 setMessages(prev => [...prev, { role: 'assistant', content: res.data.reply }]);
             } else {
-                // Si ya sabemos que la API falló antes, usamos el fallback
                 const reply = localFallback(userText);
                 setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
             }
         } catch (error) {
             console.error('Chat error:', error);
-
-            // Lógica de fallback más robusta:
-            // Si no hay respuesta del servidor (caído) o hay un error explícito de IA, usamos fallback local.
             if (!error.response || error.response?.status >= 500) {
-                setHasGemini(false); // Marcamos que la conexión con el servidor de IA falló
+                setHasGemini(false);
                 const reply = localFallback(userText);
                 setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
             } else {
-                // Errores 4xx (ej. token expirado, mala petición)
                 setMessages(prev => [...prev, { role: 'assistant', content: t('ai_error') }]);
             }
         } finally {
@@ -94,13 +92,9 @@ export default function ChatIA() {
 
     const localFallback = (text) => {
         const txt = text.toLowerCase();
-        // Fallback básico si falla el servidor
-        if (txt.includes('gasto') || txt.includes('gastar') || txt.includes('spend') || txt.includes('expense'))
-            return t('fallback_expense');
-        if (txt.includes('ingreso') || txt.includes('ganancia') || txt.includes('income') || txt.includes('profit'))
-            return t('fallback_income');
-        if (txt.includes('balance') || txt.includes('dinero') || txt.includes('money'))
-            return t('fallback_balance');
+        if (txt.includes('gasto') || txt.includes('gastar') || txt.includes('spend') || txt.includes('expense')) return t('fallback_expense');
+        if (txt.includes('ingreso') || txt.includes('ganancia') || txt.includes('income') || txt.includes('profit')) return t('fallback_income');
+        if (txt.includes('balance') || txt.includes('dinero') || txt.includes('money')) return t('fallback_balance');
         return t('fallback_error');
     };
 
@@ -109,25 +103,17 @@ export default function ChatIA() {
         sendMessage(input);
     };
 
-    // Función para renderizar negritas que envía el backend Markdown-style
     const renderContent = (content) => {
-        // Validación de seguridad en caso de que content venga indefinido
         if (!content) return null;
-
         return content.split('**').map((part, i) =>
-            i % 2 === 1
-                ? <strong key={i} className="text-[#00D4FF]">{part}</strong>
-                : part
+            i % 2 === 1 ? <strong key={i} className="text-[#00D4FF]">{part}</strong> : part
         );
     };
 
     return (
         <div className="flex flex-col h-[calc(100vh-8rem)] -m-4 md:-m-6 relative rounded-t-3xl overflow-hidden shadow-2xl z-10">
-            {/* Header */}
             <header className="bg-white/5 backdrop-blur-xl border-b border-white/5 flex items-center gap-4 px-6 py-4 flex-shrink-0 z-10 shadow-lg">
-                <Link to="/" className="text-finance-muted hover:text-finance-text transition-colors p-2 hover:bg-white/5 rounded-full">
-                    ←
-                </Link>
+                <Link to="/" className="text-finance-muted hover:text-finance-text transition-colors p-2 hover:bg-white/5 rounded-full">←</Link>
                 <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#8C30F5] to-[#00D4FF] flex items-center justify-center shadow-[0_0_15px_rgba(0,212,255,0.4)] overflow-hidden p-[2px]">
                         <img src={iaLogo} alt={t('ai_assistant')} className="w-full h-full object-cover rounded-full" />
@@ -149,7 +135,6 @@ export default function ChatIA() {
                 </div>
             </header>
 
-            {/* Messages */}
             <div className="flex-1 overflow-y-auto p-6 space-y-6" style={{ scrollbarWidth: 'thin', scrollbarColor: '#00D4FF transparent' }}>
                 {messages.map((msg, idx) => (
                     <div key={idx} className={`flex w-full ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -176,43 +161,24 @@ export default function ChatIA() {
                 <div ref={messagesEndRef} />
             </div>
 
-            {/* Suggestion chips — only show on first message */}
             {messages.length === 1 && !isTyping && (
                 <div className="px-6 pb-3 flex flex-wrap gap-2">
                     {suggestions.map((s, i) => (
-                        <button
-                            key={i}
-                            onClick={() => sendMessage(s)}
-                            className="text-xs px-3 py-1.5 rounded-full bg-finance-800 border border-finance-700 text-finance-muted hover:text-finance-text hover:border-[#4F46E5] transition-all"
-                        >
+                        <button key={i} onClick={() => sendMessage(s)} className="text-xs px-3 py-1.5 rounded-full bg-finance-800 border border-finance-700 text-finance-muted hover:text-finance-text hover:border-[#4F46E5] transition-all">
                             {s}
                         </button>
                     ))}
                 </div>
             )}
 
-            {/* Input Form */}
             <form onSubmit={handleSubmit} className="bg-white/5 backdrop-blur-2xl border-t border-white/5 p-4 shrink-0 shadow-[0_-10px_40px_rgba(0,0,0,0.2)]">
                 <div className="max-w-4xl mx-auto flex items-center gap-3">
-                    <input
-                        type="text"
-                        disabled={isTyping}
-                        className="flex-1 bg-black/40 backdrop-blur-md border border-white/10 rounded-full px-6 py-3.5 text-finance-text focus:outline-none focus:border-[#00D4FF]/50 transition-colors placeholder:text-finance-muted/50 disabled:opacity-50"
-                        placeholder={isTyping ? t('typing') : t('ask_question')}
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                    />
-                    <button
-                        type="submit"
-                        disabled={!input.trim() || isTyping}
-                        className="w-12 h-12 flex-shrink-0 rounded-full bg-gradient-to-r from-[#8C30F5] to-[#E600E6] flex items-center justify-center hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed text-white shadow-[0_0_15px_rgba(230,0,230,0.3)]"
-                    >
+                    <input type="text" disabled={isTyping} className="flex-1 bg-black/40 backdrop-blur-md border border-white/10 rounded-full px-6 py-3.5 text-finance-text focus:outline-none focus:border-[#00D4FF]/50 transition-colors placeholder:text-finance-muted/50 disabled:opacity-50" placeholder={isTyping ? t('typing') : t('ask_question')} value={input} onChange={(e) => setInput(e.target.value)} />
+                    <button type="submit" disabled={!input.trim() || isTyping} className="w-12 h-12 flex-shrink-0 rounded-full bg-gradient-to-r from-[#8C30F5] to-[#E600E6] flex items-center justify-center hover:opacity-90 transition-opacity disabled:opacity-40 disabled:cursor-not-allowed text-white shadow-[0_0_15px_rgba(230,0,230,0.3)]">
                         <Send size={20} className="-mr-0.5" />
                     </button>
                 </div>
-                <p className="text-center text-[10px] text-finance-muted mt-3">
-                    {t('ai_disclaimer')}
-                </p>
+                <p className="text-center text-[10px] text-finance-muted mt-3">{t('ai_disclaimer')}</p>
             </form>
         </div>
     );
