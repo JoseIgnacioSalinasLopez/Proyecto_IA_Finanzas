@@ -82,11 +82,18 @@ export const getStats = async (userId, filters = {}) => {
     const dailyBurnRate = expenseLast30Days / 30;
     const bufferTime = dailyBurnRate > 0 ? balance / dailyBurnRate : (balance > 0 ? 999 : 0);
 
+    // PROYECCIÓN DE FIN DE MES (NUEVO)
+    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    const daysPassed = now.getDate();
+    const daysRemaining = daysInMonth - daysPassed;
+    const projectedAdditionalExpense = dailyBurnRate * daysRemaining;
+    const projectedEndOfMonthBalance = balance - projectedAdditionalExpense;
+
     let riskLevel = 'BAJO';
     if (bufferTime < 30) riskLevel = 'CRÍTICO';
     else if (bufferTime < 90) riskLevel = 'MEDIO';
 
-    // Budget Analysis
+    // Análisis de Presupuesto
     const budgetAnalysis = (budgets || []).map(b => {
         const spent = monthlyExpensesByCategory[b.categories?.name]?.amount || 0;
         return {
@@ -98,13 +105,14 @@ export const getStats = async (userId, filters = {}) => {
         };
     });
 
-    // Fetch goals and events for the dashboard
-    const [{ data: goals }, { data: manualEvents }] = await Promise.all([
+    // Fetch goals, events and debts (New: Debts)
+    const [{ data: goals }, { data: manualEvents }, { data: debts }] = await Promise.all([
         supabase.from('goals').select('*').eq('user_id', userId).order('deadline', { ascending: true }),
-        supabase.from('timeline_events').select('*').eq('user_id', userId).order('date', { ascending: true })
+        supabase.from('timeline_events').select('*').eq('user_id', userId).order('date', { ascending: true }),
+        supabase.from('transactions').select('amount, description, date').eq('user_id', userId).eq('type', 'expense').ilike('description', '%deuda%') // Simple debt detection for now
     ]);
 
-    // Recurrent Expenses Detection (NEW)
+    // Recurrent Expenses Detection
     const subKeywords = ['netflix', 'spotify', 'disney', 'amazon', 'internet', 'teléfono', 'phone', 'cloud', 'seguro', 'gym', 'renta', 'luz', 'agua', 'gas'];
     const recurrentExpenses = new Set();
     allData.forEach(t => {
@@ -120,19 +128,22 @@ export const getStats = async (userId, filters = {}) => {
         summary: {
             totalIncome,
             totalExpense,
-            balance,
+            balance: Number(balance.toFixed(2)),
             dailyBurnRate: Number(dailyBurnRate.toFixed(2)),
+            projectedEndOfMonthBalance: Number(projectedEndOfMonthBalance.toFixed(2)),
+            daysRemainingInMonth: daysRemaining,
             bufferTime: Math.max(0, Math.floor(bufferTime)),
             riskLevel,
-            totalBudget: budgetAnalysis.reduce((acc, b) => acc + b.limit, 0),
-            totalSpentThisMonth: Object.values(monthlyExpensesByCategory).reduce((acc, c) => acc + c.amount, 0)
+            totalBudget: Number(budgetAnalysis.reduce((acc, b) => acc + b.limit, 0).toFixed(2)),
+            totalSpentThisMonth: Number(Object.values(monthlyExpensesByCategory).reduce((acc, c) => acc + c.amount, 0).toFixed(2))
         },
-        recurrentExpenses: Array.from(recurrentExpenses), // Added this line
+        recurrentExpenses: Array.from(recurrentExpenses),
         expensesByCategory: Object.entries(expensesByCategory).map(([name, data]) => ({ name, ...data })),
         incomeByCategory: Object.entries(incomeByCategory).map(([name, data]) => ({ name, ...data })),
         monthlyExpensesByCategory: Object.entries(monthlyExpensesByCategory).map(([name, data]) => ({ name, ...data })),
         timeline: Object.entries(timeline).map(([date, data]) => ({ date, ...data })).sort((a, b) => new Date(a.date) - new Date(b.date)),
         goals: goals || [],
+        debts: debts || [],
         budgetAnalysis,
         manualEvents: manualEvents || []
     };

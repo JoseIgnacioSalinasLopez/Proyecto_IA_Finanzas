@@ -47,8 +47,10 @@ export const createTransaction = async (userId, dataPayload) => {
         }])
         .select()
         .single();
-
-    if (error) throw new Error(error.message);
+    if (error) {
+        console.error('DATABASE ERROR creating transaction:', error);
+        throw new Error(error.message);
+    }
 
     await createNotification(
         userId,

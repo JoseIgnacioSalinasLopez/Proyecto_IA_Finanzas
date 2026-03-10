@@ -316,6 +316,10 @@ export default function ResumenFinanciero() {
 
     useEffect(() => {
         fetchAllData();
+
+        // ESCUCHAR RECARGAS GLOBALES
+        window.addEventListener('refresh-data', fetchAllData);
+        return () => window.removeEventListener('refresh-data', fetchAllData);
     }, []);
 
 
@@ -349,6 +353,10 @@ export default function ResumenFinanciero() {
         try {
             await api.delete(`/transactions/${id}`);
             setShowDeleteConfirm(null);
+
+            // NOTIFICAR A OTROS COMPONENTES
+            window.dispatchEvent(new CustomEvent('refresh-data'));
+
             await fetchTransactionsAndStats();
             showToast(t('movement_deleted'));
         } catch (error) {
@@ -388,6 +396,10 @@ export default function ResumenFinanciero() {
                 await api.post('/transactions', payload);
                 showToast(t('movement_registered'));
             }
+
+            // NOTIFICAR A OTROS COMPONENTES
+            window.dispatchEvent(new CustomEvent('refresh-data'));
+
             setShowModal(false); setFormData(EMPTY_FORM); setEditingTx(null);
             await fetchTransactionsAndStats();
         } catch (error) {

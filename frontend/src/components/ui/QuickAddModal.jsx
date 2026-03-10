@@ -55,6 +55,13 @@ export default function QuickAddModal() {
 
         try {
             setLoading(true);
+
+            if (!form.category_id) {
+                setToast({ message: t('select_category'), type: 'error' });
+                setLoading(false);
+                return;
+            }
+
             const now = new Date();
             const [y, m, d] = form.date.split('-');
             const dateWithTime = new Date(y, m - 1, d, now.getHours(), now.getMinutes(), now.getSeconds());
@@ -64,6 +71,10 @@ export default function QuickAddModal() {
                 amount: parseFloat(form.amount),
                 date: dateWithTime.toISOString()
             });
+
+            // DISPARAR EVENTO GLOBAL DE RECARGA
+            window.dispatchEvent(new CustomEvent('refresh-data'));
+
             setToast({ message: t('movement_registered'), type: 'success' });
             setTimeout(() => {
                 setShow(false);

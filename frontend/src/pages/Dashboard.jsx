@@ -99,6 +99,10 @@ export default function Dashboard() {
 
     useEffect(() => {
         fetchDashboardData();
+
+        // ESCUCHAR RECARGAS GLOBALES
+        window.addEventListener('refresh-data', fetchDashboardData);
+
         if (user?.id) {
             const channel = supabase
                 .channel('dashboard-updates')
@@ -109,8 +113,10 @@ export default function Dashboard() {
 
             return () => {
                 supabase.removeChannel(channel);
+                window.removeEventListener('refresh-data', fetchDashboardData);
             };
         }
+        return () => window.removeEventListener('refresh-data', fetchDashboardData);
     }, [user?.id, fetchDashboardData]);
 
     if (loading) {

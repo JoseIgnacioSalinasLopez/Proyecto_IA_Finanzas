@@ -96,3 +96,26 @@ ALTER TABLE public.user_preferences ENABLE ROW LEVEL SECURITY;
 -- Políticas de ejemplo (Solo para referencia)
 -- CREATE POLICY "Users can manage their own profile" ON public.users FOR ALL USING (auth.uid() = id);
 -- CREATE POLICY "Users can manage their own data" ON public.transactions FOR ALL USING (auth.uid() = user_id);
+
+-- 4. GESTIÓN DE CHATS (SESIONES)
+CREATE TABLE IF NOT EXISTS public.chat_sessions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
+    title TEXT DEFAULT 'Nueva Conversación',
+    is_favorite BOOLEAN DEFAULT false,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS public.chat_messages (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
+    session_id UUID REFERENCES public.chat_sessions(id) ON DELETE CASCADE,
+    role VARCHAR(20) CHECK (role IN ('user', 'assistant')) NOT NULL,
+    content TEXT NOT NULL,
+    intent VARCHAR(50),
+    data JSONB,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.chat_sessions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.chat_messages ENABLE ROW LEVEL SECURITY;
