@@ -4,7 +4,7 @@ import Sidebar from './components/layout/Sidebar';
 import Navbar from './components/layout/Navbar';
 import ProtectedRoute from './components/layout/ProtectedRoute';
 import { useAuth } from './hooks/useAuth';
-import { LanguageProvider } from './context/LanguageContext';
+import { useLanguage } from './context/LanguageContext';
 
 // Pages
 import Dashboard from './pages/Dashboard';
@@ -30,12 +30,12 @@ const DashboardLayout = ({ children }) => {
     <div className="flex h-screen overflow-hidden bg-[#05011a] text-finance-text relative font-sans">
       {/* Fondo Global Épico */}
       <div className="absolute inset-0 epic-bg-animate opacity-30 z-0"></div>
-      
+
       {/* Capa de Partículas Sutiles (Post-Login) */}
       <div className="absolute inset-0 z-0 pointer-events-none opacity-20">
         {[...Array(15)].map((_, i) => (
-          <div 
-            key={i} 
+          <div
+            key={i}
             className={`particle ${i % 5 === 0 ? 'particle-yellow' : 'particle-cyan'}`}
             style={{
               width: '2px',
@@ -65,7 +65,7 @@ const DashboardLayout = ({ children }) => {
           {children}
         </main>
       </div>
-      
+
       {/* Modal de Registro Rápido Global */}
       <QuickAddModal />
     </div>
@@ -74,20 +74,21 @@ const DashboardLayout = ({ children }) => {
 
 function App() {
   const { user, loading } = useAuth();
+  const { t } = useLanguage();
 
   if (loading) {
     return (
       <div className="min-h-screen bg-[#05011a] flex justify-center items-center">
         <div className="flex flex-col items-center gap-4">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-finance-primary"></div>
-          <p className="text-finance-muted text-sm font-medium tracking-wide">Iniciando Sistema...</p>
+          <p className="text-finance-muted text-sm font-medium tracking-wide">{t('starting_system')}</p>
         </div>
       </div>
     );
   }
 
   return (
-    <LanguageProvider>
+    <>
       <CursorFollower />
       <Routes>
         {/* Rutas Públicas */}
@@ -109,7 +110,7 @@ function App() {
         {/* Fallback */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
-    </LanguageProvider>
+    </>
   );
 }
 

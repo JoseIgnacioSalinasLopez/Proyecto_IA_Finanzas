@@ -1,34 +1,32 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
 import { useLanguage } from '../context/LanguageContext';
-import { 
-  Chart as ChartJS, 
-  ArcElement, 
-  Tooltip, 
-  Legend, 
-  CategoryScale, 
-  LinearScale, 
-  PointElement, 
-  LineElement, 
-  Title, 
-  Filler 
+import {
+    Chart as ChartJS,
+    Tooltip,
+    Legend,
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Filler
 } from 'chart.js';
-import { Pie, Line } from 'react-chartjs-2';
+import { Line } from 'react-chartjs-2';
 import { Download, FileText, Calendar, Filter, ChevronLeft, ChevronRight, X, AlertCircle } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import Toast from '../components/ui/Toast';
 
 ChartJS.register(
-  ArcElement, 
-  Tooltip, 
-  Legend, 
-  CategoryScale, 
-  LinearScale, 
-  PointElement, 
-  LineElement, 
-  Title, 
-  Filler
+    Tooltip,
+    Legend,
+    CategoryScale,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Title,
+    Filler
 );
 
 export default function Reportes() {
@@ -65,7 +63,7 @@ export default function Reportes() {
         showToast(t('exporting_tx') || 'Exportando datos...');
         const headers = [t('category_label'), t('amount_label'), t('percentage_label') || 'PORCENTAJE'];
         const total = stats.expensesByCategory.reduce((sum, item) => sum + item.amount, 0);
-        
+
         const rows = stats.expensesByCategory.map(c => [
             c.name,
             c.amount.toFixed(2),
@@ -97,18 +95,18 @@ export default function Reportes() {
             const now = new Date();
             const locale = language === 'en' ? 'en-US' : 'es-MX';
             const pageW = 210;
-            
+
             // ── Cabecera Elite ──────────────────────────────────────────
             doc.setFillColor(11, 2, 45); // Deep Navy
             doc.rect(0, 0, pageW, 45, 'F');
-            
+
             // Grid técnico de fondo (sutil - sin alpha para evitar errores)
-            doc.setDrawColor(30, 40, 70); 
-            for(let i=0; i<pageW; i+=10) doc.line(i, 0, i, 45);
-            for(let i=0; i<45; i+=10) doc.line(0, i, pageW, i);
+            doc.setDrawColor(30, 40, 70);
+            for (let i = 0; i < pageW; i += 10) doc.line(i, 0, i, 45);
+            for (let i = 0; i < 45; i += 10) doc.line(0, i, pageW, i);
 
             // Acento Cian
-            doc.setFillColor(0, 212, 255); 
+            doc.setFillColor(0, 212, 255);
             doc.rect(0, 45, pageW, 2, 'F');
 
             // Logo y Título
@@ -116,7 +114,7 @@ export default function Reportes() {
             doc.setFontSize(26);
             doc.setTextColor(255, 255, 255);
             doc.text('MENTE BILLETE', 15, 22);
-            
+
             doc.setFontSize(10);
             doc.setFont('helvetica', 'normal');
             doc.setTextColor(0, 212, 255);
@@ -132,11 +130,11 @@ export default function Reportes() {
             doc.setTextColor(11, 2, 45);
             doc.setFont('helvetica', 'bold');
             doc.text(t('executive_summary') || 'RESUMEN EJECUTIVO', 15, y);
-            
+
             y += 8;
             const summaryTable = [
-                [t('net_balance_report'), `$${stats.summary.balance.toLocaleString(locale, {minimumFractionDigits: 2})}`],
-                [t('daily_burn_rate') || 'TASA DE QUEMADO DIARIO', `$${stats.summary.dailyBurnRate.toLocaleString(locale, {minimumFractionDigits: 2})}`],
+                [t('net_balance_report'), `$${stats.summary.balance.toLocaleString(locale, { minimumFractionDigits: 2 })}`],
+                [t('daily_burn_rate') || 'TASA DE QUEMADO DIARIO', `$${stats.summary.dailyBurnRate.toLocaleString(locale, { minimumFractionDigits: 2 })}`],
                 [t('reserve_days') || 'DÍAS DE RESERVA', `${stats.summary.bufferTime} ${t('days').toLowerCase()}`],
                 [t('risk_level_label'), stats.summary.riskLevel]
             ];
@@ -146,7 +144,7 @@ export default function Reportes() {
                 body: summaryTable,
                 theme: 'plain',
                 styles: { fontSize: 10, cellPadding: 3, textColor: [30, 41, 59] },
-                columnStyles: { 
+                columnStyles: {
                     0: { fontStyle: 'bold', cellWidth: 80 },
                     1: { halign: 'right', textColor: [0, 212, 255], fontStyle: 'bold' }
                 }
@@ -159,11 +157,11 @@ export default function Reportes() {
             doc.text(t('expenses_by_category'), 15, y);
 
             const catData = stats.expensesByCategory.map(c => [
-                c.name.toUpperCase(), 
-                `$${c.amount.toLocaleString(locale, {minimumFractionDigits: 2})}`,
+                c.name.toUpperCase(),
+                `$${c.amount.toLocaleString(locale, { minimumFractionDigits: 2 })}`,
                 `${((c.amount / (stats.summary.totalExpense || 1)) * 100).toFixed(1)}%`
             ]);
-            
+
             autoTable(doc, {
                 startY: y + 5,
                 head: [[t('category_label'), t('amount_label'), '%']],
@@ -210,17 +208,6 @@ export default function Reportes() {
             </div>
         );
     }
-
-    // Chart Data: Pie Chart
-    const pieData = {
-        labels: stats.expensesByCategory.map(c => c.name),
-        datasets: [{
-            data: stats.expensesByCategory.map(c => c.amount),
-            backgroundColor: stats.expensesByCategory.map(c => c.color || '#3b82f6'),
-            borderColor: 'rgba(255, 255, 255, 0.1)',
-            borderWidth: 2,
-        }]
-    };
 
     // Chart Data: Wealth Evolution (Cumulative)
     let currentAcc = 0;
@@ -276,14 +263,14 @@ export default function Reportes() {
                     <p className="text-finance-muted text-sm">{t('report_subtitle')}</p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <button 
+                    <button
                         onClick={exportToCSV}
                         className="btn-primary !bg-white/5 !text-white flex items-center gap-2 border border-white/10 hover:!bg-white/10"
                     >
                         <Download size={18} />
                         CSV
                     </button>
-                    <button 
+                    <button
                         onClick={exportToPDF}
                         disabled={exporting}
                         className="btn-primary flex items-center gap-2"
@@ -300,40 +287,6 @@ export default function Reportes() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Stats Summary Panel */}
-                <div className="lg:col-span-1 space-y-6">
-                    <div className="card p-5 space-y-4">
-                        <h2 className="text-sm font-bold text-finance-muted uppercase tracking-wider">{t('key_metrics')}</h2>
-                        <div className="space-y-4">
-                            {[
-                                { label: t('net_balance_report'), value: stats.summary.balance, color: 'text-finance-primary' },
-                                { label: t('projected_savings'), value: stats.summary.balance * 0.2, color: 'text-emerald-400' },
-                                { label: t('reserve_days'), value: stats.summary.bufferTime, suffix: ` ${t('days').toLowerCase()}`, color: 'text-orange-400' }
-                            ].map((item, i) => (
-                                <div key={i} className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5">
-                                    <span className="text-xs text-finance-muted font-medium">{item.label}</span>
-                                    <span className={`font-bold ${item.color}`}>
-                                        {item.suffix ? `${item.value}${item.suffix}` : `$${item.value.toLocaleString(language === 'en' ? 'en-US' : 'es-MX')}`}
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="card p-5 h-[350px] flex flex-col bg-white/5">
-                        <h2 className="text-sm font-bold text-finance-muted uppercase tracking-wider mb-4">{t('expenses_by_category')}</h2>
-                        <div className="flex-1 relative">
-                            {stats.expensesByCategory.length > 0 ? (
-                                <Pie data={pieData} options={chartOptions} />
-                            ) : (
-                                <div className="absolute inset-0 flex items-center justify-center text-finance-muted text-xs italic">
-                                    {t('no_expenses_recorded')}
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                </div>
-
                 {/* Main Timeline Chart */}
                 <div className="lg:col-span-2 card p-5 flex flex-col min-h-[500px] bg-white/5">
                     <h2 className="text-sm font-bold text-finance-muted uppercase tracking-wider mb-6">{t('wealth_evolution')}</h2>
@@ -357,10 +310,31 @@ export default function Reportes() {
                             <p className="text-[10px] text-finance-muted uppercase tracking-widest mb-1">{t('risk_level_label')}</p>
                             <p className={`font-bold text-lg ${stats.summary.riskLevel === 'CRÍTICO' ? 'text-red-500' : 'text-emerald-400'}`}>
                                 {stats.summary.riskLevel === 'BAJO' ? t('risk_low') :
-                                 stats.summary.riskLevel === 'MEDIO' ? t('risk_medium') :
-                                 stats.summary.riskLevel === 'CRÍTICO' ? t('risk_critical') :
-                                 stats.summary.riskLevel}
+                                    stats.summary.riskLevel === 'MEDIO' ? t('risk_medium') :
+                                        stats.summary.riskLevel === 'CRÍTICO' ? t('risk_critical') :
+                                            stats.summary.riskLevel}
                             </p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Stats Summary Panel */}
+                <div className="lg:col-span-1 space-y-6">
+                    <div className="card p-5 space-y-4">
+                        <h2 className="text-sm font-bold text-finance-muted uppercase tracking-wider">{t('key_metrics')}</h2>
+                        <div className="space-y-4">
+                            {[
+                                { label: t('net_balance_report'), value: stats.summary.balance, color: 'text-finance-primary' },
+                                { label: t('projected_savings'), value: stats.summary.balance * 0.2, color: 'text-emerald-400' },
+                                { label: t('reserve_days'), value: stats.summary.bufferTime, suffix: ` ${t('days').toLowerCase()}`, color: 'text-orange-400' }
+                            ].map((item, i) => (
+                                <div key={i} className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5">
+                                    <span className="text-xs text-finance-muted font-medium">{item.label}</span>
+                                    <span className={`font-bold ${item.color}`}>
+                                        {item.suffix ? `${item.value}${item.suffix}` : `$${item.value.toLocaleString(language === 'en' ? 'en-US' : 'es-MX')}`}
+                                    </span>
+                                </div>
+                            ))}
                         </div>
                     </div>
                 </div>
