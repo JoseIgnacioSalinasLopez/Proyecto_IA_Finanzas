@@ -51,9 +51,9 @@ export const createTransaction = async (userId, dataPayload) => {
     if (error) throw new Error(error.message);
 
     await createNotification(
-        userId, 
-        type === 'income' ? 'Nuevo Ingreso' : 'Nuevo Gasto', 
-        `Registraste un ${type === 'income' ? 'ingreso' : 'gasto'} por $${Number(amount).toLocaleString()}`, 
+        userId,
+        type === 'income' ? 'Nuevo Ingreso' : 'Nuevo Gasto',
+        `Registraste un ${type === 'income' ? 'ingreso' : 'gasto'} por $${Number(amount).toLocaleString()}`,
         'success'
     );
 
@@ -72,9 +72,9 @@ export const updateTransaction = async (userId, transactionId, dataPayload) => {
     if (error) throw new Error(error.message);
 
     await createNotification(
-        userId, 
-        'Transacción Actualizada', 
-        `Has modificado una transacción de $${Number(dataPayload.amount || data.amount).toLocaleString()}`, 
+        userId,
+        'Transacción Actualizada',
+        `Has modificado una transacción de $${Number(dataPayload.amount || data.amount).toLocaleString()}`,
         'info'
     );
 
@@ -91,9 +91,9 @@ export const deleteTransaction = async (userId, transactionId) => {
     if (error) throw new Error(error.message);
 
     await createNotification(
-        userId, 
-        'Transacción Eliminada', 
-        'Has eliminado una transacción de tu registro', 
+        userId,
+        'Transacción Eliminada',
+        'Has eliminado una transacción de tu registro',
         'alert'
     );
 
