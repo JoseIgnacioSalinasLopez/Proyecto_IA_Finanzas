@@ -16,10 +16,15 @@ const app = express();
 
 // Middlewares
 app.use(cors());
-app.use(express.json());
+
+// MODIFICACIÓN PREVENTIVA: Aumentamos el límite a 10mb para que los 
+// historiales largos de la IA y los RAGs no colapsen el servidor.
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
 app.use(morgan('dev'));
 
-// Routes
+// Routes (Intactas)
 app.use('/api/auth', authRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/categories', categoryRoutes);
@@ -31,12 +36,12 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/budgets', budgetRoutes);
 app.use('/api/preferences', preferenceRoutes);
 
-// Healthcheck Route
+// Healthcheck Route (Intacta)
 app.get('/api/health', (req, res) => {
     res.status(200).json({ status: 'ok', message: 'Mente Billete API is running' });
 });
 
-// Centralized Error Handling Middlewares
+// Centralized Error Handling Middlewares (Intacto)
 app.use((err, req, res, next) => {
     console.error('EXPRESS ERROR CAUGHT:', err);
     console.error('Stack:', err.stack);

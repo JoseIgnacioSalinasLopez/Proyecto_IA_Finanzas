@@ -41,7 +41,7 @@ export default function ChatIA() {
     ]);
     const [input, setInput] = useState('');
     const [isTyping, setIsTyping] = useState(false);
-    const [hasGemini, setHasGemini] = useState(true); // assume true, fallback on error
+    const [hasGemini, setHasGemini] = useState(true);
     const messagesEndRef = useRef(null);
     const suggestions = GET_SUGGESTIONS(t);
 
@@ -53,27 +53,38 @@ export default function ChatIA() {
         const userText = text.trim();
         if (!userText) return;
 
+        // Añadimos el mensaje del usuario a la UI de inmediato
         setMessages(prev => [...prev, { role: 'user', content: userText }]);
         setInput('');
         setIsTyping(true);
 
         try {
             if (hasGemini) {
+                // Aquí llamamos al backend. El backend ahora se encarga de:
+                // 1. Hablar con Gemini.
+                // 2. Extraer el JSON.
+                // 3. Guardar en PostgreSQL si es un gasto.
+                // 4. Devolvernos un JSON con la propiedad 'reply'.
                 const res = await api.post('/chat', { message: userText });
+
+                // Mostramos la respuesta procesada
                 setMessages(prev => [...prev, { role: 'assistant', content: res.data.reply }]);
             } else {
-                // Fallback local NLP
+                // Si ya sabemos que la API falló antes, usamos el fallback
                 const reply = localFallback(userText);
                 setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
             }
         } catch (error) {
             console.error('Chat error:', error);
-            // If Gemini fails (no API key, quota, etc.), switch to local fallback
-            if (error.response?.status === 500) {
-                setHasGemini(false);
+
+            // Lógica de fallback más robusta:
+            // Si no hay respuesta del servidor (caído) o hay un error explícito de IA, usamos fallback local.
+            if (!error.response || error.response?.status >= 500) {
+                setHasGemini(false); // Marcamos que la conexión con el servidor de IA falló
                 const reply = localFallback(userText);
                 setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
             } else {
+                // Errores 4xx (ej. token expirado, mala petición)
                 setMessages(prev => [...prev, { role: 'assistant', content: t('ai_error') }]);
             }
         } finally {
@@ -83,7 +94,7 @@ export default function ChatIA() {
 
     const localFallback = (text) => {
         const txt = text.toLowerCase();
-        const isEn = language === 'en';
+        // Fallback básico si falla el servidor
         if (txt.includes('gasto') || txt.includes('gastar') || txt.includes('spend') || txt.includes('expense'))
             return t('fallback_expense');
         if (txt.includes('ingreso') || txt.includes('ganancia') || txt.includes('income') || txt.includes('profit'))
@@ -98,12 +109,17 @@ export default function ChatIA() {
         sendMessage(input);
     };
 
-    const renderContent = (content) =>
-        content.split('**').map((part, i) =>
+    // Función para renderizar negritas que envía el backend Markdown-style
+    const renderContent = (content) => {
+        // Validación de seguridad en caso de que content venga indefinido
+        if (!content) return null;
+
+        return content.split('**').map((part, i) =>
             i % 2 === 1
                 ? <strong key={i} className="text-[#00D4FF]">{part}</strong>
                 : part
         );
+    };
 
     return (
         <div className="flex flex-col h-[calc(100vh-8rem)] -m-4 md:-m-6 relative rounded-t-3xl overflow-hidden shadow-2xl z-10">
@@ -175,7 +191,7 @@ export default function ChatIA() {
                 </div>
             )}
 
-            {/* Input */}
+            {/* Input Form */}
             <form onSubmit={handleSubmit} className="bg-white/5 backdrop-blur-2xl border-t border-white/5 p-4 shrink-0 shadow-[0_-10px_40px_rgba(0,0,0,0.2)]">
                 <div className="max-w-4xl mx-auto flex items-center gap-3">
                     <input
