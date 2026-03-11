@@ -11,6 +11,23 @@ const hexToRgba = (hex, alpha) => {
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
 
+const glowPlugin = {
+    id: 'glow',
+    beforeDatasetsDraw: (chart) => {
+        const ctx = chart.ctx;
+        ctx.save();
+        ctx.shadowColor = typeof chart.data.datasets[0]?.borderColor === 'string'
+            ? chart.data.datasets[0].borderColor
+            : 'rgba(0, 212, 255, 0.5)';
+        ctx.shadowBlur = 12;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 4;
+    },
+    afterDatasetsDraw: (chart) => {
+        chart.ctx.restore();
+    }
+};
+
 export default function LineChart({ data, title = 'Evolución' }) {
     const chartRef = useRef(null);
 
@@ -39,7 +56,7 @@ export default function LineChart({ data, title = 'Evolución' }) {
                         return gradient;
                     },
                     fill: true,
-                    tension: 0.4,
+                    tension: 0.5,
                     pointBackgroundColor: '#0B022D',
                     pointBorderColor: color,
                     pointBorderWidth: 2,
@@ -66,7 +83,7 @@ export default function LineChart({ data, title = 'Evolución' }) {
                 position: 'top',
                 align: 'end',
                 labels: {
-                    color: 'var(--chart-text)',
+                    color: 'rgba(255, 255, 255, 0.5)',
                     usePointStyle: true,
                     boxWidth: 8,
                     font: { family: "'Inter', sans-serif", size: 12, weight: '500' }
@@ -75,19 +92,19 @@ export default function LineChart({ data, title = 'Evolución' }) {
             title: {
                 display: !!title,
                 text: title,
-                color: 'var(--chart-title)',
+                color: '#FFFFFF',
                 align: 'start',
                 font: { family: "'Inter', sans-serif", size: 16, weight: 'bold' },
                 padding: { bottom: 20 }
             },
             tooltip: {
                 backgroundColor: 'var(--chart-tooltip-bg)',
-                borderColor: 'var(--chart-grid)',
+                borderColor: 'rgba(255, 255, 255, 0.1)',
                 borderWidth: 1,
                 padding: 14,
                 cornerRadius: 12,
-                titleColor: 'var(--chart-title)',
-                bodyColor: 'var(--chart-text)',
+                titleColor: '#FFFFFF',
+                bodyColor: 'rgba(255, 255, 255, 0.8)',
                 usePointStyle: true,
                 callbacks: {
                     label: function (context) {
@@ -104,11 +121,11 @@ export default function LineChart({ data, title = 'Evolución' }) {
         scales: {
             y: {
                 grid: {
-                    color: 'var(--chart-grid)',
+                    color: 'rgba(255, 255, 255, 0.1)',
                     drawBorder: false,
                 },
                 ticks: {
-                    color: 'var(--chart-text)',
+                    color: 'rgba(255, 255, 255, 0.5)',
                     font: { family: "'Inter', sans-serif", weight: '600' },
                     callback: function (value) {
                         return '$' + value;
@@ -118,10 +135,10 @@ export default function LineChart({ data, title = 'Evolución' }) {
             },
             x: {
                 grid: { display: false, drawBorder: false },
-                ticks: { color: 'var(--chart-text)', font: { family: "'Inter', sans-serif", weight: '600' } }
+                ticks: { color: 'rgba(255, 255, 255, 0.5)', font: { family: "'Inter', sans-serif", weight: '600' } }
             }
         }
     };
 
-    return <Line ref={chartRef} options={options} data={styledData} />;
+    return <Line ref={chartRef} options={options} data={styledData} plugins={[glowPlugin]} />;
 }

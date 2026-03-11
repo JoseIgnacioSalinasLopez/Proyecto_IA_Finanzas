@@ -9,6 +9,7 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { useLanguage } from '../context/LanguageContext';
 import DatePickerElite from '../components/ui/DatePickerElite';
+import GlobalLoader from '../components/ui/GlobalLoader';
 
 const EMPTY_FORM = { amount: '', type: 'expense', category_id: '', description: '', date: new Date().toISOString().split('T')[0] };
 
@@ -455,14 +456,7 @@ export default function ResumenFinanciero() {
         return stats.timeline.slice(-30);
     }, [stats?.timeline, chartPeriod]);
 
-    if (loading) return (
-        <div className="min-h-screen p-6 flex items-center justify-center">
-            <div className="text-center">
-                <div className="w-10 h-10 border-2 border-[#00D4FF] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                <p className="text-finance-muted">{t('loading')}</p>
-            </div>
-        </div>
-    );
+    if (loading) return <GlobalLoader fullScreen={true} />;
     if (!stats) return <div className="p-6 text-red-500">{t('error_loading')}</div>;
 
     const expensesData = {
@@ -518,7 +512,7 @@ export default function ResumenFinanciero() {
                             exportToPDF(filteredTx, stats, t, language);
                             showToast(t('generating_pdf'));
                         }}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-finance-primary/10 hover:bg-finance-primary/20 border border-finance-primary/30 hover:border-finance-primary/50 text-finance-primary rounded-xl text-sm font-bold transition-all shadow-lg shadow-finance-primary/5"
+                        className="flex items-center gap-2 px-4 py-2 bg-transparent border border-white/60 dark:border-white/80 hover:bg-white/10 text-[#00D4FF] rounded-xl text-sm font-bold transition-all"
                         title={t('export_pdf')}
                     >
                         <FileText size={16} />
@@ -531,7 +525,7 @@ export default function ResumenFinanciero() {
                             exportToCSV(filteredTx, t, language);
                             showToast(t('exporting_tx'));
                         }}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 border border-black/10 dark:border-white/10 hover:border-black/20 dark:hover:border-white/20 text-finance-text dark:text-white rounded-xl text-sm font-medium transition-all"
+                        className="flex items-center gap-2 px-4 py-2 bg-transparent border border-white/60 dark:border-white/80 hover:bg-white/10 text-[#00D4FF] rounded-xl text-sm font-bold transition-all"
                         title={t('export_csv')}
                     >
                         <Download size={16} />
@@ -739,11 +733,11 @@ export default function ResumenFinanciero() {
                     <div className="flex justify-between items-center mt-3 text-xs text-finance-muted">
                         <span>{filteredTx.length} {t('transactions').toLowerCase()} {dateFilter !== 'all' ? `· ${getDateFilterLabel()}` : ''}</span>
                         {filteredTx.length > 0 && (
-                            <div className="flex gap-3">
-                                <button onClick={() => exportToCSV(filteredTx, t, language)} className="flex items-center gap-1 hover:text-white transition-colors">
+                            <div className="flex gap-3 mt-2 sm:mt-0">
+                                <button onClick={() => exportToCSV(filteredTx, t, language)} className="flex items-center gap-1 px-3 py-1.5 bg-transparent border border-white/60 dark:border-white/80 hover:bg-white/10 text-[#00D4FF] rounded-lg text-xs font-bold transition-all">
                                     <Download size={12} /> CSV
                                 </button>
-                                <button onClick={() => exportToPDF(filteredTx, stats, t, language)} className="flex items-center gap-1 hover:text-finance-primary transition-colors">
+                                <button onClick={() => exportToPDF(filteredTx, stats, t, language)} className="flex items-center gap-1 px-3 py-1.5 bg-transparent border border-white/60 dark:border-white/80 hover:bg-white/10 text-[#00D4FF] rounded-lg text-xs font-bold transition-all">
                                     <FileText size={12} /> PDF
                                 </button>
                             </div>

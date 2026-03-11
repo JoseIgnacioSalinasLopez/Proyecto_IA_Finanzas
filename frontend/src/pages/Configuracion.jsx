@@ -3,13 +3,12 @@ import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 import { Globe, Shield, Bell, Moon, Clock, Sun } from 'lucide-react';
 import api from '../services/api';
-import Toast from '../components/ui/Toast';
+import { toast } from 'react-hot-toast';
 
 export default function Configuracion() {
     const { language, setLanguage, t } = useLanguage();
     const { theme, toggleTheme } = useTheme();
     const [activeTab, setActiveTab] = useState('language'); // 'language', 'security', 'notifications'
-    const [toast, setToast] = useState(null);
     const [securityData, setSecurityData] = useState({ current: '', new: '', confirm: '' });
     const [notifSettings, setNotifSettings] = useState({ budget: true, login: true, weekly: false, ai: true });
     const [timelineSettings, setTimelineSettings] = useState({ hide_challenges: false, hide_forecasts: false });
@@ -38,20 +37,18 @@ export default function Configuracion() {
         fetchPrefs();
     }, []);
 
-    const showToast = (message, type = 'success') => setToast({ message, type });
-
     const handleLanguageChange = (lang) => {
         setLanguage(lang);
-        showToast(lang === 'es' ? 'Idioma cambiado a Español' : 'Language changed to English', 'success');
+        toast.success(lang === 'es' ? 'Idioma cambiado a Español' : 'Language changed to English');
     };
 
     const handleSecuritySave = (e) => {
         e.preventDefault();
         if (securityData.new !== securityData.confirm) {
-            showToast('Las contraseñas no coinciden', 'error');
+            toast.error('Las contraseñas no coinciden');
             return;
         }
-        showToast(t('password_changed'), 'success');
+        toast.success(t('password_changed'));
         setSecurityData({ current: '', new: '', confirm: '' });
     };
 
@@ -65,9 +62,9 @@ export default function Configuracion() {
                 hide_challenges: newTimeline.hide_challenges,
                 hide_forecasts: newTimeline.hide_forecasts
             });
-            showToast(t('notif_updated'), 'success');
+            toast.success(t('notif_updated'));
         } catch (err) {
-            showToast(t('category_error'), 'error');
+            toast.error(t('category_error'));
         }
     };
 
@@ -173,20 +170,20 @@ export default function Configuracion() {
                                 <form onSubmit={async (e) => {
                                     e.preventDefault();
                                     if (securityData.new !== securityData.confirm) {
-                                        showToast(t('passwords_dont_match'), 'error');
+                                        toast.error(t('passwords_dont_match'));
                                         return;
                                     }
                                     if (securityData.new.length < 6) {
-                                        showToast(t('password_min'), 'error');
+                                        toast.error(t('password_min'));
                                         return;
                                     }
 
                                     try {
                                         await api.put('/profile', { password: securityData.new });
-                                        showToast(t('password_changed'), 'success');
+                                        toast.success(t('password_changed'));
                                         setSecurityData({ current: '', new: '', confirm: '' });
                                     } catch (err) {
-                                        showToast(err.response?.data?.message || t('profile_error'), 'error');
+                                        toast.error(err.response?.data?.message || t('profile_error'));
                                     }
                                 }} className="space-y-4">
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -312,13 +309,6 @@ export default function Configuracion() {
                     </div>
                 </div>
             </div>
-            {toast && (
-                <Toast
-                    message={toast.message}
-                    type={toast.type}
-                    onClose={() => setToast(null)}
-                />
-            )}
         </div>
     );
 }

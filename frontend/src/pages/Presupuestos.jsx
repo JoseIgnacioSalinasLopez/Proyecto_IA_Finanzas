@@ -2,7 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import api from '../services/api';
 import { useLanguage } from '../context/LanguageContext';
 import { Target, Plus, Trash2, TrendingDown, AlertCircle, Info, Pencil } from 'lucide-react';
-import Toast from '../components/ui/Toast';
+import { toast } from 'react-hot-toast';
+import GlobalLoader from '../components/ui/GlobalLoader';
 
 export default function Presupuestos() {
     const { t } = useLanguage();
@@ -11,7 +12,6 @@ export default function Presupuestos() {
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
     const [form, setForm] = useState({ category_id: '', amount_limit: '' });
-    const [toast, setToast] = useState(null);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
     const categoryRef = useRef(null);
 
@@ -42,22 +42,22 @@ export default function Presupuestos() {
         e.preventDefault();
         try {
             await api.post('/budgets', form);
-            setToast({ message: t('budget_saved'), type: 'success' });
+            toast.success(t('budget_saved'));
             setForm({ category_id: '', amount_limit: '' });
             fetchData();
         } catch (error) {
-            setToast({ message: t('save_error'), type: 'error' });
+            toast.error(t('save_error'));
         }
     };
 
     const handleDelete = async (budget) => {
         try {
             await api.delete(`/budgets/${budget.id}`);
-            setToast({ message: t('budget_deleted'), type: 'info' });
+            toast.success(t('budget_deleted'));
             setShowDeleteConfirm(null);
             fetchData();
         } catch (error) {
-            setToast({ message: t('delete_error'), type: 'error' });
+            toast.error(t('delete_error'));
         }
     };
 
@@ -71,7 +71,7 @@ export default function Presupuestos() {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
-    if (loading) return <div className="p-10 text-center animate-pulse text-finance-muted">{t('configuring_limits')}</div>;
+    if (loading) return <GlobalLoader fullScreen={true} />;
 
     const totalBudget = budgets.reduce((acc, b) => acc + Number(b.amount_limit), 0);
     const totalSpent = stats?.summary.totalSpentThisMonth || 0;
@@ -80,7 +80,6 @@ export default function Presupuestos() {
 
     return (
         <div className="space-y-6 animate-fade-in">
-            {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
@@ -176,7 +175,7 @@ export default function Presupuestos() {
                             const spentInCat = stats?.budgetAnalysis?.find(ba => ba.category === b.categories?.name)?.spent || 0;
                             const perc = (spentInCat / b.amount_limit) * 100;
                             return (
-                                <div key={b.id} className="card p-5 group hover:border-finance-primary/30 transition-all duration-300 bg-white/5 backdrop-blur-md">
+                                <div key={b.id} className="card p-5 group card-glow hover:-translate-y-1 active:scale-[0.98] cursor-pointer transition-all duration-300 bg-white/5 backdrop-blur-md border-white/5">
                                     <div className="flex justify-between items-start mb-4">
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm" style={{ backgroundColor: b.categories?.color }}>

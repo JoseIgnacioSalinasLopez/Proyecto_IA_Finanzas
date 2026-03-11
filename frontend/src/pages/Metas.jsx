@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Plus, Trash2, Target, Calendar, TrendingUp, Pencil, X, Lightbulb } from 'lucide-react';
 import api from '../services/api';
-import Toast from '../components/ui/Toast';
+import { toast } from 'react-hot-toast';
 import { useLanguage } from '../context/LanguageContext';
 import DatePickerElite from '../components/ui/DatePickerElite';
-
+import GlobalLoader from '../components/ui/GlobalLoader';
 
 function calcMonthlySavingsNeeded(goal) {
     const target = Number(goal.target_amount) || 0;
@@ -27,10 +27,6 @@ export default function Metas() {
     const [progressModal, setProgressModal] = useState(null);
     const [deleteConfirm, setDeleteConfirm] = useState(null);
     const [formData, setFormData] = useState({ name: '', target_amount: '', current_amount: '', deadline: '' });
-    const [toast, setToast] = useState(null);
-
-    const showToast = (message, type = 'success') => setToast({ message, type });
-    const closeToast = () => setToast(null);
 
     useEffect(() => {
         fetchGoals();
@@ -87,28 +83,28 @@ export default function Metas() {
             };
             if (editingGoal) {
                 await api.put(`/goals/${editingGoal.id}`, payload);
-                showToast(t('goal_updated'));
+                toast.success(t('goal_updated'));
             } else {
                 await api.post('/goals', payload);
-                showToast(t('goal_created'));
+                toast.success(t('goal_created'));
             }
             setShowModal(false);
             setEditingGoal(null);
             setFormData({ name: '', target_amount: '', current_amount: '', deadline: '' });
             fetchGoals();
         } catch (error) {
-            showToast(t('goal_save_error'), 'error');
+            toast.error(t('goal_save_error'));
         }
     };
 
     const handleDelete = async (id) => {
         try {
             await api.delete(`/goals/${id}`);
-            showToast(t('goal_deleted'));
+            toast.success(t('goal_deleted'));
             setDeleteConfirm(null);
             fetchGoals();
         } catch (error) {
-            showToast(t('goal_delete_error'), 'error');
+            toast.error(t('goal_delete_error'));
         }
     };
 
@@ -116,31 +112,26 @@ export default function Metas() {
         if (!progressModal) return;
         const newAmount = Number(progressModal.value);
         if (isNaN(newAmount) || newAmount < 0) {
-            showToast(t('invalid_amount'), 'error');
+            toast.error(t('invalid_amount'));
             return;
         }
         try {
             await api.put(`/goals/${progressModal.goal.id}`, { current_amount: newAmount });
-            showToast(t('progress_updated'));
+            toast.success(t('progress_updated'));
             setProgressModal(null);
             fetchGoals();
         } catch (error) {
-            showToast(t('progress_error'), 'error');
+            toast.error(t('progress_error'));
         }
     };
 
-    if (loading) return (
-        <div className="p-6 min-h-screen flex items-center justify-center">
-            <div className="w-10 h-10 border-2 border-finance-primary border-t-transparent rounded-full animate-spin" />
-        </div>
-    );
+    if (loading) return <GlobalLoader fullScreen={true} />;
 
     const completedGoals = goals.filter(g => Number(g.current_amount) >= Number(g.target_amount)).length;
     const activeGoals = goals.length - completedGoals;
 
     return (
         <div className="space-y-6 animate-fade-in">
-            {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
 
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -170,11 +161,11 @@ export default function Metas() {
 
                     return (
                         <div key={goal.id}
-                            className={`card p-5 flex flex-col transition-all hover:-translate-y-0.5 animate-fade-in-up bg-white/5 ${isComplete
+                            className={`card p-5 flex flex-col transition-all duration-300 card-glow hover:-translate-y-1 active:scale-[0.98] cursor-pointer animate-fade-in-up bg-white/5 ${isComplete
                                 ? 'border-emerald-500/40 shadow-[0_0_20px_rgba(52,211,153,0.1)]'
                                 : isExpired
                                     ? 'border-red-500/30 shadow-[0_0_20px_rgba(239,68,68,0.05)]'
-                                    : 'border-white/5 hover:border-finance-primary/20 hover:shadow-[0_0_20px_rgba(0,212,255,0.05)]'
+                                    : 'border-white/5'
                                 }`}
                             style={{ animationDelay: `${idx * 60}ms` }}
                         >

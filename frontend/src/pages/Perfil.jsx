@@ -3,7 +3,7 @@ import { useLanguage } from '../context/LanguageContext';
 import api from '../services/api';
 import { useAuth } from '../hooks/useAuth';
 import { Save, User, Phone, MapPin, Briefcase, ShieldCheck, TrendingUp, Wallet, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
-import Toast from '../components/ui/Toast';
+import { toast } from 'react-hot-toast';
 
 export default function Perfil() {
     const { user } = useAuth();
@@ -16,7 +16,6 @@ export default function Perfil() {
     });
     const [loading, setLoading] = useState(false);
     const [stats, setStats] = useState(null);
-    const [toast, setToast] = useState(null);
 
     useEffect(() => {
         const fetchStats = async () => {
@@ -30,16 +29,14 @@ export default function Perfil() {
         fetchStats();
     }, []);
 
-    const showToast = (msg, type = 'success') => setToast({ message: msg, type });
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         try {
             await api.put('/profile', formData);
-            showToast(t('profile_updated'));
+            toast.success(t('profile_updated'));
         } catch (error) {
-            showToast(error.response?.data?.message || t('profile_error'), 'error');
+            toast.error(error.response?.data?.message || t('profile_error'));
         } finally {
             setLoading(false);
         }
@@ -52,7 +49,6 @@ export default function Perfil() {
 
     return (
         <div className="max-w-6xl mx-auto space-y-8 pb-12 animate-fade-in">
-            {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
             {/* Header / Avatar Section */}
             <div className="relative overflow-hidden rounded-3xl bg-white/5 border border-white/5 p-8">

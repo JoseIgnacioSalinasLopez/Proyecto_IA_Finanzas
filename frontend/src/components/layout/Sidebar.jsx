@@ -34,15 +34,15 @@ export default function Sidebar({ isOpen, onClose }) {
         <>
             <aside
                 className={`
-                    bg-finance-800 border-r border-white/5 h-screen flex flex-col flex-shrink-0
-                    fixed md:sticky top-0 z-40
+                    bg-finance-900/60 backdrop-blur-2xl border-r border-white/10 h-screen flex flex-col flex-shrink-0
+                    fixed md:sticky top-0 z-40 backdrop-saturate-150 shadow-[4px_0_24px_rgba(0,0,0,0.3)]
                     transition-all duration-500 ease-in-out group
-                    ${isOpen ? 'w-64 translate-x-0' : '-translate-x-full md:translate-x-0 w-20 hover:md:w-64'}
+                    ${isOpen ? 'w-64 translate-x-0' : '-translate-x-full md:translate-x-0 w-20 md:hover:w-64'}
                 `}
                 aria-label={t('main_navigation')}
             >
                 {/* Header - Solo Logo/Bolsa */}
-                <div className="p-0 h-24 flex items-center border-b border-white/5 overflow-hidden bg-black/20">
+                <div className="p-0 h-24 flex items-center border-b border-white/10 overflow-hidden bg-white/5 backdrop-blur-md">
                     <Link to="/" onClick={handleLinkClick} className="flex items-center w-full h-full relative">
                         {/* Contenedor para la Bolsa (siempre centrado en los primeros 80px) */}
                         <div className="w-20 h-full flex-shrink-0 flex items-center justify-center relative z-10">
@@ -115,18 +115,18 @@ export default function Sidebar({ isOpen, onClose }) {
                 </nav>
 
                 {/* Footer / Logout */}
-                <div className="p-2 border-t border-white/5 overflow-hidden">
+                <div className="p-2 border-t border-white/10 overflow-hidden bg-white/5 backdrop-blur-md">
                     <button
                         onClick={logout}
                         className={`
-                            flex items-center w-full min-h-[50px] text-finance-muted hover:bg-red-500/10 hover:text-red-400 rounded-xl transition-all duration-200 overflow-hidden
+                            flex items-center w-full min-h-[50px] text-finance-muted hover:bg-red-500/10 hover:text-red-400 rounded-xl transition-all duration-200 overflow-hidden group/logout
                             ${isOpen ? 'px-0' : 'px-0 justify-start'}
                         `}
                     >
-                        <div className="w-[64px] flex-shrink-0 flex items-center justify-center">
+                        <div className="w-[64px] flex-shrink-0 flex items-center justify-center group-hover/logout:scale-110 transition-transform">
                             <LogOut size={20} />
                         </div>
-                        <span className={`whitespace-nowrap transition-all duration-300 ${isOpen ? 'opacity-100 ml-0' : 'opacity-0 w-0 group-hover:opacity-100 group-hover:w-auto group-hover:ml-0'}`}>
+                        <span className={`whitespace-nowrap font-bold tracking-widest text-xs uppercase transition-all duration-300 ${isOpen ? 'opacity-100 ml-0' : 'opacity-0 w-0 group-hover:opacity-100 group-hover:w-auto md:group-hover:ml-0'}`}>
                             {t('logout')}
                         </span>
                     </button>

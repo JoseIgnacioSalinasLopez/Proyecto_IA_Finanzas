@@ -17,6 +17,7 @@ import { Download, FileText, Calendar, Filter, ChevronLeft, ChevronRight, X, Ale
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import Toast from '../components/ui/Toast';
+import GlobalLoader from '../components/ui/GlobalLoader';
 
 ChartJS.register(
     Tooltip,
@@ -61,7 +62,7 @@ export default function Reportes() {
             return;
         }
         showToast(t('exporting_tx') || 'Exportando datos...');
-        const headers = [t('category_label'), t('amount_label'), t('percentage_label') || 'PORCENTAJE'];
+        const headers = [t('category_label'), t('amount_label'), t('percentage_label')];
         const total = stats.expensesByCategory.reduce((sum, item) => sum + item.amount, 0);
 
         const rows = stats.expensesByCategory.map(c => [
@@ -134,6 +135,7 @@ export default function Reportes() {
             y += 8;
             const summaryTable = [
                 [t('net_balance_report'), `$${stats.summary.balance.toLocaleString(locale, { minimumFractionDigits: 2 })}`],
+                [t('total_expense') || 'GASTOS TOTALES', `$${stats.summary.totalExpense.toLocaleString(locale, { minimumFractionDigits: 2 })}`],
                 [t('daily_burn_rate') || 'TASA DE QUEMADO DIARIO', `$${stats.summary.dailyBurnRate.toLocaleString(locale, { minimumFractionDigits: 2 })}`],
                 [t('reserve_days') || 'DÍAS DE RESERVA', `${stats.summary.bufferTime} ${t('days').toLowerCase()}`],
                 [t('risk_level_label'), stats.summary.riskLevel]
@@ -164,7 +166,7 @@ export default function Reportes() {
 
             autoTable(doc, {
                 startY: y + 5,
-                head: [[t('category_label'), t('amount_label'), '%']],
+                head: [[t('category_label'), t('amount_label'), t('percentage_label')]],
                 body: catData,
                 theme: 'grid',
                 headStyles: { fillColor: [11, 2, 45], textColor: [0, 212, 255], fontStyle: 'bold' },
@@ -200,14 +202,7 @@ export default function Reportes() {
     };
 
 
-    if (loading) {
-        return (
-            <div className="flex flex-col items-center justify-center h-64 gap-4">
-                <div className="w-12 h-12 border-4 border-white/10 border-t-finance-primary rounded-full animate-spin" />
-                <p className="text-finance-muted animate-pulse">{t('loading')}</p>
-            </div>
-        );
-    }
+    if (loading) return <GlobalLoader fullScreen={true} />;
 
     // Chart Data: Wealth Evolution (Cumulative)
     let currentAcc = 0;
@@ -265,7 +260,7 @@ export default function Reportes() {
                 <div className="flex items-center gap-3">
                     <button
                         onClick={exportToCSV}
-                        className="btn-primary !bg-white/5 !text-white flex items-center gap-2 border border-white/10 hover:!bg-white/10"
+                        className="flex items-center gap-2 px-4 py-2 bg-transparent border border-white/60 dark:border-white/80 hover:bg-white/10 text-[#00D4FF] rounded-xl text-sm font-bold transition-all"
                     >
                         <Download size={18} />
                         CSV
@@ -273,10 +268,10 @@ export default function Reportes() {
                     <button
                         onClick={exportToPDF}
                         disabled={exporting}
-                        className="btn-primary flex items-center gap-2"
+                        className="flex items-center gap-2 px-4 py-2 bg-transparent border border-white/60 dark:border-white/80 hover:bg-white/10 text-[#00D4FF] rounded-xl text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {exporting ? (
-                            <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                            <div className="w-4 h-4 border-2 border-[#00D4FF]/30 border-t-[#00D4FF] rounded-full animate-spin" />
                         ) : (
                             <FileText size={18} />
                         )}

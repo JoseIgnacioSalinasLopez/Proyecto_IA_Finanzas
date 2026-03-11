@@ -11,6 +11,21 @@ const hexToRgba = (hex, alpha) => {
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
 
+const glowPlugin = {
+    id: 'glow',
+    beforeDatasetsDraw: (chart) => {
+        const ctx = chart.ctx;
+        ctx.save();
+        ctx.shadowColor = 'rgba(0, 212, 255, 0.3)';
+        ctx.shadowBlur = 10;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 4;
+    },
+    afterDatasetsDraw: (chart) => {
+        chart.ctx.restore();
+    }
+};
+
 export default function BarChart({ data, title = 'Comparativa' }) {
     const chartRef = useRef(null);
 
@@ -38,10 +53,10 @@ export default function BarChart({ data, title = 'Comparativa' }) {
                         gradient.addColorStop(1, isHex ? hexToRgba(baseColor, 0.15) : baseColor.replace(')', ', 0.15)').replace('rgb', 'rgba'));
                         return gradient;
                     },
-                    borderRadius: 6,
+                    borderRadius: 4,
                     borderSkipped: false,
-                    barPercentage: 0.6,
-                    categoryPercentage: 0.8,
+                    barPercentage: 0.5,
+                    categoryPercentage: 0.7,
                 };
             })
 
@@ -60,7 +75,7 @@ export default function BarChart({ data, title = 'Comparativa' }) {
                 position: 'top',
                 align: 'end',
                 labels: {
-                    color: 'var(--chart-text)',
+                    color: 'rgba(255, 255, 255, 0.5)',
                     usePointStyle: true,
                     boxWidth: 8,
                     font: { family: "'Inter', sans-serif", size: 12, weight: '500' }
@@ -69,16 +84,16 @@ export default function BarChart({ data, title = 'Comparativa' }) {
             title: {
                 display: !!title,
                 text: title,
-                color: 'var(--chart-title)',
+                color: '#FFFFFF',
                 align: 'start',
                 font: { family: "'Inter', sans-serif", size: 16, weight: 'bold' },
                 padding: { bottom: 20 }
             },
             tooltip: {
                 backgroundColor: 'var(--chart-tooltip-bg)',
-                titleColor: 'var(--chart-title)',
-                bodyColor: 'var(--chart-text)',
-                borderColor: 'var(--chart-grid)',
+                titleColor: '#FFFFFF',
+                bodyColor: 'rgba(255, 255, 255, 0.8)',
+                borderColor: 'rgba(255, 255, 255, 0.1)',
                 borderWidth: 1,
                 padding: 14,
                 cornerRadius: 12,
@@ -100,19 +115,19 @@ export default function BarChart({ data, title = 'Comparativa' }) {
             y: {
                 stacked: true,
                 grid: {
-                    color: 'var(--chart-grid)',
+                    color: 'rgba(255, 255, 255, 0.1)',
                     drawBorder: false,
                 },
-                ticks: { color: 'var(--chart-text)', font: { family: "'Inter', sans-serif", weight: '600' } },
+                ticks: { color: 'rgba(255, 255, 255, 0.5)', font: { family: "'Inter', sans-serif", weight: '600' } },
                 beginAtZero: true
             },
             x: {
                 stacked: true,
                 grid: { display: false, drawBorder: false },
-                ticks: { color: 'var(--chart-text)', font: { family: "'Inter', sans-serif", weight: '600' } }
+                ticks: { color: 'rgba(255, 255, 255, 0.5)', font: { family: "'Inter', sans-serif", weight: '600' } }
             }
         }
     };
 
-    return <Bar ref={chartRef} data={styledData} options={options} />;
+    return <Bar ref={chartRef} data={styledData} options={options} plugins={[glowPlugin]} />;
 }

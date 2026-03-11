@@ -21,6 +21,7 @@ import {
 import api from '../../services/api';
 import { useLanguage } from '../../context/LanguageContext';
 import DatePickerElite from './DatePickerElite';
+import { motion, AnimatePresence } from 'framer-motion';
 
 
 const PriorityBadge = ({ level }) => {
@@ -444,10 +445,28 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                         </div>
                         {goals?.length > 0 ? (
                             <div className="bg-white/5 backdrop-blur-md p-4 rounded-2xl border border-white/10 flex items-center gap-4 relative overflow-hidden group">
+                                {/* Botones de acción - Visibles y posicionados arriba a la derecha */}
+                                <div className="absolute top-3 right-3 flex items-center gap-3 z-10">
+                                    <button
+                                        onClick={() => window.dispatchEvent(new CustomEvent('open-progress-goal', { detail: goals[currentGoalIndex] }))}
+                                        className="text-finance-muted hover:text-finance-primary transition-colors"
+                                        title={t('update_progress')}
+                                    >
+                                        <TrendingUp size={16} />
+                                    </button>
+                                    <button
+                                        onClick={() => window.dispatchEvent(new CustomEvent('open-edit-goal', { detail: goals[currentGoalIndex] }))}
+                                        className="text-finance-muted hover:text-finance-primary transition-colors"
+                                        title={t('edit_goal')}
+                                    >
+                                        <Pencil size={15} />
+                                    </button>
+                                </div>
+
                                 <div className="w-12 h-12 bg-gradient-to-br from-finance-primary/20 to-finance-neon/10 rounded-xl flex items-center justify-center text-finance-primary shadow-[0_0_15px_rgba(0,212,255,0.1)]">
                                     <Target size={24} />
                                 </div>
-                                <div className="flex-1 min-w-0">
+                                <div className="flex-1 min-w-0 pr-12">
                                     <p className="text-sm font-bold mb-2 truncate uppercase tracking-tight text-finance-text">{goals[currentGoalIndex].name}</p>
                                     <div className="h-2 bg-black/20 dark:bg-black/40 rounded-full mb-2 overflow-hidden border border-white/5">
                                         <div
@@ -567,139 +586,157 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                 </div>
             </div>
 
-            {showEventModal && (
-                <div className="fixed inset-0 bg-black/80 backdrop-blur-xl flex justify-center items-center z-50 p-6 animate-fade-in">
-                    <div className="card max-w-lg w-full p-8 relative overflow-visible bg-finance-800 border-white/10 animate-scale-in">
-                        <div className="absolute -top-10 -right-10 p-20 bg-finance-primary/5 rounded-full blur-3xl" />
+            <AnimatePresence>
+                {showEventModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="fixed inset-0 bg-black/80 backdrop-blur-xl flex justify-center items-center z-50 p-6"
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            exit={{ scale: 0.95, opacity: 0 }}
+                            transition={{ duration: 0.2, type: 'spring', bounce: 0.2 }}
+                            className="card max-w-lg w-full p-8 relative overflow-visible bg-finance-800 border-white/10"
+                        >
+                            <div className="absolute -top-10 -right-10 p-20 bg-finance-primary/5 rounded-full blur-3xl" />
 
-                        <h2 className="text-2xl font-black mb-8 text-finance-text uppercase tracking-tighter flex items-center gap-3">
-                            {editEventId ? <Pencil size={24} className="text-finance-primary" /> : <Plus size={24} className="text-finance-primary" />}
-                            {editEventId ? t('edit_event') : t('schedule_manual_event')}
-                        </h2>
+                            <h2 className="text-2xl font-black mb-8 text-finance-text uppercase tracking-tighter flex items-center gap-3">
+                                {editEventId ? <Pencil size={24} className="text-finance-primary" /> : <Plus size={24} className="text-finance-primary" />}
+                                {editEventId ? t('edit_event') : t('schedule_manual_event')}
+                            </h2>
 
-                        <form onSubmit={handleEventSubmit} className="space-y-6 relative z-10">
-                            <div>
-                                <label className="block text-[10px] font-black text-finance-muted uppercase tracking-widest mb-2">{t('event_title')}</label>
-                                <input
-                                    type="text"
-                                    required
-                                    className="input-field !bg-white/5 focus:!bg-white/10"
-                                    placeholder={t('event_title_placeholder')}
-                                    value={eventFormData.title}
-                                    onChange={e => setEventFormData({ ...eventFormData, title: e.target.value })}
-                                />
-                            </div>
-
-                            <div className="flex items-center gap-4 p-4 bg-white/5 rounded-2xl border border-white/5">
-                                <div className={`p-2 rounded-lg transition-colors ${eventFormData.is_recurring ? 'bg-finance-primary/20 text-finance-primary' : 'bg-white/5 text-finance-muted'}`}>
-                                    <Bell size={20} />
-                                </div>
-                                <div className="flex-1">
-                                    <h4 className="text-sm font-bold">{t('recurring_event')}</h4>
-                                    <p className="text-[10px] text-finance-muted uppercase font-bold">{t('monthly_reminder')}</p>
-                                </div>
-                                <button
-                                    type="button"
-                                    onClick={() => setEventFormData({ ...eventFormData, is_recurring: !eventFormData.is_recurring })}
-                                    className={`w-12 h-6 rounded-full transition-all relative ${eventFormData.is_recurring ? 'bg-finance-primary' : 'bg-white/10'}`}
-                                >
-                                    <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${eventFormData.is_recurring ? 'left-7' : 'left-1'}`} />
-                                </button>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
+                            <form onSubmit={handleEventSubmit} className="space-y-6 relative z-10">
                                 <div>
-                                    <label className="block text-[10px] font-black text-finance-muted uppercase tracking-widest mb-2">{t('amount_label')}</label>
+                                    <label className="block text-[10px] font-black text-finance-muted uppercase tracking-widest mb-2">{t('event_title')}</label>
                                     <input
-                                        type="number"
-                                        className="input-field"
-                                        placeholder="$0.00"
-                                        value={eventFormData.amount}
-                                        onChange={e => setEventFormData({ ...eventFormData, amount: e.target.value })}
+                                        type="text"
+                                        required
+                                        className="input-field !bg-white/5 focus:!bg-white/10"
+                                        placeholder={t('event_title_placeholder')}
+                                        value={eventFormData.title}
+                                        onChange={e => setEventFormData({ ...eventFormData, title: e.target.value })}
                                     />
                                 </div>
+
+                                <div className="flex items-center gap-4 p-4 bg-white/5 rounded-2xl border border-white/5">
+                                    <div className={`p-2 rounded-lg transition-colors ${eventFormData.is_recurring ? 'bg-finance-primary/20 text-finance-primary' : 'bg-white/5 text-finance-muted'}`}>
+                                        <Bell size={20} />
+                                    </div>
+                                    <div className="flex-1">
+                                        <h4 className="text-sm font-bold">{t('recurring_event')}</h4>
+                                        <p className="text-[10px] text-finance-muted uppercase font-bold">{t('monthly_reminder')}</p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => setEventFormData({ ...eventFormData, is_recurring: !eventFormData.is_recurring })}
+                                        className={`w-12 h-6 rounded-full transition-all relative ${eventFormData.is_recurring ? 'bg-finance-primary' : 'bg-white/10'}`}
+                                    >
+                                        <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${eventFormData.is_recurring ? 'left-7' : 'left-1'}`} />
+                                    </button>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-[10px] font-black text-finance-muted uppercase tracking-widest mb-2">{t('amount_label')}</label>
+                                        <input
+                                            type="number"
+                                            className="input-field"
+                                            placeholder="$0.00"
+                                            value={eventFormData.amount}
+                                            onChange={e => setEventFormData({ ...eventFormData, amount: e.target.value })}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-[10px] font-black text-finance-muted uppercase tracking-widest mb-2">{t('date_label')}</label>
+                                        <DatePickerElite
+                                            value={eventFormData.date}
+                                            onChange={(val) => setEventFormData({ ...eventFormData, date: val })}
+                                        />
+                                    </div>
+                                </div>
+
+
+                                {eventFormData.is_recurring && (
+                                    <motion.div
+                                        initial={{ height: 0, opacity: 0 }}
+                                        animate={{ height: 'auto', opacity: 1 }}
+                                        exit={{ height: 0, opacity: 0 }}
+                                        className="grid grid-cols-2 gap-4 overflow-hidden"
+                                    >
+                                        <div>
+                                            <label className="block text-[10px] font-black text-finance-muted uppercase tracking-widest mb-2">{t('payment_day')}</label>
+                                            <input
+                                                type="number"
+                                                min="1" max="31"
+                                                required
+                                                className="input-field border-white/5 bg-white/5 focus:bg-white/10"
+                                                placeholder="Ej: 8"
+                                                value={eventFormData.payment_day}
+                                                onChange={e => setEventFormData({ ...eventFormData, payment_day: e.target.value })}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[10px] font-black text-finance-muted uppercase tracking-widest mb-2">{t('deadline_day')}</label>
+                                            <input
+                                                type="number"
+                                                min="1" max="31"
+                                                required
+                                                className="input-field border-white/5 bg-white/5 focus:bg-white/10"
+                                                placeholder="Ej: 15"
+                                                value={eventFormData.deadline_day}
+                                                onChange={e => setEventFormData({ ...eventFormData, deadline_day: e.target.value })}
+                                            />
+                                        </div>
+                                    </motion.div>
+                                )}
+
                                 <div>
-                                    <label className="block text-[10px] font-black text-finance-muted uppercase tracking-widest mb-2">{t('date_label')}</label>
-                                    <DatePickerElite
-                                        value={eventFormData.date}
-                                        onChange={(val) => setEventFormData({ ...eventFormData, date: val })}
-                                    />
-                                </div>
-                            </div>
-
-
-                            {eventFormData.is_recurring && (
-                                <div className="grid grid-cols-2 gap-4 animate-scale-in">
-                                    <div>
-                                        <label className="block text-[10px] font-black text-finance-muted uppercase tracking-widest mb-2">{t('payment_day')}</label>
-                                        <input
-                                            type="number"
-                                            min="1" max="31"
-                                            required
-                                            className="input-field border-white/5 bg-white/5 focus:bg-white/10"
-                                            placeholder="Ej: 8"
-                                            value={eventFormData.payment_day}
-                                            onChange={e => setEventFormData({ ...eventFormData, payment_day: e.target.value })}
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-[10px] font-black text-finance-muted uppercase tracking-widest mb-2">{t('deadline_day')}</label>
-                                        <input
-                                            type="number"
-                                            min="1" max="31"
-                                            required
-                                            className="input-field border-white/5 bg-white/5 focus:bg-white/10"
-                                            placeholder="Ej: 15"
-                                            value={eventFormData.deadline_day}
-                                            onChange={e => setEventFormData({ ...eventFormData, deadline_day: e.target.value })}
-                                        />
+                                    <label className="block text-[10px] font-black text-finance-muted uppercase tracking-widest mb-2">{t('priority_label')}</label>
+                                    <div className="flex gap-2">
+                                        {['optional', 'important', 'critical'].map(p => (
+                                            <button
+                                                key={p}
+                                                type="button"
+                                                onClick={() => setEventFormData({ ...eventFormData, priority: p })}
+                                                className={`flex-1 py-3 px-2 rounded-xl border text-[10px] font-black uppercase tracking-widest transition-all
+                                                    ${eventFormData.priority === p ?
+                                                        (p === 'critical' ? 'bg-red-500 border-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.4)]' : p === 'important' ? 'bg-orange-500 border-orange-500 text-white shadow-[0_0_15px_rgba(249,115,22,0.4)]' : 'bg-finance-primary border-finance-primary text-black shadow-[0_0_15px_rgba(0,212,255,0.4)]') :
+                                                        'bg-white/5 border-white/10 text-finance-muted hover:border-white/20'}`}
+                                            >
+                                                {t(`priority_${p}`)}
+                                            </button>
+                                        ))}
                                     </div>
                                 </div>
-                            )}
 
-                            {/* FIX: New Priority Selection clearly visible and always present */}
-                            <div>
-                                <label className="block text-[10px] font-black text-finance-muted uppercase tracking-widest mb-2">{t('priority_label')}</label>
-                                <div className="flex gap-2">
-                                    {['optional', 'important', 'critical'].map(p => (
-                                        <button
-                                            key={p}
-                                            type="button"
-                                            onClick={() => setEventFormData({ ...eventFormData, priority: p })}
-                                            className={`flex-1 py-3 px-2 rounded-xl border text-[10px] font-black uppercase tracking-widest transition-all
-                                                ${eventFormData.priority === p ?
-                                                    (p === 'critical' ? 'bg-red-500 border-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.4)]' : p === 'important' ? 'bg-orange-500 border-orange-500 text-white shadow-[0_0_15px_rgba(249,115,22,0.4)]' : 'bg-finance-primary border-finance-primary text-black shadow-[0_0_15px_rgba(0,212,255,0.4)]') :
-                                                    'bg-white/5 border-white/10 text-finance-muted hover:border-white/20'}`}
-                                        >
-                                            {t(`priority_${p}`)}
-                                        </button>
-                                    ))}
+                                <div className="flex justify-end gap-4 mt-8">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setShowEventModal(false);
+                                            setEditEventId(null);
+                                        }}
+                                        className="px-6 py-4 text-xs font-black text-finance-muted hover:text-white uppercase tracking-widest"
+                                    >
+                                        {t('cancel')}
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="btn-epic !px-10 flex items-center gap-3 shadow-[0_0_30px_rgba(0,212,255,0.2)]"
+                                    >
+                                        <Check size={20} />
+                                        <span>{editEventId ? t('save_changes').toUpperCase() : t('add_to_timeline').toUpperCase()}</span>
+                                    </button>
                                 </div>
-                            </div>
-
-                            <div className="flex justify-end gap-4 mt-8">
-                                <button
-                                    type="button"
-                                    onClick={() => {
-                                        setShowEventModal(false);
-                                        setEditEventId(null);
-                                    }}
-                                    className="px-6 py-4 text-xs font-black text-finance-muted hover:text-white uppercase tracking-widest"
-                                >
-                                    {t('cancel')}
-                                </button>
-                                <button
-                                    type="submit"
-                                    className="btn-epic !px-10 flex items-center gap-3 shadow-[0_0_30px_rgba(0,212,255,0.2)]"
-                                >
-                                    <Check size={20} />
-                                    <span>{editEventId ? t('save_changes').toUpperCase() : t('add_to_timeline').toUpperCase()}</span>
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
+                            </form>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

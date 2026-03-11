@@ -1,0 +1,88 @@
+.stroke-loader {
+    stroke: var(--epic-cyan, #00d4ff);
+}
+
+.loader-path {
+    stroke-dasharray: 400;
+    stroke-dashoffset: 400;
+    animation: draw 3.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* 
+ * Animaciones progresivas con delays variados
+ * Utilizamos un sistema de pseudoaleatoriedad mediante nth-child o nth-of-type
+ * Al envolverlo en una configuración de animación infinita, cambiarán las prioridades perceptualmente si las duraciones o delays difieren ligeramente.
+ * Para simular "empezar por el contorno" vs "empezar por el dólar" 
+ * se han definido animaciones con duraciones ligeramente desfasadas.
+ */
+
+.path-bag { animation-delay: 0s; }
+.path-neck { animation-delay: 0.5s; }
+.path-tie { animation-delay: 0.8s; }
+.path-dollar { 
+    animation-delay: 1.2s; 
+    stroke-width: 4; 
+    stroke: var(--finance-neon, #fff); /* Hacer brillar más el $ */
+}
+
+/* 
+ * Variación 1: La bolsa se dibuja primero, luego el dólar. 
+ * Variación 2: El dólar se dibuja primero, luego la bolsa.
+ * Variación 3: Todo a la vez de forma esporádica.
+ * Usamos una animación secundaria que modifique los offsets o que desplace la duración.
+ */
+
+@keyframes draw {
+    0% {
+        stroke-dashoffset: 400;
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    40% {
+        stroke-dashoffset: 0;
+        opacity: 1;
+    }
+    60% {
+        stroke-dashoffset: 0;
+        opacity: 1;
+        filter: drop-shadow(0 0 10px rgba(0,212,255,1));
+    }
+    90% {
+        stroke-dashoffset: -400;
+        opacity: 1;
+    }
+    100% {
+        stroke-dashoffset: -400;
+        opacity: 0;
+    }
+}
+
+.animate-spin-slow {
+    animation: spin 4s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.animate-pulse-slow {
+    animation: pulse-slow 3s ease-in-out infinite alternate;
+}
+
+@keyframes pulse-slow {
+    0% { transform: scale(0.9); opacity: 0.5; }
+    100% { transform: scale(1.1); opacity: 0.8; }
+}
+
+/* 
+ * Pseudo-aleatoriedad: Añadimos una variación global 
+ * que alterna el `animation-direction` entre normal y reverse cada N segundos 
+ * para simular los cambios de prioridad que pide el usuario sin recurrir a JS complejo.
+ */
+.path-bag { animation-duration: 4s; }
+.path-dollar { animation-duration: 3.5s; animation-direction: alternate-reverse; }
+.path-neck { animation-duration: 4.2s; }
+.path-tie { animation-duration: 3.8s; }

@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Plus, Trash2, Tags, Pencil, X, Search, ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
 import api from '../services/api';
-import Toast from '../components/ui/Toast';
+import { toast } from 'react-hot-toast';
 import { useLanguage } from '../context/LanguageContext';
+import GlobalLoader from '../components/ui/GlobalLoader';
 
 export default function Categorias() {
     const { t } = useLanguage();
@@ -11,13 +12,8 @@ export default function Categorias() {
     const [showModal, setShowModal] = useState(false);
     const [editingCat, setEditingCat] = useState(null);
     const [activeTab, setActiveTab] = useState('expense'); // 'expense' or 'income'
-    const [formData, setFormData] = useState({ name: '', color: '#00D4FF', type: 'expense' });
-    const [toast, setToast] = useState(null);
     const [search, setSearch] = useState('');
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
-
-    const showToast = (message, type = 'success') => setToast({ message, type });
-    const closeToast = () => setToast(null);
 
     useEffect(() => { fetchCategories(); }, []);
 
@@ -40,7 +36,7 @@ export default function Categorias() {
 
     const openEdit = (cat) => {
         if (cat.is_editable === false) {
-            showToast(t('system_category_no_edit'), 'error');
+            toast.error(t('system_category_no_edit'));
             return;
         }
         setEditingCat(cat);
@@ -56,16 +52,16 @@ export default function Categorias() {
 
     const handleDelete = async (cat) => {
         if (cat.is_editable === false) {
-            showToast(t('system_category_no_edit'), 'error');
+            toast.error(t('system_category_no_edit'));
             return;
         }
         try {
             await api.delete(`/categories/${cat.id}`);
-            showToast(t('category_deleted'));
+            toast.success(t('category_deleted'));
             setShowDeleteConfirm(null);
             fetchCategories();
         } catch (error) {
-            showToast(error.response?.data?.message || t('category_delete_error'), 'error');
+            toast.error(error.response?.data?.message || t('category_delete_error'));
             setShowDeleteConfirm(null);
         }
     };
@@ -73,21 +69,21 @@ export default function Categorias() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!formData.name.trim()) {
-            showToast(t('category_name_required'), 'error');
+            toast.error(t('category_name_required'));
             return;
         }
         try {
             if (editingCat) {
                 await api.put(`/categories/${editingCat.id}`, formData);
-                showToast(t('category_updated'));
+                toast.success(t('category_updated'));
             } else {
                 await api.post('/categories', formData);
-                showToast(t('category_created'));
+                toast.success(t('category_created'));
             }
             handleCloseModal();
             fetchCategories();
         } catch (error) {
-            showToast(error.response?.data?.message || t('category_error'), 'error');
+            toast.error(error.response?.data?.message || t('category_error'));
         }
     };
 
@@ -102,15 +98,10 @@ export default function Categorias() {
         return matchesSearch && matchesType;
     });
 
-    if (loading) return (
-        <div className="flex justify-center items-center min-h-[40vh]">
-            <div className="w-8 h-8 border-2 border-finance-primary border-t-transparent rounded-full animate-spin" />
-        </div>
-    );
+    if (loading) return <GlobalLoader fullScreen={true} />;
 
     return (
         <div className="space-y-6 animate-fade-in">
-            {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
 
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>

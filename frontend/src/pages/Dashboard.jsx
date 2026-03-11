@@ -1,13 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import api from '../services/api';
 import SummaryCard from '../components/ui/SummaryCard';
-import { ArrowDownRight, ArrowUpRight, Wallet, Plus, X, ChevronDown, ChevronUp, Target, Calendar } from 'lucide-react';
+import { ArrowDownRight, ArrowUpRight, Wallet, Plus, X, ChevronDown, ChevronUp, Target, Calendar, Eye, EyeOff } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import EngineeringAssistant from '../components/ui/EngineeringAssistant';
 import { supabase } from '../lib/supabase';
 import { useAuthContext } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
-import Toast from '../components/ui/Toast';
+import GlobalLoader from '../components/ui/GlobalLoader';
+import SpotlightCard from '../components/ui/SpotlightCard';
 
 function getGreeting(t) {
     const hour = new Date().getHours();
@@ -23,18 +24,9 @@ function getFormattedDate(language) {
     });
 }
 
+import { DashboardSkeleton, ListSkeleton } from '../components/ui/SkeletonLoader';
+
 // Skeleton de carga para tarjetas
-function CardSkeleton() {
-    return (
-        <div className="card animate-pulse flex items-center gap-4 p-5">
-            <div className="w-14 h-14 rounded-2xl skeleton-shimmer skeleton flex-shrink-0" />
-            <div className="flex-1 space-y-2">
-                <div className="h-3 w-20 rounded skeleton skeleton-shimmer" />
-                <div className="h-7 w-32 rounded skeleton skeleton-shimmer" />
-            </div>
-        </div>
-    );
-}
 
 export default function Dashboard() {
     const { user } = useAuthContext();
@@ -42,7 +34,7 @@ export default function Dashboard() {
     const [stats, setStats] = useState(null);
     const [recentTransactions, setRecentTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [toast, setToast] = useState(null);
+    const [showBalances, setShowBalances] = useState(true);
 
     const fetchDashboardData = useCallback(async () => {
         try {
@@ -77,19 +69,18 @@ export default function Dashboard() {
         const startOfYesterday = startOfToday - (24 * 60 * 60 * 1000);
 
         transactions.forEach(tx => {
-            const d = new Date(tx.date);
-            // Si es medianoche UTC (manual), ajustamos a mediodía local para que la comparación de 'startOfDay' sea estable
-            let txTime = d.getTime();
-            if (tx.date.includes('T00:00:00')) {
-                txTime = new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 12, 0, 0).getTime();
-            }
+            // Check created_at as priority since tx.date might just be a day string (YYYY-MM-DD)
+            const d = tx.created_at ? new Date(tx.created_at) : new Date(tx.date);
 
-            const txDateObj = new Date(txTime);
-            const txStartOfDay = new Date(txDateObj.getFullYear(), txDateObj.getMonth(), txDateObj.getDate()).getTime();
+            // Normalize transaction date to start of its day for comparison
+            const txStartOfDay = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
 
             if (txStartOfDay === startOfToday) {
                 if (groups.today.length < 5) groups.today.push(tx);
-            } else if (txStartOfDay === startOfYesterday) {
+            } else if (txStartOfDay === startOfYesterday || txStartOfDay < startOfYesterday) {
+                // If it's yesterday or older, put it in yesterday (acting as a "Recents" bin if today is empty)
+                // but usually "yesterday" just holds the past. 
+                // We'll rename it later if needed, but for now we group anything older than today into "YESTERDAY"
                 if (groups.yesterday.length < 5) groups.yesterday.push(tx);
             }
         });
@@ -120,40 +111,37 @@ export default function Dashboard() {
     }, [user?.id, fetchDashboardData]);
 
     if (loading) {
-        return (
-            <div className="space-y-6 animate-fade-in">
-                <div className="space-y-2">
-                    <div className="h-7 w-48 rounded skeleton skeleton-shimmer" />
-                    <div className="h-4 w-64 rounded skeleton skeleton-shimmer" />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                    <CardSkeleton /><CardSkeleton /><CardSkeleton />
-                </div>
-                <div className="h-64 rounded-2xl skeleton skeleton-shimmer" />
-                <div className="h-48 rounded-2xl skeleton skeleton-shimmer" />
-            </div>
-        );
+        return <GlobalLoader fullScreen={true} />;
     }
 
     const { summary } = stats || { summary: { totalIncome: 0, totalExpense: 0, balance: 0, totalBudget: 0, totalSpentThisMonth: 0 } };
 
     return (
         <div className="space-y-6 relative">
-            {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
 
             {/* Encabezado con saludo personalizado */}
-            <div className="animate-fade-in-up">
-                <h1 className="text-2xl md:text-3xl font-bold mb-0.5 text-finance-text">
-                    {getGreeting(t)}, <span className="text-finance-primary">{user?.name?.split(' ')[0] || t('guest')}</span> 👋
-                </h1>
-                <p className="text-finance-muted text-sm capitalize">{getFormattedDate(language)}</p>
+            <div className="animate-fade-in-up flex justify-between items-end">
+                <div>
+                    <h1 className="text-2xl md:text-3xl font-bold mb-0.5 text-finance-text">
+                        {getGreeting(t)}, <span className="text-finance-primary">{user?.name?.split(' ')[0] || t('guest')}</span> 👋
+                    </h1>
+                    <p className="text-finance-muted text-sm capitalize">{getFormattedDate(language)}</p>
+                </div>
+
+                <button
+                    onClick={() => setShowBalances(!showBalances)}
+                    className="p-2 mb-1 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-[#00fbff]/30 text-finance-muted hover:text-[#00fbff] transition-all shadow-sm flex items-center gap-2 group"
+                    title={showBalances ? 'Ocultar saldos' : 'Mostrar saldos'}
+                >
+                    {showBalances ? <EyeOff size={20} className="group-hover:scale-110 transition-transform" /> : <Eye size={20} className="group-hover:scale-110 transition-transform" />}
+                </button>
             </div>
 
             {/* Tarjetas de resumen */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <SummaryCard title={t('total_balance')} amount={summary.balance} icon={<Wallet size={22} />} type="balance" delay={0} />
-                <SummaryCard title={t('monthly_income')} amount={summary.totalIncome} icon={<ArrowUpRight size={22} />} type="income" delay={80} />
-                <SummaryCard title={t('monthly_expenses')} amount={summary.totalExpense} icon={<ArrowDownRight size={22} />} type="expense" delay={160} />
+                <SummaryCard title={t('total_balance')} amount={summary.balance} icon={<Wallet size={22} />} type="balance" delay={0} showBalances={showBalances} />
+                <SummaryCard title={t('monthly_income')} amount={summary.totalIncome} icon={<ArrowUpRight size={22} />} type="income" delay={80} showBalances={showBalances} />
+                <SummaryCard title={t('monthly_expenses')} amount={summary.totalExpense} icon={<ArrowDownRight size={22} />} type="expense" delay={160} showBalances={showBalances} />
             </div>
 
             {/* Resumen de Presupuesto Mensual */}
@@ -180,26 +168,28 @@ export default function Dashboard() {
             {/* Grid 50/50: Ingeniería Financiera + Movimientos Recientes */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
                 {/* Tarjeta de Ingeniería Financiera */}
-                <div className="card p-0 overflow-hidden animate-fade-in-up h-full flex flex-col" style={{ animationDelay: '200ms' }}>
-                    <div className="w-full p-4 md:p-5 border-b border-white/5 bg-white/[0.02]">
-                        <div className="flex items-center gap-3">
-                            <div className="p-2 bg-finance-primary/10 rounded-xl border border-finance-primary/20 text-finance-primary">
-                                <Calendar size={24} strokeWidth={2} />
-                            </div>
-                            <div className="flex flex-col">
-                                <h3 className="text-lg font-black text-finance-text leading-none">
-                                    {t('engineering_card')}
-                                </h3>
-                                <span className="text-[10px] font-black tracking-widest text-finance-primary/80 uppercase mt-1">
-                                    {t('smart_tracking_system')}
-                                </span>
+                <SpotlightCard className="h-full rounded-[2rem]" spotlightColor="rgba(0, 212, 255, 0.1)">
+                    <div className="card p-0 overflow-hidden animate-fade-in-up h-full flex flex-col" style={{ animationDelay: '200ms' }}>
+                        <div className="w-full p-4 md:p-5 border-b border-white/5 bg-white/[0.02]">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-finance-primary/10 rounded-xl border border-finance-primary/20 text-finance-primary">
+                                    <Calendar size={24} strokeWidth={2} />
+                                </div>
+                                <div className="flex flex-col">
+                                    <h3 className="text-lg font-black text-finance-text leading-none">
+                                        {t('engineering_card')}
+                                    </h3>
+                                    <span className="text-[10px] font-black tracking-widest text-finance-primary/80 uppercase mt-1">
+                                        {t('smart_tracking_system')}
+                                    </span>
+                                </div>
                             </div>
                         </div>
+                        <div className="p-4 md:p-5 flex-1 overflow-auto">
+                            <EngineeringAssistant stats={stats} onRefresh={fetchDashboardData} />
+                        </div>
                     </div>
-                    <div className="p-4 md:p-5 flex-1 overflow-auto">
-                        <EngineeringAssistant stats={stats} onRefresh={fetchDashboardData} />
-                    </div>
-                </div>
+                </SpotlightCard>
 
                 {/* Movimientos Recientes (Elite Timeline Style) */}
                 <div className="card animate-fade-in-up h-full flex flex-col border-white/5 bg-white/5" style={{ animationDelay: '300ms' }}>
@@ -210,7 +200,7 @@ export default function Dashboard() {
                         </h2>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto custom-scrollbar max-h-[600px] pr-2">
+                    <div className="flex-1 overflow-y-auto custom-scrollbar max-h-[720px] pr-2 mb-2">
                         {recentTransactions.length === 0 ? (
                             <div className="text-center py-10">
                                 <p className="text-finance-muted mb-4 text-sm italic">{t('no_movements')}</p>
@@ -224,31 +214,31 @@ export default function Dashboard() {
                         ) : (() => {
                             const groups = groupTransactionsByDate(recentTransactions);
                             return (
-                                <div className="space-y-6 relative ml-2">
-                                    {/* Línea vertical de tiempo */}
-                                    <div className="absolute left-[11px] top-2 bottom-4 w-[1.5px] bg-gradient-to-b from-finance-primary/40 via-finance-primary/10 to-transparent" />
+                                <div className="space-y-6 relative ml-2 mt-4 pb-4">
+                                    {/* Línea vertical de tiempo Sólida para que se note */}
+                                    <div className="absolute left-[11px] top-3 bottom-0 w-[2px] bg-gradient-to-b from-[#00fbff]/80 via-[#00fbff]/30 to-transparent" />
 
                                     {Object.entries(groups).map(([key, txs]) => {
                                         if (txs.length === 0) return null;
                                         return (
                                             <div key={key} className="space-y-4">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="z-10 w-[24px] h-[24px] rounded-full bg-finance-900 border border-finance-primary/30 flex items-center justify-center shadow-[0_0_10px_rgba(0,212,255,0.1)]">
-                                                        <div className="w-1.5 h-1.5 rounded-full bg-finance-primary animate-pulse shadow-[0_0_5px_#00d4ff]" />
+                                                <div className="flex items-center gap-3 relative z-10">
+                                                    <div className="w-[24px] h-[24px] rounded-full bg-finance-900 border border-[#00fbff]/50 flex items-center justify-center shadow-[0_0_10px_rgba(0,251,255,0.2)]">
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-[#00fbff] shadow-[0_0_8px_#00fbff]" />
                                                     </div>
-                                                    <span className="text-[10px] font-black uppercase tracking-widest text-finance-primary/60 bg-finance-primary/5 px-2 py-0.5 rounded-md border border-finance-primary/10">
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-[#00fbff]/80 bg-[#00fbff]/10 px-2 py-0.5 rounded-md border border-[#00fbff]/20">
                                                         {key === 'today' ? t('today_label') : t('yesterday_label')}
                                                     </span>
                                                 </div>
 
-                                                <div className="space-y-3 ml-[12px] pl-6">
+                                                <div className="space-y-3 ml-[11px] pl-6">
                                                     {txs.map((tx) => (
                                                         <div
                                                             key={tx.id}
-                                                            className="flex justify-between items-center p-3 sm:p-4 bg-white/[0.03] rounded-2xl border border-white/5 hover:border-finance-primary/20 hover:bg-white/[0.05] transition-all duration-300 group relative"
+                                                            className="relative flex justify-between items-center p-3 sm:p-4 bg-white/[0.03] rounded-2xl border border-white/5 hover:border-[#00fbff]/20 hover:bg-white/[0.05] transition-all duration-300 group"
                                                         >
-                                                            {/* Mini conector horizontal */}
-                                                            <div className="absolute -left-6 top-1/2 w-6 h-[1px] bg-white/5" />
+                                                            {/* Mini conector horizontal sólido */}
+                                                            <div className="absolute -left-6 top-1/2 w-6 h-[1px] bg-[#00fbff]/40" />
 
                                                             <div className="flex items-center gap-4 min-w-0">
                                                                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 ${tx.type === 'income' ? 'bg-emerald-500/10 text-emerald-400 shadow-[inset_0_0_12px_rgba(52,211,153,0.05)]' : 'bg-red-500/10 text-red-400 shadow-[inset_0_0_12px_rgba(248,113,113,0.05)]'}`}>
@@ -293,15 +283,19 @@ export default function Dashboard() {
                                         );
                                     })}
 
-                                    <div className="pt-4 text-center">
-                                        <Link to="/resumen" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-finance-primary hover:text-finance-text transition-all bg-finance-primary/5 hover:bg-finance-primary/20 px-4 py-2 rounded-full border border-finance-primary/10">
-                                            {t('view_all')} <Plus size={12} />
-                                        </Link>
-                                    </div>
                                 </div>
                             );
                         })()}
                     </div>
+
+                    {/* Footer Fijo con el Botón "Ver Todo" siempre visible */}
+                    {recentTransactions.length > 0 && (
+                        <div className="pt-4 mt-auto border-t border-white/5 text-center shrink-0">
+                            <Link to="/resumen" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-finance-primary hover:text-finance-text transition-all bg-finance-primary/5 hover:bg-finance-primary/20 px-4 py-2 rounded-full border border-finance-primary/10">
+                                {t('view_all')} <Plus size={12} />
+                            </Link>
+                        </div>
+                    )}
                 </div>
             </div>
 

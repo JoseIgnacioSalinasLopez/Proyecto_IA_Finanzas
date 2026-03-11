@@ -39,11 +39,16 @@ export default function Navbar({ onMenuClick }) {
         try {
             const res = await api.get('/notifications');
             if (res.data.success) {
-                const newNotifs = res.data.data;
-                // Si hay más notificaciones de las que teníamos antes, marcar como no vistas
-                if (newNotifs.length > notifications.length) {
-                    setHasUnseenNotifications(true);
-                }
+                const newNotifs = res.data.data || [];
+
+                // Read the last seen date from localStorage
+                const lastSeenStr = localStorage.getItem(`lastSeenNotifs_${user.id}`);
+                const lastSeenDate = lastSeenStr ? new Date(lastSeenStr).getTime() : 0;
+
+                // A notification is unseen if its created_at is strictly newer than our last seen date
+                const hasNew = newNotifs.some(n => new Date(n.created_at).getTime() > lastSeenDate);
+
+                setHasUnseenNotifications(hasNew);
                 setNotifications(newNotifs);
             }
         } catch (error) {
@@ -51,12 +56,16 @@ export default function Navbar({ onMenuClick }) {
         }
     };
 
-    // Apagar el punto cuando se abre el menú
+    // Apagar el punto y guardar la última fecha vista cuando se abre el menú
     useEffect(() => {
-        if (showNotifs) {
+        if (showNotifs && user?.id) {
             setHasUnseenNotifications(false);
+            if (notifications.length > 0) {
+                const latestDate = Math.max(...notifications.map(n => new Date(n.created_at).getTime()));
+                localStorage.setItem(`lastSeenNotifs_${user.id}`, new Date(latestDate).toISOString());
+            }
         }
-    }, [showNotifs]);
+    }, [showNotifs, notifications, user?.id]);
 
     const handleClearNotifs = async () => {
         try {
