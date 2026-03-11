@@ -30,7 +30,7 @@ export default function LineChart({ data, title = 'Evolución' }) {
                         const { ctx, chartArea } = chart;
                         if (!chartArea) return 'rgba(0,0,0,0)';
                         const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-                        
+
                         // Intentar crear un gradiente basado en el color de borde
                         const baseColor = typeof color === 'string' ? color : '#00D4FF';
                         const isHex = baseColor.startsWith('#');
@@ -66,7 +66,7 @@ export default function LineChart({ data, title = 'Evolución' }) {
                 position: 'top',
                 align: 'end',
                 labels: {
-                    color: '#FFFFFF',
+                    color: 'var(--chart-text)',
                     usePointStyle: true,
                     boxWidth: 8,
                     font: { family: "'Inter', sans-serif", size: 12, weight: '500' }
@@ -75,19 +75,19 @@ export default function LineChart({ data, title = 'Evolución' }) {
             title: {
                 display: !!title,
                 text: title,
-                color: '#e5e7eb',
+                color: 'var(--chart-title)',
                 align: 'start',
                 font: { family: "'Inter', sans-serif", size: 16, weight: 'bold' },
                 padding: { bottom: 20 }
             },
             tooltip: {
-                backgroundColor: 'rgba(11, 2, 45, 0.95)',
-                borderColor: 'rgba(255,255,255,0.08)',
+                backgroundColor: 'var(--chart-tooltip-bg)',
+                borderColor: 'var(--chart-grid)',
                 borderWidth: 1,
                 padding: 14,
                 cornerRadius: 12,
-                titleColor: '#FFFFFF',
-                bodyColor: '#9EA3B0',
+                titleColor: 'var(--chart-title)',
+                bodyColor: 'var(--chart-text)',
                 usePointStyle: true,
                 callbacks: {
                     label: function (context) {
@@ -104,12 +104,12 @@ export default function LineChart({ data, title = 'Evolución' }) {
         scales: {
             y: {
                 grid: {
-                    color: 'rgba(255,255,255,0.05)',
+                    color: 'var(--chart-grid)',
                     drawBorder: false,
                 },
                 ticks: {
-                    color: '#9EA3B0',
-                    font: { family: "'Inter', sans-serif" },
+                    color: 'var(--chart-text)',
+                    font: { family: "'Inter', sans-serif", weight: '600' },
                     callback: function (value) {
                         return '$' + value;
                     }
@@ -118,7 +118,7 @@ export default function LineChart({ data, title = 'Evolución' }) {
             },
             x: {
                 grid: { display: false, drawBorder: false },
-                ticks: { color: '#9EA3B0', font: { family: "'Inter', sans-serif" } }
+                ticks: { color: 'var(--chart-text)', font: { family: "'Inter', sans-serif", weight: '600' } }
             }
         }
     };

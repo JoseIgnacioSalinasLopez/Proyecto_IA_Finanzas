@@ -2,12 +2,16 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import appLogo from '../assets/logo.png';
+import appLogoLight from '../assets/logo claro.png';
+import { useTheme } from '../context/ThemeContext';
 import fondoLogin from '../assets/fondo-login2.jpg';
 import { useAuth } from '../hooks/useAuth';
 import { ChevronRight, Mail, Lock, User, RefreshCw, Eye, EyeOff } from 'lucide-react';
 
 export default function Login() {
     const { t, language } = useLanguage();
+    const { theme } = useTheme();
+    const isLight = theme === 'light';
     const [isExpanded, setIsExpanded] = useState(false);
     const [currentView, setCurrentView] = useState('login'); // 'login', 'register', 'forgot'
     const [email, setEmail] = useState('');
@@ -163,7 +167,7 @@ export default function Login() {
                             <div className="animate-fade-in text-center">
                                 {/* Se eliminaron las clases de rotación y transformación */}
                                 <div className="flex justify-center mb-6 cursor-pointer">
-                                    <img src={appLogo} alt="Logo" className="h-16 w-auto drop-shadow-[0_0_20px_rgba(0,212,255,0.6)]" />
+                                    <img src={isLight ? appLogoLight : appLogo} alt="Logo" className="h-16 w-auto drop-shadow-[0_0_20px_rgba(0,212,255,0.6)]" />
                                 </div>
                                 <h1 className="text-5xl font-black tracking-tighter leading-tight mb-3 bg-clip-text text-transparent bg-gradient-to-r from-[#8C30F5] via-[#4F46E5] to-[#2E6FF2] drop-shadow-sm">
                                     {currentView === 'login' ? t('welcome_elite') : currentView === 'register' ? t('create_account_elite') : t('recover_elite')}

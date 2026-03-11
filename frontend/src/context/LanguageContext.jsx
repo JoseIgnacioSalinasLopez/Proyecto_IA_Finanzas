@@ -303,6 +303,8 @@ const translations = {
         security: 'Seguridad',
         lang_help: '* Cambiar el idioma afectará a todos los menús y etiquetas principales de la aplicación.',
         dark_mode: 'Modo Oscuro',
+        light_mode: 'Modo Claro',
+        appearance: 'Apariencia',
         // Categorias
         movement_updated: 'Movimiento actualizado',
         // Seguridad y Notificaciones
@@ -652,6 +654,8 @@ const translations = {
         security: 'Security',
         lang_help: '* Changing the language will affect all major menus and labels of the application.',
         dark_mode: 'Dark Mode',
+        light_mode: 'Light Mode',
+        appearance: 'Appearance',
         // Categorias
         movement_updated: 'Movement updated',
         // Security & Notifications

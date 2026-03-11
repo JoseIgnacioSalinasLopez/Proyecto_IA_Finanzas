@@ -2,13 +2,18 @@ import { Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, Wallet, BarChart3, Tags, User, Bot, LogOut, Target, X, Settings, Plus, Calculator } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { useLanguage } from '../../context/LanguageContext';
+import { useTheme } from '../../context/ThemeContext';
 import appLogo from '../../assets/logo.png';
+import appLogoLight from '../../assets/logo claro.png';
 import bolsaIcon from '../../assets/bolsa.png';
+import bolsaIconLight from '../../assets/bolsa claro.png';
 
 export default function Sidebar({ isOpen, onClose }) {
     const { pathname } = useLocation();
     const { logout } = useAuth();
     const { t } = useLanguage();
+    const { theme } = useTheme();
+    const isLight = theme === 'light';
 
     const navLinks = [
         { name: t('dashboard'), path: '/', icon: <LayoutDashboard size={20} /> },
@@ -29,7 +34,7 @@ export default function Sidebar({ isOpen, onClose }) {
         <>
             <aside
                 className={`
-                    bg-[#11111d] border-r border-white/5 h-screen flex flex-col flex-shrink-0
+                    bg-finance-800 border-r border-white/5 h-screen flex flex-col flex-shrink-0
                     fixed md:sticky top-0 z-40
                     transition-all duration-500 ease-in-out group
                     ${isOpen ? 'w-64 translate-x-0' : '-translate-x-full md:translate-x-0 w-20 hover:md:w-64'}
@@ -42,16 +47,15 @@ export default function Sidebar({ isOpen, onClose }) {
                         {/* Contenedor para la Bolsa (siempre centrado en los primeros 80px) */}
                         <div className="w-20 h-full flex-shrink-0 flex items-center justify-center relative z-10">
                             <img
-                                src={bolsaIcon}
+                                src={isLight ? bolsaIconLight : bolsaIcon}
                                 alt="Bolsa"
-                                className={`h-8 w-auto object-contain transition-all duration-300 drop-shadow-[0_0_10px_rgba(0,212,255,0.4)] ${isOpen ? 'opacity-0 scale-50' : 'opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-50'}`}
+                                className={`h-11 w-auto object-contain transition-all duration-300 drop-shadow-[0_0_10px_rgba(0,212,255,0.4)] ${isOpen ? 'opacity-0 scale-50' : 'opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-50'}`}
                             />
                         </div>
 
-                        {/* Contenedor para el Logo Principal (centrado en el ancho TOTAL del sidebar) */}
                         <div className={`absolute inset-0 flex items-center justify-center transition-all duration-500 ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-50 group-hover:opacity-100 group-hover:scale-110'}`}>
                             <img
-                                src={appLogo}
+                                src={isLight ? appLogoLight : appLogo}
                                 alt="Logo"
                                 className="h-14 w-auto object-contain drop-shadow-[0_0_15px_rgba(0,212,255,0.5)]"
                             />
@@ -91,7 +95,7 @@ export default function Sidebar({ isOpen, onClose }) {
                                 onClick={handleLinkClick}
                                 className={`
                                     flex items-center min-h-[50px] transition-all duration-300 mx-2 rounded-xl relative
-                                    ${isActive ? 'bg-finance-primary/10 text-finance-primary font-black border border-finance-primary/20 shadow-[0_0_15px_rgba(0,212,255,0.1)]' : 'text-slate-500 hover:bg-white/5 hover:text-white'}
+                                    ${isActive ? 'bg-finance-primary/10 text-finance-primary font-black border border-finance-primary/20 shadow-[0_0_15px_rgba(0,212,255,0.1)]' : 'text-finance-muted hover:bg-white/5 hover:text-finance-text'}
                                 `}
                             >
                                 <div className="w-[64px] flex-shrink-0 flex items-center justify-center h-full">

@@ -7,25 +7,35 @@ export default function Toast({ message, type = 'success', onClose, duration = 4
     const timerRef = useRef(null);
 
     useEffect(() => {
-        timerRef.current = setTimeout(onClose, duration);
-        return () => clearTimeout(timerRef.current);
-    }, [onClose, duration]);
+        // Clear any existing timer
+        if (timerRef.current) clearTimeout(timerRef.current);
+
+        // Set new timer
+        timerRef.current = setTimeout(() => {
+            onClose();
+            timerRef.current = null;
+        }, duration);
+
+        return () => {
+            if (timerRef.current) clearTimeout(timerRef.current);
+        };
+    }, [message, duration, onClose]);
 
     const config = {
         success: {
-            classes: 'bg-emerald-900/95 border-emerald-500/40 text-emerald-300',
+            classes: 'bg-[var(--toast-bg-success)] border-[var(--toast-border-success)] text-[var(--toast-text-success)]',
             Icon: CheckCircle2,
-            iconClass: 'text-emerald-400',
+            iconClass: 'text-[var(--toast-text-success)]',
         },
         error: {
-            classes: 'bg-red-900/95 border-red-500/40 text-red-300',
+            classes: 'bg-[var(--toast-bg-error)] border-[var(--toast-border-error)] text-[var(--toast-text-error)]',
             Icon: XCircle,
-            iconClass: 'text-red-400',
+            iconClass: 'text-[var(--toast-text-error)]',
         },
         warning: {
-            classes: 'bg-amber-900/95 border-amber-500/40 text-amber-300',
+            classes: 'bg-[var(--toast-bg-warning)] border-[var(--toast-border-warning)] text-[var(--toast-text-warning)]',
             Icon: AlertTriangle,
-            iconClass: 'text-amber-400',
+            iconClass: 'text-[var(--toast-text-warning)]',
         },
     };
 
@@ -36,13 +46,13 @@ export default function Toast({ message, type = 'success', onClose, duration = 4
             role="status"
             aria-live="polite"
             aria-atomic="true"
-            className={`fixed bottom-6 left-1/2 -translate-x-1/2 z-[300] flex items-center gap-3 px-5 py-3.5 rounded-2xl border backdrop-blur-md shadow-2xl animate-slide-up max-w-sm w-[90vw] ${classes}`}
+            className={`fixed bottom-8 left-1/2 -translate-x-1/2 md:ml-10 z-[300] flex items-center gap-3 px-5 py-3.5 rounded-2xl border backdrop-blur-md shadow-2xl animate-slide-up max-w-sm w-max min-w-[280px] ${classes}`}
         >
-            <Icon size={18} className={`flex-shrink-0 ${iconClass}`} />
-            <span className="text-sm font-medium flex-1">{message}</span>
+            <Icon size={18} className={`flex-shrink-0 ${iconClass} opacity-80`} />
+            <span className="text-sm font-bold flex-1">{message}</span>
             <button
                 onClick={onClose}
-                className="ml-1 opacity-60 hover:opacity-100 transition-opacity flex-shrink-0 p-0.5"
+                className="ml-2 opacity-40 hover:opacity-100 transition-opacity flex-shrink-0 p-0.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5"
                 aria-label={t('close_notification')}
             >
                 <X size={14} />

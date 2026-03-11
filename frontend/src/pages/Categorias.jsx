@@ -128,13 +128,13 @@ export default function Categorias() {
             <div className="flex gap-2 p-1 bg-black/20 rounded-xl w-full max-w-sm">
                 <button
                     onClick={() => setActiveTab('expense')}
-                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all ${activeTab === 'expense' ? 'bg-finance-primary text-white shadow-lg' : 'text-finance-muted hover:text-white hover:bg-white/5'}`}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all ${activeTab === 'expense' ? 'bg-finance-primary text-white shadow-lg' : 'text-finance-muted hover:text-finance-text dark:hover:text-white hover:bg-white/5'}`}
                 >
                     <ArrowDownCircle size={16} /> {t('expenses_section')}
                 </button>
                 <button
                     onClick={() => setActiveTab('income')}
-                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all ${activeTab === 'income' ? 'bg-finance-primary text-white shadow-lg' : 'text-finance-muted hover:text-white hover:bg-white/5'}`}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all ${activeTab === 'income' ? 'bg-finance-primary text-white shadow-lg' : 'text-finance-muted hover:text-finance-text dark:hover:text-white hover:bg-white/5'}`}
                 >
                     <ArrowUpCircle size={16} /> {t('income_section')}
                 </button>
@@ -151,7 +151,7 @@ export default function Categorias() {
                     onChange={e => setSearch(e.target.value)}
                 />
                 {search && (
-                    <button onClick={() => setSearch('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-finance-muted hover:text-white">
+                    <button onClick={() => setSearch('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-finance-muted hover:text-finance-text dark:hover:text-white">
                         <X size={12} />
                     </button>
                 )}
@@ -228,7 +228,7 @@ export default function Categorias() {
                             <h2 id="cat-modal-title" className="text-xl font-bold">
                                 {editingCat ? t('edit_category') : t('add_category')}
                             </h2>
-                            <button onClick={handleCloseModal} className="text-finance-muted hover:text-white hover:bg-white/5 p-1.5 rounded-lg transition-all">
+                            <button onClick={handleCloseModal} className="text-finance-muted hover:text-finance-text dark:hover:text-white hover:bg-white/5 p-1.5 rounded-lg transition-all">
                                 <X size={18} />
                             </button>
                         </div>

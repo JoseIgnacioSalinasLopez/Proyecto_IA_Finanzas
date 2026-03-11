@@ -13,26 +13,25 @@ export default function Navbar({ onMenuClick }) {
     const { t } = useLanguage();
     const [showNotifs, setShowNotifs] = useState(false);
     const [notifications, setNotifications] = useState([]);
+    const [hasUnseenNotifications, setHasUnseenNotifications] = useState(false);
 
     useEffect(() => {
         if (!user?.id) return;
-
         fetchNotifications();
 
-        const channel = supabase
-            .channel('realtime-notifications')
-            .on('postgres_changes', {
-                event: '*',
-                schema: 'public',
-                table: 'notifications',
-                filter: `user_id=eq.${user.id}`
-            }, () => {
+        // Escuchar recargas globales
+        window.addEventListener('refresh-data', fetchNotifications);
+
+        const subscription = supabase
+            .channel('any')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.id}` }, () => {
                 fetchNotifications();
             })
             .subscribe();
 
         return () => {
-            supabase.removeChannel(channel);
+            supabase.removeChannel(subscription);
+            window.removeEventListener('refresh-data', fetchNotifications);
         };
     }, [user?.id]);
 
@@ -40,12 +39,24 @@ export default function Navbar({ onMenuClick }) {
         try {
             const res = await api.get('/notifications');
             if (res.data.success) {
-                setNotifications(res.data.data);
+                const newNotifs = res.data.data;
+                // Si hay más notificaciones de las que teníamos antes, marcar como no vistas
+                if (newNotifs.length > notifications.length) {
+                    setHasUnseenNotifications(true);
+                }
+                setNotifications(newNotifs);
             }
         } catch (error) {
             console.error('Error fetching notifications:', error);
         }
     };
+
+    // Apagar el punto cuando se abre el menú
+    useEffect(() => {
+        if (showNotifs) {
+            setHasUnseenNotifications(false);
+        }
+    }, [showNotifs]);
 
     const handleClearNotifs = async () => {
         try {
@@ -59,11 +70,11 @@ export default function Navbar({ onMenuClick }) {
     };
 
     return (
-        <header className="bg-[#05011a]/80 backdrop-blur-xl border-b border-white/5 h-16 flex items-center justify-between px-4 md:px-6 sticky top-0 z-20 flex-shrink-0">
+        <header className="bg-finance-900/80 backdrop-blur-xl border-b border-white/5 h-16 flex items-center justify-between px-4 md:px-6 sticky top-0 z-20 flex-shrink-0">
             <div className="flex items-center gap-3">
                 {/* Botón hamburger — FUNCIONAL en móvil */}
                 <button
-                    className="md:hidden text-slate-400 hover:text-white hover:bg-white/5 p-2 rounded-lg transition-all"
+                    className="md:hidden text-finance-muted hover:text-finance-text hover:bg-white/5 p-2 rounded-lg transition-all"
                     onClick={onMenuClick}
                     aria-label="Abrir menú de navegación"
                     title="Abrir menú"
@@ -82,10 +93,10 @@ export default function Navbar({ onMenuClick }) {
                     <button
                         aria-label={t('notifications')}
                         onClick={() => setShowNotifs(!showNotifs)}
-                        className={`flex items-center justify-center w-9 h-9 rounded-full transition-all relative group cursor-pointer ${showNotifs ? 'bg-finance-primary/10 text-finance-primary' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+                        className={`flex items-center justify-center w-9 h-9 rounded-full transition-all relative group cursor-pointer ${showNotifs ? 'bg-finance-primary/10 text-finance-primary' : 'text-finance-muted hover:text-finance-text hover:bg-white/5'}`}
                     >
                         <Bell size={18} className="group-hover:drop-shadow-[0_0_8px_rgba(0,212,255,0.5)]" />
-                        {notifications.length > 0 && (
+                        {hasUnseenNotifications && notifications.length > 0 && (
                             <span className="absolute top-1 right-1 w-2 h-2 bg-finance-primary rounded-full shadow-[0_0_8px_#00D4FF] cursor-pointer" />
                         )}
                     </button>
@@ -109,7 +120,7 @@ export default function Navbar({ onMenuClick }) {
                     `}
                 >
                     <div className="text-right hidden sm:block">
-                        <p className="text-sm font-black text-white leading-tight tracking-tight">{user?.name}</p>
+                        <p className="text-sm font-black text-finance-text leading-tight tracking-tight">{user?.name}</p>
                         <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{user?.email?.split('@')[0]}</p>
                     </div>
 

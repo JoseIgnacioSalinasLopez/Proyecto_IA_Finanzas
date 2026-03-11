@@ -32,7 +32,11 @@ export default function Metas() {
     const showToast = (message, type = 'success') => setToast({ message, type });
     const closeToast = () => setToast(null);
 
-    useEffect(() => { fetchGoals(); }, []);
+    useEffect(() => {
+        fetchGoals();
+        window.addEventListener('refresh-data', fetchGoals);
+        return () => window.removeEventListener('refresh-data', fetchGoals);
+    }, []);
 
     useEffect(() => {
         const handler = (e) => {
@@ -141,7 +145,7 @@ export default function Metas() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h1 className="text-2xl md:text-3xl font-bold">{t('goals')}</h1>
+                    <h1 className="text-2xl md:text-3xl font-bold text-finance-text">{t('goals')}</h1>
                     <p className="text-finance-muted mt-1 text-sm">
                         {activeGoals} {activeGoals === 1 ? t('active_label') : t('actives_label')}
                         {completedGoals > 0 && ` · ${completedGoals} ${completedGoals === 1 ? t('completed_label_sm') : t('completed_labels_sm')} ✅`}
@@ -186,7 +190,7 @@ export default function Metas() {
                                         <TrendingUp size={15} />
                                     </button>
                                     <button onClick={() => openEdit(goal)}
-                                        className="text-finance-muted hover:text-[#4F46E5] hover:bg-[#4F46E5]/10 p-1.5 rounded-lg transition-all">
+                                        className="text-finance-muted hover:text-finance-primary hover:bg-finance-primary/10 p-1.5 rounded-lg transition-all">
                                         <Pencil size={15} />
                                     </button>
                                     <button onClick={() => setDeleteConfirm(goal)}
@@ -196,7 +200,7 @@ export default function Metas() {
                                 </div>
                             </div>
 
-                            <h3 className="text-lg font-bold mb-1 leading-tight">{goal.name}</h3>
+                            <h3 className="text-lg font-bold mb-1 leading-tight text-finance-text">{goal.name}</h3>
                             <p className={`text-xs mb-3 flex items-center gap-1 ${isExpired ? 'text-red-400' : 'text-finance-muted'}`}>
                                 <Calendar size={11} />
                                 {isExpired ? (t('expired_label_sm') + ': ') : `${t('deadline_label')}: `}
@@ -261,8 +265,8 @@ export default function Metas() {
             {/* Modal Crear/Editar */}
             {showModal && (
                 <div className="fixed inset-0 bg-black/65 backdrop-blur-md flex justify-center items-center z-50 p-4" onClick={(e) => e.target === e.currentTarget && setShowModal(false)}>
-                    <div className="card p-6 w-full max-w-md border-white/10 animate-scale-in bg-[#11111d] overflow-visible">
-                        <h2 className="text-xl font-bold mb-5">{editingGoal ? t('edit_goal') : t('add_goal')}</h2>
+                    <div className="card p-6 w-full max-w-md border-white/10 animate-scale-in bg-finance-800 overflow-visible">
+                        <h2 className="text-xl font-bold mb-5 text-finance-text">{editingGoal ? t('edit_goal') : t('add_goal')}</h2>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
                                 <label className="block text-sm text-finance-muted mb-1.5">{t('goal_name_label')} *</label>
@@ -299,7 +303,7 @@ export default function Metas() {
             {progressModal && (
                 <div className="fixed inset-0 bg-black/65 backdrop-blur-md flex justify-center items-center z-50 p-4" onClick={(e) => e.target === e.currentTarget && setProgressModal(null)}>
                     <div className="card p-6 w-full max-w-sm border-white/10 animate-scale-in">
-                        <h2 className="text-lg font-bold mb-4">{t('update_progress')}</h2>
+                        <h2 className="text-lg font-bold mb-4 text-finance-text">{t('update_progress')}</h2>
                         <p className="text-sm text-finance-muted mb-4">{progressModal.goal.name}</p>
                         <input type="number" className="input-field text-xl font-bold mb-5" value={progressModal.value} onChange={e => setProgressModal({ ...progressModal, value: e.target.value })} autoFocus />
                         <div className="flex gap-3">
@@ -314,7 +318,7 @@ export default function Metas() {
             {deleteConfirm && (
                 <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex justify-center items-center z-50 p-4" onClick={(e) => e.target === e.currentTarget && setDeleteConfirm(null)}>
                     <div className="card p-6 w-full max-w-sm border-red-500/20 animate-scale-in">
-                        <h2 className="text-lg font-bold mb-4">{t('delete_confirm')}</h2>
+                        <h2 className="text-lg font-bold mb-4 text-finance-text">{t('delete_confirm')}</h2>
                         <p className="text-sm text-finance-muted mb-5">"{deleteConfirm.name}"</p>
                         <div className="flex gap-3">
                             <button onClick={() => setDeleteConfirm(null)} className="flex-1 btn-ghost">{t('cancel')}</button>

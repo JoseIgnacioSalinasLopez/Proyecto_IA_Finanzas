@@ -93,14 +93,14 @@ export default function QuickAddModal() {
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 drop-shadow-2xl">
             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" onClick={() => setShow(false)} />
 
-            <div className="relative w-full max-w-md bg-[#11111d] border border-white/10 rounded-2xl overflow-visible shadow-2xl animate-scale-up">
+            <div className="relative w-full max-w-md bg-finance-800 border border-white/10 rounded-2xl overflow-visible shadow-2xl animate-scale-up">
                 {/* Header */}
                 <div className="p-4 border-b border-white/5 flex items-center justify-between bg-black/20">
                     <div className="flex items-center gap-2">
                         <div className="p-1.5 bg-finance-primary/20 rounded-lg text-finance-primary">
                             <Plus size={18} />
                         </div>
-                        <h2 className="text-lg font-bold tracking-tight">{t('quick_registration')}</h2>
+                        <h2 className="text-lg font-bold tracking-tight text-finance-text">{t('quick_registration')}</h2>
                     </div>
                     <button onClick={() => setShow(false)} className="text-finance-muted hover:text-white transition-colors">
                         <X size={20} />
@@ -126,7 +126,7 @@ export default function QuickAddModal() {
                                         ? type.color === 'red'
                                             ? 'bg-red-500/20 border-red-500 text-red-400 shadow-[0_0_10px_rgba(239,68,68,0.2)]'
                                             : 'bg-emerald-500/20 border-emerald-500 text-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.2)]'
-                                        : 'bg-black/20 border-white/10 text-finance-muted hover:border-white/30'
+                                        : 'bg-black/10 dark:bg-black/20 border-white/10 text-finance-muted hover:border-white/30'
                                         }`}
                                 >
                                     {type.label}

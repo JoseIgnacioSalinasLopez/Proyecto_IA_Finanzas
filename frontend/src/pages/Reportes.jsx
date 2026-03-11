@@ -259,7 +259,7 @@ export default function Reportes() {
             {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl md:text-3xl font-bold">{t('strategic_analysis')}</h1>
+                    <h1 className="text-2xl md:text-3xl font-bold text-finance-text">{t('strategic_analysis')}</h1>
                     <p className="text-finance-muted text-sm">{t('report_subtitle')}</p>
                 </div>
                 <div className="flex items-center gap-3">

@@ -42,31 +42,198 @@ body {
 
 /* ─── Neon SaaS Variables ─────────────────────────────────────────── */
 :root {
-  /* Paleta Principal */
-  --epic-purple: #8C30F5;
-  --epic-deep-purple: #6A3DF0;
-  --epic-indigo: #4F46E5;
+  /* Paleta Principal - Dashboard Inspired */
+  --epic-purple: #cc208e;
+  --epic-deep-purple: #6713d2;
+  --epic-indigo: #2575fc;
   --epic-blue: #2E6FF2;
-  --epic-cyan: #00D4FF;
+  --epic-cyan: #00fbff;
   --epic-aqua: #00FFFF;
   --epic-white: #FFFFFF;
 
+  /* Color Bindings for Tailwind */
+  --bg-main: #05011a;
+  --bg-card: #11111d;
+  --text-main: #FFFFFF;
+  --text-muted: #818cf8;
+
   /* Colores Secundarios */
-  --epic-pink: #FF4DA6;
-  --epic-light-gray: #E5E7EB;
-  --epic-muted-gray: #9EA3B0;
+  --epic-pink: #ff0099;
+  --epic-light-gray: #f8fafc;
+  --epic-muted-gray: #818cf8;
 
   /* Glow & Effects */
-  --epic-magenta-glow: #E600E6;
-  --epic-pink-glow: #FF4DFF;
-  --epic-electric-blue: #7DF9FF;
+  --epic-magenta-glow: #ff00ff;
+  --epic-pink-glow: #ff4dff;
+  --epic-electric-blue: #00d2ff;
   --epic-sparkle: #FFD166;
+
+  /* Chart Variables (Dark) */
+  --chart-text: #ffffff;
+  /* Blanco puro para máxima legibilidad */
+  --chart-grid: rgba(255, 255, 255, 0.5);
+  --chart-title: #FFFFFF;
+  --chart-tooltip-bg: rgba(11, 2, 45, 0.95);
+  --chart-border: #130B42;
+
+  /* Toast Variables (Dark) */
+  --toast-bg-success: rgba(6, 78, 59, 0.95);
+  --toast-text-success: #bbf7d0;
+  --toast-border-success: rgba(16, 185, 129, 0.4);
+
+  --toast-bg-error: rgba(127, 29, 29, 0.95);
+  --toast-text-error: #fecaca;
+  --toast-border-error: rgba(239, 68, 68, 0.4);
+
+  --toast-bg-warning: rgba(120, 53, 15, 0.95);
+  --toast-text-warning: #fde68a;
+  --toast-border-warning: rgba(245, 158, 11, 0.4);
+
+  /* Skeleton Variables (Dark) */
+  --skeleton-bg: rgba(255, 255, 255, 0.03);
+  --skeleton-shimmer: rgba(255, 255, 255, 0.08);
 
   /* Legacy mapping for compatibility */
   --neon-cyan: var(--epic-cyan);
   --neon-purple: var(--epic-purple);
   --neon-blue: var(--epic-blue);
-  --neon-glow: rgba(0, 212, 255, 0.5);
+  --neon-glow: rgba(0, 251, 255, 0.5);
+}
+
+/* ─── Light Mode Overrides (Soft & Aesthetic) ────────────────────── */
+.light-mode {
+  --bg-main: #f4f4f5;
+  /* Zinc-100: Soft and neutral */
+  --bg-card: #fafafa;
+  /* Neutral-50: Off-white for better contrast */
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+
+  --epic-purple: #9333ea;
+  --epic-cyan: #0ea5e9;
+  --epic-indigo: #3b82f6;
+  --epic-white: #0f172a;
+
+  --neon-glow: rgba(14, 165, 233, 0.1);
+
+  /* Chart Variables (Light) */
+  --chart-text: #475569;
+  --chart-grid: rgba(0, 0, 0, 0.05);
+  --chart-title: #1e293b;
+  --chart-tooltip-bg: rgba(255, 255, 255, 0.98);
+  --chart-border: #f0f0f0;
+
+  /* Toast Variables (Light) */
+  --toast-bg-success: #f0fdf4;
+  /* Softer Emerald/Green 50 */
+  --toast-text-success: #166534;
+  /* Green 800 */
+  --toast-border-success: rgba(22, 101, 52, 0.1);
+
+  --toast-bg-error: #fef2f2;
+  /* Red 50 */
+  --toast-text-error: #991b1b;
+  /* Red 800 */
+  --toast-border-error: rgba(239, 68, 68, 0.15);
+
+  --toast-bg-warning: #fffbeb;
+  /* Amber 50 */
+  --toast-text-warning: #92400e;
+  /* Amber 800 */
+  --toast-border-warning: rgba(245, 158, 11, 0.15);
+
+  /* Skeleton Variables (Light) */
+  --skeleton-bg: rgba(0, 0, 0, 0.05);
+  --skeleton-shimmer: rgba(0, 0, 0, 0.1);
+}
+
+.light-mode body {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+}
+
+/* Base containers in light mode */
+.light-mode #root,
+.light-mode .h-screen,
+.light-mode main {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+}
+
+/* Navigation & Sidebar in light mode */
+.light-mode aside,
+.light-mode header,
+.light-mode nav {
+  background-color: var(--bg-card);
+  border-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Cards and specific containers */
+.light-mode .card {
+  background-color: var(--bg-card);
+  border-color: rgba(0, 0, 0, 0.05);
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+  color: var(--text-main);
+}
+
+.light-mode .epic-bg-animate {
+  opacity: 0.1;
+  /* Fade instead of hide to maintain some depth */
+}
+
+.light-mode .epic-border-card,
+.light-mode .epic-border-card::after {
+  background: var(--bg-card);
+}
+
+/* Standardized theme-aware text utilities */
+.light-mode .text-finance-text {
+  color: var(--text-main);
+}
+
+.light-mode .text-finance-muted {
+  color: var(--text-muted);
+}
+
+/* Background transparency mappings */
+.light-mode .bg-white\/5 {
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.light-mode .bg-black\/20 {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.light-mode .bg-black\/40 {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Borders */
+.light-mode .border-white\/5,
+.light-mode .border-white\/10 {
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+.light-mode .input-field {
+  background-color: var(--bg-card);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: var(--text-main);
+}
+
+/* Navigation consistency */
+.light-mode aside a {
+  color: var(--text-muted);
+}
+
+.light-mode aside a:hover {
+  color: var(--text-main);
+  background-color: rgba(0, 0, 0, 0.03);
+}
+
+.light-mode a.active,
+.light-mode .bg-finance-primary\/10 {
+  background-color: rgba(14, 165, 233, 0.1);
+  color: #0ea5e9;
 }
 
 
@@ -82,7 +249,7 @@ body {
 /* ─── Utility Classes ──────────────────────────────────────────────── */
 @layer utilities {
   .input-field {
-    @apply w-full p-4 rounded-2xl bg-black/40 border border-white/5 text-finance-text focus:outline-none focus:border-finance-primary/70 focus:ring-4 focus:ring-finance-primary/10 transition-all duration-300 placeholder:text-finance-muted/40;
+    @apply w-full p-4 rounded-2xl bg-black/40 border border-white/5 text-finance-text focus:outline-none focus:border-finance-primary focus:ring-4 focus:ring-finance-primary transition-all duration-300 placeholder:text-finance-muted;
     backdrop-filter: blur(10px);
   }
 
@@ -114,10 +281,10 @@ body {
   }
 
   .card {
-    @apply rounded-[2.5rem] border border-white/5 p-10;
-    background: rgba(17, 17, 29, 0.8);
+    @apply rounded-[2rem] border border-white/[0.03] p-8;
+    background: rgba(13, 13, 43, 0.7);
     backdrop-filter: blur(40px);
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 20px rgba(140, 48, 245, 0.05);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 15px rgba(0, 210, 255, 0.03);
   }
 
   .focus-ring {
@@ -141,12 +308,12 @@ body {
 @keyframes slide-up {
   from {
     opacity: 0;
-    transform: translateY(1.5rem);
+    transform: translate(-50%, 1.5rem);
   }
 
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate(-50%, 0);
   }
 }
 
@@ -226,9 +393,9 @@ body {
 
 .skeleton-shimmer {
   background: linear-gradient(90deg,
-      rgba(255, 255, 255, 0.03) 0%,
-      rgba(255, 255, 255, 0.08) 50%,
-      rgba(255, 255, 255, 0.03) 100%);
+      var(--skeleton-bg) 0%,
+      var(--skeleton-shimmer) 50%,
+      var(--skeleton-bg) 100%);
   background-size: 200% 100%;
   animation: shimmer 1.6s ease-in-out infinite;
 }
@@ -292,7 +459,7 @@ body {
 /* ─── Epic Rotating Border ───────────────────────────────────────── */
 .epic-border-card {
   position: relative;
-  background: #11111d;
+  background: #0d0d2b;
   /* Dark premium background as in the reference image */
   backdrop-filter: blur(20px);
   border-radius: 20px;
@@ -312,9 +479,9 @@ body {
   height: 180%;
   background-image: conic-gradient(from 0deg,
       transparent 0deg,
-      #8C30F5 90deg,
+      #cc208e 90deg,
       transparent 180deg,
-      #00D4FF 270deg,
+      #00fbff 270deg,
       transparent 360deg);
   animation: rotate 1.5s linear infinite;
   /* Increased speed to 1.5s */
@@ -326,8 +493,8 @@ body {
 .epic-border-card::after {
   content: '';
   position: absolute;
-  inset: 3px;
-  background: #11111d;
+  inset: 2px;
+  background: #0d0d2b;
   border-radius: 17px;
   z-index: -1;
 }
@@ -518,7 +685,7 @@ body {
 
 /* ─── Epic Background & Particles ────────────────────────────────── */
 .epic-bg-animate {
-  background: linear-gradient(-45deg, #0F0F1A, #141432, #1B1B3A, #0F0F1A);
+  background: linear-gradient(-45deg, #030014, #0d0d2b, #05011a, #030014);
   background-size: 400% 400%;
   animation: gradientBG 120s ease infinite;
   /* Ultra-slow for premium feel */

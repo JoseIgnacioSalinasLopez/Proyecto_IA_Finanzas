@@ -21,15 +21,20 @@ const centerTextPlugin = {
 
         const formattedTotal = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(sum);
 
+        // Responsive styles from CSS variables
+        const style = getComputedStyle(document.documentElement);
+        const titleColor = style.getPropertyValue('--chart-title').trim() || "#FFFFFF";
+        const textColor = style.getPropertyValue('--chart-text').trim() || "#9EA3B0";
+
         ctx.font = "600 24px Inter, sans-serif";
         ctx.textBaseline = "middle";
-        ctx.fillStyle = "#FFFFFF";
+        ctx.fillStyle = titleColor;
 
         const textWidth = ctx.measureText(formattedTotal).width;
         ctx.fillText(formattedTotal, centerX - textWidth / 2, centerY + 10);
 
         ctx.font = "500 13px Inter, sans-serif";
-        ctx.fillStyle = "#9EA3B0";
+        ctx.fillStyle = textColor;
         const labelText = "Total";
         const labelWidth = ctx.measureText(labelText).width;
         ctx.fillText(labelText, centerX - labelWidth / 2, centerY - 15);
@@ -40,6 +45,9 @@ const centerTextPlugin = {
 export default function PieChart({ data, title = 'Distribución' }) {
     const styledData = useMemo(() => {
         if (!data || !data.datasets) return data;
+        const style = getComputedStyle(document.documentElement);
+        const borderColor = style.getPropertyValue('--chart-border').trim() || '#130B42';
+
         return {
             ...data,
             datasets: data.datasets.map(ds => {
@@ -48,7 +56,7 @@ export default function PieChart({ data, title = 'Distribución' }) {
                     ...ds,
                     backgroundColor: ds.data ? ds.data.map((_, i) => palette[i % palette.length]) : ds.backgroundColor,
                     borderWidth: 6,
-                    borderColor: '#130B42',
+                    borderColor: borderColor,
                     hoverOffset: 18,
                     spacing: 2,
                     borderRadius: 4,
@@ -65,7 +73,7 @@ export default function PieChart({ data, title = 'Distribución' }) {
             legend: {
                 position: 'right',
                 labels: {
-                    color: '#FFFFFF',
+                    color: 'var(--chart-text)',
                     usePointStyle: true,
                     padding: 20,
                     font: { family: "'Inter', sans-serif", size: 12, weight: '500' }
@@ -74,16 +82,16 @@ export default function PieChart({ data, title = 'Distribución' }) {
             title: {
                 display: !!title,
                 text: title,
-                color: '#FFFFFF',
+                color: 'var(--chart-title)',
                 align: 'start',
                 font: { family: "'Inter', sans-serif", size: 16, weight: 'bold' },
                 padding: { bottom: 20 }
             },
             tooltip: {
-                backgroundColor: 'rgba(11, 2, 45, 0.95)',
-                titleColor: '#FFFFFF',
-                bodyColor: '#9EA3B0',
-                borderColor: 'rgba(255,255,255,0.08)',
+                backgroundColor: 'var(--chart-tooltip-bg)',
+                titleColor: 'var(--chart-title)',
+                bodyColor: 'var(--chart-text)',
+                borderColor: 'var(--chart-grid)',
                 borderWidth: 1,
                 padding: 14,
                 cornerRadius: 12,

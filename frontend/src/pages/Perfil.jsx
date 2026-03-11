@@ -59,17 +59,17 @@ export default function Perfil() {
                 <div className="absolute top-0 right-0 p-8 opacity-10">
                     <User size={120} className="text-finance-primary" />
                 </div>
-                
+
                 <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
                     <div className="relative">
                         <div className="w-32 h-32 rounded-3xl bg-gradient-to-tr from-[#4F46E5] to-[#00D4FF] flex items-center justify-center text-white font-bold text-4xl shadow-[0_0_30px_rgba(0,212,255,0.3)] border-2 border-white/20">
                             {initials}
                         </div>
-                        <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-[#05011a] rounded-full border-2 border-white/10 flex items-center justify-center text-finance-primary shadow-lg">
+                        <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-finance-900 rounded-full border-2 border-white/10 flex items-center justify-center text-finance-primary shadow-lg">
                             <ShieldCheck size={20} />
                         </div>
                     </div>
-                    
+
                     <div className="text-center md:text-left">
                         <h1 className="text-4xl font-black text-white tracking-tight mb-2 uppercase">{user?.name}</h1>
                         <div className="flex flex-wrap justify-center md:justify-start gap-4 text-finance-muted font-medium text-sm">
@@ -191,7 +191,7 @@ export default function Perfil() {
                             <ShieldCheck size={16} className="text-finance-primary" />
                             {t('security_status')}
                         </h4>
-                        
+
                         <div className="space-y-4">
                             <div className="flex items-center justify-between">
                                 <span className="text-sm text-finance-muted">{t('levels') || 'Nivel de Protección'}</span>
@@ -202,13 +202,13 @@ export default function Perfil() {
                             <div className="h-2 bg-white/5 rounded-full overflow-hidden">
                                 <div className="h-full bg-finance-primary w-[85%] shadow-[0_0_10px_rgba(0,212,255,0.5)]" />
                             </div>
-                            
+
                             <div className="space-y-3 pt-4">
-                                <div className="flex items-center gap-3 text-xs text-white/70">
+                                <div className="flex items-center gap-3 text-xs text-finance-text">
                                     <CheckCircle2 size={14} className="text-emerald-400" />
                                     <span>{t('2fa_active') || 'Autenticación activa'}</span>
                                 </div>
-                                <div className="flex items-center gap-3 text-xs text-white/70">
+                                <div className="flex items-center gap-3 text-xs text-finance-text">
                                     <CheckCircle2 size={14} className="text-emerald-400" />
                                     <span>{t('encryption_ok') || 'Cifrado de grado bancario'}</span>
                                 </div>
@@ -229,7 +229,7 @@ export default function Perfil() {
                             <TrendingUp size={16} className="text-finance-neon" />
                             {t('activity_overview')}
                         </h4>
-                        
+
                         <div className="space-y-6">
                             {[
                                 { icon: <Wallet size={16} />, label: t('last_sync'), value: 'Hace 5 min' },

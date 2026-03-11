@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { Send, User, Sparkles, MessageSquare, Plus, Trash2, Search, Filter, Menu, X, Star } from 'lucide-react';
 import api from '../services/api';
 import iaLogo from '../assets/logo.png';
+import iaLogoLight from '../assets/logo claro.png';
+import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 import {
     Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler
@@ -30,6 +32,8 @@ function GrowthChart({ data }) {
 
 export default function ChatIA() {
     const { t } = useLanguage();
+    const { theme } = useTheme();
+    const isLight = theme === 'light';
     const [sessions, setSessions] = useState([]);
     const [currentSessionId, setCurrentSessionId] = useState(null);
     const [messages, setMessages] = useState([]);
@@ -334,7 +338,7 @@ export default function ChatIA() {
                         <div key={idx} className={`flex w-full ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                             <div className={`flex max-w-[90%] md:max-w-[75%] gap-4 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
                                 <div className={`w-8 h-8 flex-shrink-0 rounded-full flex items-center justify-center mt-auto ${msg.role === 'assistant' ? 'bg-finance-800 border border-finance-primary/30 p-0.5' : 'bg-finance-700'}`}>
-                                    {msg.role === 'assistant' ? <img src={iaLogo} className="w-full h-full object-cover rounded-full" /> : <User size={16} />}
+                                    {msg.role === 'assistant' ? <img src={isLight ? iaLogoLight : iaLogo} className="w-full h-full object-cover rounded-full" /> : <User size={16} />}
                                 </div>
                                 <div className={`flex flex-col gap-1 ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
                                     <div className={`p-4 rounded-2xl text-sm shadow-xl ${msg.role === 'user' ? 'bg-gradient-to-br from-[#8C30F5] to-[#4F46E5] text-white rounded-br-sm' : 'bg-[#1e1e2d] border border-white/5 text-finance-text rounded-bl-sm'}`}>
@@ -382,7 +386,7 @@ export default function ChatIA() {
                             </div>
                         </div>
                     ))}
-                    {isTyping && <div className="flex gap-4"><div className="w-8 h-8 flex-shrink-0 rounded-full bg-finance-800 p-0.5"><img src={iaLogo} className="w-full h-full rounded-full" /></div><div className="bg-white/5 p-4 rounded-2xl animate-pulse text-xs text-finance-muted">Escribiendo...</div></div>}
+                    {isTyping && <div className="flex gap-4"><div className="w-8 h-8 flex-shrink-0 rounded-full bg-finance-800 p-0.5"><img src={isLight ? iaLogoLight : iaLogo} className="w-full h-full rounded-full" /></div><div className="bg-white/5 p-4 rounded-2xl animate-pulse text-xs text-finance-muted">Escribiendo...</div></div>}
                     <div ref={messagesEndRef} />
                 </div>
 

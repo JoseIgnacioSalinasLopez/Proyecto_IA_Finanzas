@@ -8,17 +8,17 @@ export default {
     extend: {
       colors: {
         finance: {
-          900: '#05011a', /* Deepest Black/Blue for Page Background */
-          800: '#11111d', /* Dark Card Background as per Epic style */
-          700: 'rgba(255, 255, 255, 0.05)', /* Subtle Elite Border */
-          text: '#FFFFFF',
-          muted: '#94a3b8',
-          primary: '#00D4FF', /* Cyan Elite */
-          primaryHover: 'rgba(0, 212, 255, 0.8)',
-          danger: '#8C30F5', /* Purple Elite - Replaced Magenta for consistency */
-          dangerHover: 'rgba(140, 48, 245, 0.8)',
-          neon: '#00FFFF', /* Electric Aqua */
-          electric: '#7DF9FF', /* Electric Blue */
+          900: 'var(--bg-main)', /* Variable background */
+          800: 'var(--bg-card)', /* Variable card background */
+          700: 'rgba(255, 255, 255, 0.03)',
+          text: 'var(--text-main)',
+          muted: 'var(--text-muted)',
+          primary: 'var(--epic-cyan)',
+          primaryHover: 'rgba(0, 210, 255, 0.8)',
+          danger: 'var(--epic-purple)',
+          dangerHover: 'rgba(204, 32, 142, 0.8)',
+          neon: 'var(--epic-aqua)',
+          electric: 'var(--epic-indigo)',
         }
       },
       fontFamily: {

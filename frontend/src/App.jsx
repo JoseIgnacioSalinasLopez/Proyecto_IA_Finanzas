@@ -27,7 +27,7 @@ const DashboardLayout = ({ children }) => {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#05011a] text-finance-text relative font-sans">
+    <div className="flex h-screen overflow-hidden bg-finance-900 text-finance-text relative font-sans">
       {/* Fondo Global Épico */}
       <div className="absolute inset-0 epic-bg-animate opacity-30 z-0"></div>
 
@@ -78,7 +78,7 @@ function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#05011a] flex justify-center items-center">
+      <div className="min-h-screen bg-finance-900 flex justify-center items-center">
         <div className="flex flex-col items-center gap-4">
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-finance-primary"></div>
           <p className="text-finance-muted text-sm font-medium tracking-wide">{t('starting_system')}</p>

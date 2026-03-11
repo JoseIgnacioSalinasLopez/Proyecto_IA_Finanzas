@@ -143,7 +143,7 @@ export default function Dashboard() {
 
             {/* Encabezado con saludo personalizado */}
             <div className="animate-fade-in-up">
-                <h1 className="text-2xl md:text-3xl font-bold mb-0.5">
+                <h1 className="text-2xl md:text-3xl font-bold mb-0.5 text-finance-text">
                     {getGreeting(t)}, <span className="text-finance-primary">{user?.name?.split(' ')[0] || t('guest')}</span> 👋
                 </h1>
                 <p className="text-finance-muted text-sm capitalize">{getFormattedDate(language)}</p>
@@ -167,7 +167,7 @@ export default function Dashboard() {
                             ${summary.totalSpentThisMonth.toLocaleString()} / ${summary.totalBudget.toLocaleString()}
                         </span>
                     </div>
-                    <div className="h-2.5 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
+                    <div className="h-2.5 w-full bg-black/20 dark:bg-black/40 rounded-full overflow-hidden border border-white/5">
                         <div
                             className={`h-full transition-all duration-1000 ease-out ${(summary.totalSpentThisMonth / summary.totalBudget) > 0.9 ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.3)]' : 'bg-finance-primary'
                                 }`}
@@ -187,7 +187,7 @@ export default function Dashboard() {
                                 <Calendar size={24} strokeWidth={2} />
                             </div>
                             <div className="flex flex-col">
-                                <h3 className="text-lg font-black text-white leading-none">
+                                <h3 className="text-lg font-black text-finance-text leading-none">
                                     {t('engineering_card')}
                                 </h3>
                                 <span className="text-[10px] font-black tracking-widest text-finance-primary/80 uppercase mt-1">
@@ -233,7 +233,7 @@ export default function Dashboard() {
                                         return (
                                             <div key={key} className="space-y-4">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="z-10 w-[24px] h-[24px] rounded-full bg-[#0a0a0a] border border-finance-primary/30 flex items-center justify-center shadow-[0_0_10px_rgba(0,212,255,0.1)]">
+                                                    <div className="z-10 w-[24px] h-[24px] rounded-full bg-finance-900 border border-finance-primary/30 flex items-center justify-center shadow-[0_0_10px_rgba(0,212,255,0.1)]">
                                                         <div className="w-1.5 h-1.5 rounded-full bg-finance-primary animate-pulse shadow-[0_0_5px_#00d4ff]" />
                                                     </div>
                                                     <span className="text-[10px] font-black uppercase tracking-widest text-finance-primary/60 bg-finance-primary/5 px-2 py-0.5 rounded-md border border-finance-primary/10">
@@ -255,7 +255,7 @@ export default function Dashboard() {
                                                                     {tx.type === 'income' ? <ArrowUpRight size={18} /> : <ArrowDownRight size={18} />}
                                                                 </div>
                                                                 <div className="min-w-0">
-                                                                    <p className="font-bold text-sm text-white group-hover:text-finance-primary transition-colors truncate">
+                                                                    <p className="font-bold text-sm text-finance-text group-hover:text-finance-primary transition-colors truncate">
                                                                         {tx.description || tx.categories?.name || t('no_description')}
                                                                     </p>
                                                                     <div className="flex items-center gap-2 mt-1.5 font-bold">
@@ -294,7 +294,7 @@ export default function Dashboard() {
                                     })}
 
                                     <div className="pt-4 text-center">
-                                        <Link to="/resumen" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-finance-primary hover:text-white transition-all bg-finance-primary/5 hover:bg-finance-primary/20 px-4 py-2 rounded-full border border-finance-primary/10">
+                                        <Link to="/resumen" className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-finance-primary hover:text-finance-text transition-all bg-finance-primary/5 hover:bg-finance-primary/20 px-4 py-2 rounded-full border border-finance-primary/10">
                                             {t('view_all')} <Plus size={12} />
                                         </Link>
                                     </div>

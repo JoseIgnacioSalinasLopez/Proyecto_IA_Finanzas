@@ -31,10 +31,10 @@ function Modal({ title, onClose, children }) {
         >
             <div className="card p-8 w-full max-w-lg animate-scale-in">
                 <div className="flex justify-between items-center mb-6">
-                    <h2 id="modal-title" className="text-2xl font-bold text-white">{title}</h2>
+                    <h2 id="modal-title" className="text-2xl font-bold text-finance-text">{title}</h2>
                     <button
                         onClick={onClose}
-                        className="text-[#9EA3B0] hover:text-white hover:bg-white/5 p-1.5 rounded-lg transition-all"
+                        className="text-finance-muted hover:text-white hover:bg-white/5 p-1.5 rounded-lg transition-all"
                         aria-label={t('cancel')}
                     >
                         <X size={20} />
@@ -52,7 +52,7 @@ function TransactionForm({ formData, setFormData, categories, onSubmit, onClose,
         <form onSubmit={onSubmit} className="space-y-5" noValidate>
             {/* Tipo */}
             <div>
-                <label className="block text-sm mb-2 text-[#9EA3B0] font-semibold uppercase tracking-wide">
+                <label className="block text-sm mb-2 text-finance-muted font-semibold uppercase tracking-wide">
                     {t('movement_type')}
                 </label>
                 <div className="flex gap-3" role="group" aria-label={t('movement_type')}>
@@ -64,7 +64,7 @@ function TransactionForm({ formData, setFormData, categories, onSubmit, onClose,
                                 ? tKey === 'expense'
                                     ? 'bg-red-500/20 border-red-500 text-red-400 shadow-[0_0_12px_rgba(239,68,68,0.2)]'
                                     : 'bg-emerald-500/20 border-emerald-500 text-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.2)]'
-                                : 'bg-black/20 border-white/10 text-[#9EA3B0] hover:border-white/30'
+                                : 'bg-black/20 border-white/10 text-finance-muted hover:border-white/30'
                                 }`}
                         >
                             <div className="flex items-center justify-center gap-2">
@@ -79,7 +79,7 @@ function TransactionForm({ formData, setFormData, categories, onSubmit, onClose,
             {/* Monto + Fecha */}
             <div className="grid grid-cols-2 gap-4">
                 <div>
-                    <label htmlFor="tx-amount" className="block text-sm mb-2 text-[#9EA3B0] font-medium">{t('amount_label')} ($)</label>
+                    <label htmlFor="tx-amount" className="block text-sm mb-2 text-finance-muted font-medium">{t('amount_label')} ($)</label>
                     <input id="tx-amount" type="number" step="0.01" min="0.01" required placeholder="0.00"
                         className="input-field"
                         value={formData.amount}
@@ -95,9 +95,9 @@ function TransactionForm({ formData, setFormData, categories, onSubmit, onClose,
 
             {/* Categoría */}
             <div>
-                <label htmlFor="tx-category" className="block text-sm mb-2 text-[#9EA3B0] font-medium">{t('category_label')}</label>
+                <label htmlFor="tx-category" className="block text-sm mb-2 text-finance-muted font-medium">{t('category_label')}</label>
                 <select id="tx-category" required
-                    className="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white focus:outline-none focus:border-[#4F46E5] transition-colors"
+                    className="w-full p-3 rounded-xl bg-black/20 dark:bg-black/40 border border-white/10 text-finance-text transition-colors"
                     value={formData.category_id}
                     onChange={e => setFormData({ ...formData, category_id: e.target.value })}>
                     <option value="" disabled>{t('select_category')}</option>
@@ -110,17 +110,17 @@ function TransactionForm({ formData, setFormData, categories, onSubmit, onClose,
 
             {/* Descripción */}
             <div>
-                <label htmlFor="tx-description" className="block text-sm mb-2 text-[#9EA3B0] font-medium">{t('description_label')}</label>
+                <label htmlFor="tx-description" className="block text-sm mb-2 text-finance-muted font-medium">{t('description_label')}</label>
                 <input id="tx-description" type="text" required
                     placeholder={t('description_placeholder')}
-                    className="w-full p-3 rounded-xl bg-black/40 border border-white/10 text-white focus:outline-none focus:border-[#4F46E5] transition-colors"
+                    className="w-full p-3 rounded-xl bg-black/20 dark:bg-black/40 border border-white/10 text-finance-text transition-colors"
                     value={formData.description}
                     onChange={e => setFormData({ ...formData, description: e.target.value })} />
             </div>
 
             <div className="flex justify-end gap-3 mt-8 pt-4 border-t border-white/5">
                 <button type="button" onClick={onClose}
-                    className="px-5 py-2.5 rounded-xl text-[#9EA3B0] hover:text-white hover:bg-white/5 transition-colors font-medium">
+                    className="px-5 py-2.5 rounded-xl text-finance-muted hover:text-white hover:bg-white/5 transition-colors font-medium">
                     {t('cancel')}
                 </button>
                 <button type="submit"
@@ -359,7 +359,6 @@ export default function ResumenFinanciero() {
             // NOTIFICAR A OTROS COMPONENTES
             window.dispatchEvent(new CustomEvent('refresh-data'));
 
-            await fetchTransactionsAndStats();
             showToast(t('movement_deleted'));
         } catch (error) {
             showToast(t('error_loading'), 'error');
@@ -403,7 +402,6 @@ export default function ResumenFinanciero() {
             window.dispatchEvent(new CustomEvent('refresh-data'));
 
             setShowModal(false); setFormData(EMPTY_FORM); setEditingTx(null);
-            await fetchTransactionsAndStats();
         } catch (error) {
             showToast(t('registration_error'), 'error');
         }
@@ -461,7 +459,7 @@ export default function ResumenFinanciero() {
         <div className="min-h-screen p-6 flex items-center justify-center">
             <div className="text-center">
                 <div className="w-10 h-10 border-2 border-[#00D4FF] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                <p className="text-[#9EA3B0]">{t('loading')}</p>
+                <p className="text-finance-muted">{t('loading')}</p>
             </div>
         </div>
     );
@@ -469,7 +467,7 @@ export default function ResumenFinanciero() {
 
     const expensesData = {
         labels: stats.expensesByCategory.map(c => c.name),
-        datasets: [{ label: t('expense_distribution'), data: stats.expensesByCategory.map(c => c.amount), backgroundColor: stats.expensesByCategory.map(c => c.color), borderColor: '#161b22', borderWidth: 2 }]
+        datasets: [{ label: t('expense_distribution'), data: stats.expensesByCategory.map(c => c.amount), backgroundColor: stats.expensesByCategory.map(c => c.color), borderColor: 'var(--chart-border)', borderWidth: 2 }]
     };
 
     const savingsRate = stats.summary.totalIncome > 0
@@ -503,14 +501,14 @@ export default function ResumenFinanciero() {
     };
 
     return (
-        <div className="min-h-full p-0 text-white animate-fade-in relative z-10">
+        <div className="min-h-full p-0 text-finance-text dark:text-white animate-fade-in relative z-10">
             {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
 
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                 <div>
-                    <h1 className="text-2xl md:text-3xl font-bold">{t('finances')}</h1>
-                    <p className="text-[#9EA3B0] mt-1 text-sm">{t('organize_finances')}</p>
+                    <h1 className="text-2xl md:text-3xl font-bold text-finance-text">{t('finances')}</h1>
+                    <p className="text-finance-muted mt-1 text-sm">{t('organize_finances')}</p>
                 </div>
                 <div className="flex gap-2 flex-wrap">
                     {/* Exportar PDF */}
@@ -533,7 +531,7 @@ export default function ResumenFinanciero() {
                             exportToCSV(filteredTx, t, language);
                             showToast(t('exporting_tx'));
                         }}
-                        className="flex items-center gap-2 px-4 py-2.5 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white rounded-xl text-sm font-medium transition-all"
+                        className="flex items-center gap-2 px-4 py-2.5 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 border border-black/10 dark:border-white/10 hover:border-black/20 dark:hover:border-white/20 text-finance-text dark:text-white rounded-xl text-sm font-medium transition-all"
                         title={t('export_csv')}
                     >
                         <Download size={16} />
@@ -550,8 +548,8 @@ export default function ResumenFinanciero() {
             <div className="grid grid-cols-12 gap-5">
                 {/* Tarjetas de Resumen */}
                 <div className="col-span-12 md:col-span-4 card p-6 hover:border-[#00D4FF]/20 transition-all flex flex-col justify-center">
-                    <p className="text-[#9EA3B0] text-xs uppercase font-semibold tracking-wide mb-2">{t('net_balance')}</p>
-                    <h3 className={`text-3xl font-bold ${stats.summary.balance >= 0 ? 'text-[#00D4FF]' : 'text-red-400'}`}>
+                    <p className="text-finance-muted text-xs uppercase font-semibold tracking-wide mb-2">{t('net_balance')}</p>
+                    <h3 className={`text-3xl font-bold ${stats.summary.balance >= 0 ? 'text-finance-primary' : 'text-red-400'}`}>
                         ${stats.summary.balance.toLocaleString(language === 'en' ? 'en-US' : 'es-MX', { minimumFractionDigits: 2 })}
                     </h3>
                     <div className={`text-xs mt-2 font-semibold flex items-center gap-1 ${Number(savingsRate) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
@@ -559,13 +557,13 @@ export default function ResumenFinanciero() {
                     </div>
                 </div>
                 <div className="col-span-12 md:col-span-4 card p-6 flex flex-col justify-center">
-                    <p className="text-[#9EA3B0] text-xs uppercase font-semibold tracking-wide mb-2">{t('total_income')}</p>
+                    <p className="text-finance-muted text-xs uppercase font-semibold tracking-wide mb-2">{t('total_income')}</p>
                     <h3 className="text-3xl font-bold text-emerald-400">
                         ${stats.summary.totalIncome.toLocaleString(language === 'en' ? 'en-US' : 'es-MX', { minimumFractionDigits: 2 })}
                     </h3>
                 </div>
                 <div className="col-span-12 md:col-span-4 card p-6 flex flex-col justify-center">
-                    <p className="text-[#9EA3B0] text-xs uppercase font-semibold tracking-wide mb-2">{t('total_expense')}</p>
+                    <p className="text-finance-muted text-xs uppercase font-semibold tracking-wide mb-2">{t('total_expense')}</p>
                     <h3 className="text-3xl font-bold text-red-400">
                         ${stats.summary.totalExpense.toLocaleString(language === 'en' ? 'en-US' : 'es-MX', { minimumFractionDigits: 2 })}
                     </h3>
@@ -574,17 +572,17 @@ export default function ResumenFinanciero() {
                 {/* Gráficos */}
                 <div className="col-span-12 lg:col-span-8 card p-6 min-h-[360px] flex flex-col">
                     <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-base font-bold text-finance-muted">{t('movement_history')}</h3>
-                        <div className="flex bg-black/40 rounded-xl p-1 border border-white/5">
+                        <h3 className="text-base font-bold text-finance-text dark:text-finance-muted">{t('movement_history')}</h3>
+                        <div className="flex bg-black/10 dark:bg-black/40 rounded-xl p-1 border border-black/5 dark:border-white/5">
                             <button
                                 onClick={() => setChartPeriod('7days')}
-                                className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${chartPeriod === '7days' ? 'bg-[#00D4FF]/20 text-[#00D4FF] shadow-[0_0_10px_rgba(0,212,255,0.2)]' : 'text-[#9EA3B0] hover:text-white'}`}
+                                className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${chartPeriod === '7days' ? 'bg-[#00D4FF]/20 text-finance-primary shadow-[0_0_10px_rgba(0,212,255,0.2)]' : 'text-finance-muted hover:text-white'}`}
                             >
                                 {t('filter_week')}
                             </button>
                             <button
                                 onClick={() => setChartPeriod('30days')}
-                                className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${chartPeriod === '30days' ? 'bg-[#00D4FF]/20 text-[#00D4FF] shadow-[0_0_10px_rgba(0,212,255,0.2)]' : 'text-[#9EA3B0] hover:text-white'}`}
+                                className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${chartPeriod === '30days' ? 'bg-[#00D4FF]/20 text-finance-primary shadow-[0_0_10px_rgba(0,212,255,0.2)]' : 'text-finance-muted hover:text-white'}`}
                             >
                                 {t('filter_30_days')}
                             </button>
@@ -599,8 +597,8 @@ export default function ResumenFinanciero() {
                         ? <PieChart data={expensesData} title={t('expense_distribution')} />
                         : (
                             <div className="h-full flex flex-col items-center justify-center text-center">
-                                <p className="text-[#9EA3B0] text-sm">{t('no_expenses_cat')}</p>
-                                <p className="text-[#9EA3B0] text-xs mt-1 opacity-60">{t('register_to_see')}</p>
+                                <p className="text-finance-muted text-sm">{t('no_expenses_cat')}</p>
+                                <p className="text-finance-muted text-xs mt-1 opacity-60">{t('register_to_see')}</p>
                             </div>
                         )
                     }
@@ -610,21 +608,21 @@ export default function ResumenFinanciero() {
                 <div className="col-span-12 lg:col-span-8 card p-5 flex flex-col bg-white/5 backdrop-blur-md">
                     <div className="flex flex-col gap-3 mb-4">
                         <div className="flex flex-col sm:flex-row justify-between gap-3">
-                            <h3 className="text-base font-bold">{t('movement_history')}</h3>
+                            <h3 className="text-base font-bold text-finance-text">{t('movement_history')}</h3>
                             <div className="flex gap-2 flex-wrap items-center">
                                 {/* Buscador */}
                                 <div className="relative">
-                                    <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#9EA3B0]" />
+                                    <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-finance-muted" />
                                     <input
                                         type="text"
                                         placeholder={t('search_placeholder')}
                                         aria-label={t('search_placeholder')}
-                                        className="pl-8 pr-3 py-2 rounded-xl bg-black/40 border border-white/10 text-sm text-white focus:outline-none focus:border-[#4F46E5] w-36 transition-colors"
+                                        className="pl-8 pr-3 py-2 rounded-xl bg-black/5 dark:bg-black/40 border border-black/10 dark:border-white/10 text-sm text-finance-text dark:text-white focus:outline-none focus:border-[#4F46E5] w-36 transition-colors"
                                         value={search}
                                         onChange={e => setSearch(e.target.value)}
                                     />
                                     {search && (
-                                        <button onClick={() => setSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-[#9EA3B0] hover:text-white" aria-label={t('clear_search')}>
+                                        <button onClick={() => setSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-finance-muted hover:text-white" aria-label={t('clear_search')}>
                                             <X size={12} />
                                         </button>
                                     )}
@@ -634,7 +632,7 @@ export default function ResumenFinanciero() {
                                     {[['all', t('filter_all')], ['income', t('total_income')], ['expense', t('total_expense')]].map(([val, label]) => (
                                         <button key={val} onClick={() => setFilter(val)}
                                             aria-pressed={filter === val}
-                                            className={`px-3 py-2 rounded-xl text-xs font-bold transition-all ${filter === val ? 'btn-primary py-2 text-black' : 'bg-black/20 text-[#9EA3B0] hover:text-white border border-white/10'}`}>
+                                            className={`px-3 py-2 rounded-xl text-xs font-bold transition-all ${filter === val ? 'btn-primary py-2 text-black' : 'bg-black/10 dark:bg-black/20 text-finance-muted hover:text-finance-text dark:hover:text-white border border-black/5 dark:border-white/10'}`}>
                                             {label}
                                         </button>
                                     ))}
@@ -643,13 +641,13 @@ export default function ResumenFinanciero() {
                         </div>
 
                         <div className="flex items-center gap-2 flex-wrap">
-                            <Calendar size={13} className="text-[#9EA3B0] flex-shrink-0" />
-                            <span className="text-xs text-[#9EA3B0] font-medium">{t('period_label')}</span>
+                            <Calendar size={13} className="text-finance-muted flex-shrink-0" />
+                            <span className="text-xs text-finance-muted font-medium">{t('period_label')}</span>
                             {[['all', t('filter_all')], ['thisMonth', t('filter_month')], ['lastMonth', t('filter_last_month')], ['custom', t('filter_custom')]].map(([val, label]) => (
                                 <button key={val}
                                     onClick={() => { setDateFilter(val); if (val === 'custom') setShowDatePicker(true); else setShowDatePicker(false); }}
                                     aria-pressed={dateFilter === val}
-                                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${dateFilter === val ? 'bg-[#00D4FF]/20 text-[#00D4FF] border border-[#00D4FF]/40' : 'bg-black/20 text-[#9EA3B0] hover:text-white border border-white/10'}`}>
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${dateFilter === val ? 'bg-[#00D4FF]/20 text-finance-primary border border-[#00D4FF]/40' : 'bg-black/10 dark:bg-black/20 text-finance-muted hover:text-finance-text dark:hover:text-white border border-black/5 dark:border-white/10'}`}>
                                     {label}
                                 </button>
                             ))}
@@ -659,7 +657,7 @@ export default function ResumenFinanciero() {
                         {showDatePicker && dateFilter === 'custom' && (
                             <div className="flex gap-4 flex-wrap items-center animate-fade-in">
                                 <div className="flex items-center gap-2">
-                                    <span className="text-[10px] uppercase font-bold text-[#9EA3B0] tracking-wider">{t('from_label')}</span>
+                                    <span className="text-[10px] uppercase font-bold text-finance-muted tracking-wider">{t('from_label')}</span>
                                     <div className="w-40">
                                         <DatePickerElite
                                             value={customDateStart}
@@ -668,7 +666,7 @@ export default function ResumenFinanciero() {
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <span className="text-[10px] uppercase font-bold text-[#9EA3B0] tracking-wider">{t('to_label')}</span>
+                                    <span className="text-[10px] uppercase font-bold text-finance-muted tracking-wider">{t('to_label')}</span>
                                     <div className="w-40">
                                         <DatePickerElite
                                             value={customDateEnd}
@@ -682,8 +680,8 @@ export default function ResumenFinanciero() {
 
                     <div className="overflow-x-auto flex-1 overflow-y-auto max-h-[380px]" style={{ scrollbarWidth: 'thin', scrollbarColor: '#00D4FF transparent' }}>
                         <table className="w-full text-left border-collapse min-w-[480px]">
-                            <thead className="sticky top-0 bg-black/60 backdrop-blur-md z-10">
-                                <tr className="border-b border-white/10 text-[#9EA3B0] text-xs uppercase">
+                            <thead className="sticky top-0 bg-white dark:bg-black/60 backdrop-blur-md z-10">
+                                <tr className="border-b border-black/5 dark:border-white/10 text-finance-muted text-xs uppercase">
                                     <th className="p-3 font-semibold">{t('date_label')}</th>
                                     <th className="p-3 font-semibold">{t('description_label')}</th>
                                     <th className="p-3 font-semibold">{t('categories')}</th>
@@ -693,17 +691,17 @@ export default function ResumenFinanciero() {
                             </thead>
                             <tbody>
                                 {filteredTx.map(tx => (
-                                    <tr key={tx.id} className="border-b border-white/5 hover:bg-white/4 transition-colors">
-                                        <td className="p-3 text-sm text-[#BCBFCD]">
+                                    <tr key={tx.id} className="border-b border-black/5 dark:border-white/5 hover:bg-black/5 dark:hover:bg-white/4 transition-colors text-finance-text dark:text-white">
+                                        <td className="p-3 text-sm text-finance-muted dark:text-finance-muted">
                                             {/* Fix date offset: parse string directly instead of using constructor */}
                                             {(() => {
                                                 const [y, m, d] = tx.date.split('T')[0].split('-');
                                                 return language === 'en' ? `${m}/${d}/${y}` : `${d}/${m}/${y}`;
                                             })()}
                                         </td>
-                                        <td className="p-3 text-sm text-white font-medium max-w-[160px] truncate">{tx.description || '—'}</td>
+                                        <td className="p-3 text-sm font-medium max-w-[160px] truncate">{tx.description || '—'}</td>
                                         <td className="p-3">
-                                            <span className="px-2 py-1 rounded-md text-xs bg-black/40 border border-white/10 text-[#9EA3B0] whitespace-nowrap">
+                                            <span className="px-2 py-1 rounded-md text-xs bg-black/5 dark:bg-black/40 border border-black/5 dark:border-white/10 text-finance-muted whitespace-nowrap">
                                                 {tx.categories?.name || t('no_category')}
                                             </span>
                                         </td>
@@ -714,11 +712,11 @@ export default function ResumenFinanciero() {
                                             {/* Acciones siempre visibles */}
                                             <div className="flex gap-1 justify-end">
                                                 <button onClick={() => openEdit(tx)} aria-label={`${t('edit_label')} ${t('movement_type')}`}
-                                                    className="text-[#9EA3B0] hover:text-[#4F46E5] p-2 rounded-lg hover:bg-[#4F46E5]/10 transition-colors">
+                                                    className="text-finance-muted hover:text-finance-primary p-2 rounded-lg hover:bg-finance-primary/10 transition-colors">
                                                     <Pencil size={14} />
                                                 </button>
                                                 <button onClick={() => setShowDeleteConfirm(tx)} aria-label={`${t('delete_label')} ${t('movement_type')}`}
-                                                    className="text-[#9EA3B0] hover:text-red-500 p-2 rounded-lg hover:bg-red-500/10 transition-colors">
+                                                    className="text-finance-muted hover:text-red-500 p-2 rounded-lg hover:bg-red-500/10 transition-colors">
                                                     <Trash2 size={14} />
                                                 </button>
                                             </div>
@@ -727,7 +725,7 @@ export default function ResumenFinanciero() {
                                 ))}
                                 {filteredTx.length === 0 && (
                                     <tr>
-                                        <td colSpan="5" className="p-10 text-center text-[#9EA3B0]">
+                                        <td colSpan="5" className="p-10 text-center text-finance-muted">
                                             <Filter size={32} className="mx-auto mb-3 opacity-20" />
                                             {search || filter !== 'all' || dateFilter !== 'all'
                                                 ? t('no_results_search')
@@ -738,7 +736,7 @@ export default function ResumenFinanciero() {
                             </tbody>
                         </table>
                     </div>
-                    <div className="flex justify-between items-center mt-3 text-xs text-[#9EA3B0]">
+                    <div className="flex justify-between items-center mt-3 text-xs text-finance-muted">
                         <span>{filteredTx.length} {t('transactions').toLowerCase()} {dateFilter !== 'all' ? `· ${getDateFilterLabel()}` : ''}</span>
                         {filteredTx.length > 0 && (
                             <div className="flex gap-3">
@@ -764,23 +762,23 @@ export default function ResumenFinanciero() {
                         </div>
 
                         <div className="space-y-4">
-                            <div className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5">
-                                <span className="text-xs text-[#9EA3B0]">{t('monthly_income')}</span>
+                            <div className="flex justify-between items-center p-3 bg-black/5 dark:bg-white/5 rounded-xl border border-black/5 dark:border-white/5">
+                                <span className="text-xs text-finance-muted">{t('monthly_income')}</span>
                                 <span className="font-bold text-emerald-400">
                                     ${(stats?.summary?.totalIncome || 0).toLocaleString(language === 'en' ? 'en-US' : 'es-MX', { minimumFractionDigits: 2 })}
                                 </span>
                             </div>
 
                             <div className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5">
-                                <span className="text-xs text-[#9EA3B0]">{t('monthly_expenses')}</span>
+                                <span className="text-xs text-finance-muted">{t('monthly_expenses')}</span>
                                 <span className="font-bold text-red-400">
                                     ${(stats?.summary?.totalSpentThisMonth || 0).toLocaleString(language === 'en' ? 'en-US' : 'es-MX', { minimumFractionDigits: 2 })}
                                 </span>
                             </div>
 
-                            <div className="pt-4 border-t border-white/10">
+                            <div className="pt-4 border-t border-black/10 dark:border-white/10">
                                 <div className="flex justify-between items-center px-1">
-                                    <span className="text-xs font-bold text-white uppercase tracking-wider">{t('monthly_savings')}</span>
+                                    <span className="text-xs font-bold text-finance-text dark:text-white uppercase tracking-wider">{t('monthly_savings')}</span>
                                     <span className={`text-lg font-black ${(stats?.summary?.totalIncome - stats?.summary?.totalSpentThisMonth) >= 0 ? 'text-finance-primary drop-shadow-[0_0_8px_rgba(0,212,255,0.4)]' : 'text-red-500'}`}>
                                         ${((stats?.summary?.totalIncome || 0) - (stats?.summary?.totalSpentThisMonth || 0)).toLocaleString(language === 'en' ? 'en-US' : 'es-MX', { minimumFractionDigits: 2 })}
                                     </span>
@@ -789,8 +787,8 @@ export default function ResumenFinanciero() {
 
                             {/* Categoría más gastada del mes */}
                             {stats.monthlyExpensesByCategory?.length > 0 && (
-                                <div className="mt-6 p-4 bg-black/20 rounded-2xl border border-white/5">
-                                    <p className="text-[10px] text-[#9EA3B0] uppercase font-bold tracking-[0.15em] mb-2">{t('most_spent_category')}</p>
+                                <div className="mt-6 p-4 bg-black/5 dark:bg-black/20 rounded-2xl border border-black/5 dark:border-white/5">
+                                    <p className="text-[10px] text-finance-muted uppercase font-bold tracking-[0.15em] mb-2">{t('most_spent_category')}</p>
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2">
                                             <div className="w-2 h-2 rounded-full" style={{ backgroundColor: stats.monthlyExpensesByCategory.sort((a, b) => b.amount - a.amount)[0].color }} />
@@ -798,7 +796,7 @@ export default function ResumenFinanciero() {
                                                 {stats.monthlyExpensesByCategory.sort((a, b) => b.amount - a.amount)[0].name}
                                             </span>
                                         </div>
-                                        <span className="text-sm font-black text-white">
+                                        <span className="text-sm font-black text-finance-text dark:text-white">
                                             ${stats.monthlyExpensesByCategory.sort((a, b) => b.amount - a.amount)[0].amount.toLocaleString(language === 'en' ? 'en-US' : 'es-MX')}
                                         </span>
                                     </div>
@@ -819,9 +817,9 @@ export default function ResumenFinanciero() {
 
             {/* Modal de Confirmación de Eliminación (estilizado) */}
             {showDeleteConfirm && (
-                <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center z-50 p-4 modal-overlay"
+                <div className="fixed inset-0 bg-black/40 dark:bg-black/70 backdrop-blur-sm flex justify-center items-center z-50 p-4 modal-overlay"
                     role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
-                    <div className="card p-6 w-full max-w-sm border-red-500/20 animate-scale-in">
+                    <div className="card p-6 w-full max-w-sm border border-black/5 dark:border-red-500/20 animate-scale-in">
                         <div className="flex items-center gap-3 mb-4">
                             <div className="p-2.5 bg-red-500/15 rounded-xl">
                                 <Trash2 size={20} className="text-red-400" />
@@ -829,15 +827,15 @@ export default function ResumenFinanciero() {
                             <h2 id="delete-modal-title" className="text-lg font-bold">{t('delete_confirm')}</h2>
                         </div>
                         <p className="text-[#9EA3B0] text-sm mb-2">{t('delete_warning')}</p>
-                        <div className="p-3 bg-black/40 border border-white/5 rounded-xl mb-5 text-sm">
-                            <p className="font-semibold">{showDeleteConfirm.description || t('no_description')}</p>
+                        <div className="p-3 bg-black/5 dark:bg-black/40 border border-black/5 dark:border-white/5 rounded-xl mb-5 text-sm">
+                            <p className="font-semibold text-finance-text dark:text-white">{showDeleteConfirm.description || t('no_description')}</p>
                             <p className={`font-bold mt-0.5 ${showDeleteConfirm.type === 'income' ? 'text-emerald-400' : 'text-red-400'}`}>
                                 {showDeleteConfirm.type === 'income' ? '+' : '-'}${Number(showDeleteConfirm.amount).toLocaleString(language === 'en' ? 'en-US' : 'es-MX', { minimumFractionDigits: 2 })}
                             </p>
                         </div>
                         <div className="flex gap-3">
                             <button onClick={() => setShowDeleteConfirm(null)}
-                                className="flex-1 px-4 py-2.5 text-[#9EA3B0] hover:text-white hover:bg-white/5 rounded-xl transition-colors font-medium text-sm">
+                                className="flex-1 px-4 py-2.5 text-[#9EA3B0] hover:text-finance-text dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 rounded-xl transition-colors font-medium text-sm">
                                 {t('cancel')}
                             </button>
                             <button onClick={() => handleDelete(showDeleteConfirm.id)}

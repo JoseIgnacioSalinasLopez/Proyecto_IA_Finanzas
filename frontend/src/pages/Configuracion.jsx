@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
-import { Globe, Shield, Bell, Moon, Clock } from 'lucide-react';
+import { useTheme } from '../context/ThemeContext';
+import { Globe, Shield, Bell, Moon, Clock, Sun } from 'lucide-react';
 import api from '../services/api';
 import Toast from '../components/ui/Toast';
 
 export default function Configuracion() {
     const { language, setLanguage, t } = useLanguage();
+    const { theme, toggleTheme } = useTheme();
     const [activeTab, setActiveTab] = useState('language'); // 'language', 'security', 'notifications'
     const [toast, setToast] = useState(null);
     const [securityData, setSecurityData] = useState({ current: '', new: '', confirm: '' });
@@ -92,21 +94,21 @@ export default function Configuracion() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {/* Navegación lateral de Ajustes */}
                     <div className="space-y-2">
-                        <button 
+                        <button
                             onClick={() => setActiveTab('language')}
                             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold border transition-all ${activeTab === 'language' ? 'bg-finance-primary/10 text-finance-primary border-finance-primary/20 shadow-sm' : 'text-finance-muted border-transparent hover:bg-white/5 hover:text-finance-text'}`}
                         >
                             <Globe size={18} />
                             <span>{t('language')}</span>
                         </button>
-                        <button 
+                        <button
                             onClick={() => setActiveTab('security')}
                             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold border transition-all ${activeTab === 'security' ? 'bg-finance-primary/10 text-finance-primary border-finance-primary/20 shadow-sm' : 'text-finance-muted border-transparent hover:bg-white/5 hover:text-finance-text'}`}
                         >
                             <Shield size={18} />
                             <span>{t('security')}</span>
                         </button>
-                        <button 
+                        <button
                             onClick={() => setActiveTab('notifications')}
                             className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold border transition-all ${activeTab === 'notifications' ? 'bg-finance-primary/10 text-finance-primary border-finance-primary/20 shadow-sm' : 'text-finance-muted border-transparent hover:bg-white/5 hover:text-finance-text'}`}
                         >
@@ -123,7 +125,7 @@ export default function Configuracion() {
                                     <div className="p-3 bg-finance-primary/10 rounded-2xl">
                                         <Globe size={24} className="text-finance-primary" />
                                     </div>
-                                    <h2 className="text-xl font-bold">{t('select_language')}</h2>
+                                    <h2 className="text-xl font-bold text-finance-text">{t('select_language')}</h2>
                                 </div>
 
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -133,7 +135,7 @@ export default function Configuracion() {
                                     >
                                         <div className="flex items-center gap-3">
                                             <span className="text-2xl">🇪🇸</span>
-                                            <span className="font-bold">{t('spanish')}</span>
+                                            <span className="font-bold text-finance-text">{t('spanish')}</span>
                                         </div>
                                         {language === 'es' && <div className="w-2 h-2 rounded-full bg-finance-primary shadow-[0_0_8px_rgba(0,212,255,0.6)]" />}
                                     </button>
@@ -144,7 +146,7 @@ export default function Configuracion() {
                                     >
                                         <div className="flex items-center gap-3">
                                             <span className="text-2xl">🇺🇸</span>
-                                            <span className="font-bold">{t('english')}</span>
+                                            <span className="font-bold text-finance-text">{t('english')}</span>
                                         </div>
                                         {language === 'en' && <div className="w-2 h-2 rounded-full bg-finance-primary shadow-[0_0_8px_rgba(0,212,255,0.6)]" />}
                                     </button>
@@ -165,7 +167,7 @@ export default function Configuracion() {
                                     <div className="p-3 bg-red-500/10 rounded-2xl">
                                         <Shield size={24} className="text-red-500" />
                                     </div>
-                                    <h2 className="text-xl font-bold">{t('account_security')}</h2>
+                                    <h2 className="text-xl font-bold text-finance-text">{t('account_security')}</h2>
                                 </div>
 
                                 <form onSubmit={async (e) => {
@@ -190,23 +192,23 @@ export default function Configuracion() {
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                         <div>
                                             <label className="block text-sm text-finance-muted mb-1">{t('password_new')}</label>
-                                            <input 
-                                                type="password" 
-                                                className="input-field" 
+                                            <input
+                                                type="password"
+                                                className="input-field"
                                                 value={securityData.new}
-                                                onChange={e => setSecurityData({...securityData, new: e.target.value})}
-                                                required 
+                                                onChange={e => setSecurityData({ ...securityData, new: e.target.value })}
+                                                required
                                                 placeholder="••••••••"
                                             />
                                         </div>
                                         <div>
                                             <label className="block text-sm text-finance-muted mb-1">{t('password_confirm')}</label>
-                                            <input 
-                                                type="password" 
-                                                className="input-field" 
+                                            <input
+                                                type="password"
+                                                className="input-field"
                                                 value={securityData.confirm}
-                                                onChange={e => setSecurityData({...securityData, confirm: e.target.value})}
-                                                required 
+                                                onChange={e => setSecurityData({ ...securityData, confirm: e.target.value })}
+                                                required
                                                 placeholder="••••••••"
                                             />
                                         </div>
@@ -228,7 +230,7 @@ export default function Configuracion() {
                                         <div className="p-3 bg-finance-neon/10 rounded-2xl">
                                             <Bell size={24} className="text-finance-neon" />
                                         </div>
-                                        <h2 className="text-xl font-bold">{t('notifications')}</h2>
+                                        <h2 className="text-xl font-bold text-finance-text">{t('notifications')}</h2>
                                     </div>
 
                                     <div className="space-y-4">
@@ -239,8 +241,8 @@ export default function Configuracion() {
                                             { id: 'ai', label: t('notif_ai_tips') },
                                         ].map(n => (
                                             <div key={n.id} className="flex justify-between items-center p-4 bg-white/5 rounded-xl border border-white/5">
-                                                <span className="font-bold text-sm">{n.label}</span>
-                                                <button 
+                                                <span className="font-bold text-sm text-finance-text">{n.label}</span>
+                                                <button
                                                     onClick={() => toggleNotif(n.id)}
                                                     className={`w-12 h-6 rounded-full transition-all flex items-center px-1 ${notifSettings[n.id] ? 'bg-finance-primary shadow-[0_0_10px_#00D4FF]' : 'bg-white/10'}`}
                                                 >
@@ -256,7 +258,7 @@ export default function Configuracion() {
                                         <div className="p-3 bg-finance-primary/10 rounded-2xl">
                                             <Clock size={24} className="text-finance-primary" />
                                         </div>
-                                        <h2 className="text-xl font-bold">{t('timeline_settings')}</h2>
+                                        <h2 className="text-xl font-bold text-finance-text">{t('timeline_settings')}</h2>
                                     </div>
 
                                     <div className="space-y-4">
@@ -266,10 +268,10 @@ export default function Configuracion() {
                                         ].map(s => (
                                             <div key={s.id} className="flex justify-between items-center p-4 bg-white/5 rounded-xl border border-white/5">
                                                 <div className="flex flex-col">
-                                                    <span className="font-bold text-sm">{s.label}</span>
+                                                    <span className="font-bold text-sm text-finance-text">{s.label}</span>
                                                     <span className="text-[10px] text-finance-muted uppercase tracking-tighter">{s.desc}</span>
                                                 </div>
-                                                <button 
+                                                <button
                                                     onClick={() => toggleTimeline(s.id)}
                                                     className={`w-12 h-6 rounded-full transition-all flex items-center px-1 ${timelineSettings[s.id] ? 'bg-finance-primary shadow-[0_0_10px_#00D4FF]' : 'bg-white/10'}`}
                                                 >
@@ -282,18 +284,29 @@ export default function Configuracion() {
                             </div>
                         )}
 
-                        {/* Modo Oscuro (Visual) */}
-                        <div className="card border-white/5 bg-white/5">
-                            <div className="flex justify-between items-center">
+
+                        {/* Apariencia - Modo Claro/Oscuro */}
+                        <div className="card border-white/5 bg-white/5 animate-slide-in">
+                            <div className="flex justify-between items-center transition-all">
                                 <div className="flex items-center gap-3">
-                                    <div className="p-2 bg-indigo-500/10 rounded-xl">
-                                        <Moon size={20} className="text-indigo-400" />
+                                    <div className={`p-3 rounded-2xl transition-colors ${theme === 'dark' ? 'bg-indigo-500/10' : 'bg-amber-500/10'}`}>
+                                        {theme === 'dark' ? (
+                                            <Moon size={24} className="text-indigo-400" />
+                                        ) : (
+                                            <Sun size={24} className="text-amber-500" />
+                                        )}
                                     </div>
-                                    <span className="font-bold">{t('dark_mode')}</span>
+                                    <div className="flex flex-col">
+                                        <span className="font-bold text-sm tracking-tight">{t('appearance')}</span>
+                                        <span className="text-[10px] text-finance-muted uppercase font-bold tracking-widest">{theme === 'dark' ? t('dark_mode') : t('light_mode')}</span>
+                                    </div>
                                 </div>
-                                <div className="w-12 h-6 bg-finance-primary rounded-full flex items-center px-1 shadow-[0_0_10px_#00D4FF]">
-                                    <div className="w-4 h-4 bg-white rounded-full shadow-sm ml-auto" />
-                                </div>
+                                <button
+                                    onClick={toggleTheme}
+                                    className={`w-14 h-7 rounded-full transition-all duration-300 flex items-center px-1.5 ${theme === 'dark' ? 'bg-finance-primary shadow-[0_0_15px_rgba(0,212,255,0.4)]' : 'bg-black/10'}`}
+                                >
+                                    <div className={`w-4 h-4 bg-white rounded-full shadow-lg transform transition-transform duration-300 ${theme === 'dark' ? 'translate-x-7' : 'translate-x-0'}`} />
+                                </button>
                             </div>
                         </div>
                     </div>

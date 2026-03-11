@@ -355,14 +355,14 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
     const prevGoal = () => goals.length > 0 && setCurrentGoalIndex((currentGoalIndex - 1 + goals.length) % goals.length);
 
     return (
-        <div className="text-white overflow-hidden flex flex-col h-full font-sans">
+        <div className="text-finance-text overflow-hidden flex flex-col h-full font-sans">
 
 
             <div className="grid grid-cols-1 2xl:grid-cols-12 gap-8 flex-1 overflow-hidden">
                 <div className="2xl:col-span-5 space-y-8 flex flex-col justify-start 2xl:border-r border-white/5 2xl:pr-6 overflow-y-auto custom-scrollbar">
                     {/* Survival Engine */}
                     <section>
-                        <div className="flex items-center gap-2 mb-4 text-white">
+                        <div className="flex items-center gap-2 mb-4 text-finance-text">
                             <Zap size={14} className="text-finance-neon" />
                             <h3 className="text-xs font-bold uppercase tracking-wider">{t('survival_engine')}</h3>
                         </div>
@@ -394,7 +394,7 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
 
                     {/* Apartados (Mes Actual) */}
                     <section>
-                        <div className="flex items-center gap-2 mb-4 text-white">
+                        <div className="flex items-center gap-2 mb-4 text-finance-text">
                             <PieChart size={14} className="text-finance-primary" />
                             <h3 className="text-xs font-bold uppercase tracking-wider">{t('budget_allocation')}</h3>
                         </div>
@@ -402,9 +402,9 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                             {budgetAnalysis?.length > 0 ? budgetAnalysis.map((b, idx) => (
                                 <div key={idx} className="relative group">
                                     <div className="flex justify-between items-end mb-2">
-                                        <p className="text-xs font-bold uppercase tracking-wider">{b.category || t('uncategorized')}</p>
+                                        <p className="text-xs font-bold uppercase tracking-wider text-finance-text">{b.category || t('uncategorized')}</p>
                                         <div className="text-right">
-                                            <p className="text-sm font-mono font-black">${b.spent.toLocaleString()} <span className="text-[10px] text-finance-muted font-normal">/ ${b.limit.toLocaleString()}</span></p>
+                                            <p className="text-sm font-mono font-black text-finance-text">${b.spent.toLocaleString()} <span className="text-[10px] text-finance-muted font-normal">/ ${b.limit.toLocaleString()}</span></p>
                                         </div>
                                     </div>
                                     <div className="h-1.5 bg-black/40 rounded-full overflow-hidden border border-white/5">
@@ -426,17 +426,17 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                     {/* Strategic Goals */}
                     <section className="mt-auto pb-4">
                         <div className="flex justify-between items-center mb-4">
-                            <div className="flex items-center gap-2 text-white">
+                            <div className="flex items-center gap-2 text-finance-text">
                                 <TrendingUp size={14} className="text-finance-neon" />
-                                <h3 className="text-xs font-bold uppercase tracking-wider">{t('strategic_goals')}</h3>
+                                <h3 className="text-xs font-bold uppercase tracking-wider text-finance-text">{t('strategic_goals')}</h3>
                             </div>
                             {goals.length > 1 && (
                                 <div className="flex items-center gap-2">
-                                    <button onClick={prevGoal} className="p-1 hover:bg-white/10 rounded-full transition-colors text-finance-muted hover:text-white">
+                                    <button onClick={prevGoal} className="p-1 hover:bg-white/10 rounded-full transition-colors text-finance-muted hover:text-finance-text">
                                         <ChevronLeft size={16} />
                                     </button>
                                     <span className="text-[10px] font-mono text-finance-muted">{currentGoalIndex + 1}/{goals.length}</span>
-                                    <button onClick={nextGoal} className="p-1 hover:bg-white/10 rounded-full transition-colors text-finance-muted hover:text-white">
+                                    <button onClick={nextGoal} className="p-1 hover:bg-white/10 rounded-full transition-colors text-finance-muted hover:text-finance-text">
                                         <ChevronRight size={16} />
                                     </button>
                                 </div>
@@ -448,15 +448,15 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                                     <Target size={24} />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-bold mb-2 truncate uppercase tracking-tight">{goals[currentGoalIndex].name}</p>
-                                    <div className="h-2 bg-black/40 rounded-full mb-2 overflow-hidden border border-white/5">
+                                    <p className="text-sm font-bold mb-2 truncate uppercase tracking-tight text-finance-text">{goals[currentGoalIndex].name}</p>
+                                    <div className="h-2 bg-black/20 dark:bg-black/40 rounded-full mb-2 overflow-hidden border border-white/5">
                                         <div
                                             className="h-full bg-finance-primary shadow-[0_0_10px_rgba(0,212,255,0.4)] transition-all duration-1000"
                                             style={{ width: `${Math.min((goals[currentGoalIndex].current_amount / goals[currentGoalIndex].target_amount) * 100, 100)}%` }}
                                         ></div>
                                     </div>
                                     <div className="flex justify-between text-[11px] text-finance-muted font-mono font-bold">
-                                        <span>${Number(goals[currentGoalIndex].current_amount || 0).toLocaleString()} / ${Number(goals[currentGoalIndex].target_amount || 0).toLocaleString()}</span>
+                                        <span className="text-finance-text">${Number(goals[currentGoalIndex].current_amount || 0).toLocaleString()} / ${Number(goals[currentGoalIndex].target_amount || 0).toLocaleString()}</span>
                                         <span className="text-finance-primary">
                                             {((goals[currentGoalIndex].current_amount / goals[currentGoalIndex].target_amount) * 100).toFixed(0)}%
                                         </span>
@@ -475,7 +475,7 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                 {/* Smart Timeline section remains similarly structured but with icon updates */}
                 <div className="2xl:col-span-7 flex flex-col h-full overflow-hidden">
                     <div className="flex justify-between items-center mb-6">
-                        <div className="flex items-center gap-2 text-white">
+                        <div className="flex items-center gap-2 text-finance-text">
                             <Clock size={14} className="text-finance-neon" />
                             <h3 className="text-xs font-bold uppercase tracking-wider">{t('smart_timeline')}</h3>
                         </div>
@@ -513,7 +513,7 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                                             'bg-white/5 border-white/5 hover:border-white/10'}`}>
 
                                     {deleteConfirmId === item.id ? (
-                                        <div className="absolute inset-0 bg-[#0a061d] z-20 flex items-center justify-between px-6 animate-fade-in">
+                                        <div className="absolute inset-0 bg-finance-900 z-20 flex items-center justify-between px-6 animate-fade-in">
                                             <span className="text-xs font-bold text-red-400">{t('delete_event_confirm')}</span>
                                             <div className="flex gap-3">
                                                 <button onClick={() => setDeleteConfirmId(null)} className="text-[10px] uppercase font-black text-finance-muted hover:text-white">{t('keep_action')}</button>
@@ -529,7 +529,7 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                                                             item.status === 'today' ? 'text-orange-500' : 'text-finance-primary'}`}>
                                                         {item.time}
                                                     </p>
-                                                    <h4 className="text-sm font-bold truncate leading-tight uppercase tracking-tight">{item.title}</h4>
+                                                    <h4 className="text-sm font-bold truncate leading-tight uppercase tracking-tight text-finance-text">{item.title}</h4>
                                                 </div>
                                                 <div className="flex items-center gap-2 opacity-100 transition-opacity">
                                                     {item.isManual && (
@@ -549,7 +549,7 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                                                 <p className="text-[11px] text-finance-muted max-w-[70%] leading-relaxed font-medium">
                                                     {item.description}
                                                 </p>
-                                                <span className={`text-base font-mono font-black ${item.status === 'expired' ? 'text-red-500' : 'text-white'}`}>
+                                                <span className={`text-base font-mono font-black ${item.status === 'expired' ? 'text-red-500' : 'text-finance-text'}`}>
                                                     {item.amount > 0 ? `$${item.amount.toLocaleString()}` : ''}
                                                 </span>
                                             </div>
@@ -559,7 +559,7 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                             </div>
                         )) : (
                             <div className="py-12 text-center border-2 border-dashed border-white/5 rounded-3xl">
-                                <Clock size={40} className="mx-auto text-white/5 mb-3" />
+                                <Clock size={40} className="mx-auto text-finance-muted/20 mb-3" />
                                 <p className="text-xs text-finance-muted italic font-medium">{t('no_events')}</p>
                             </div>
                         )}
@@ -569,10 +569,10 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
 
             {showEventModal && (
                 <div className="fixed inset-0 bg-black/80 backdrop-blur-xl flex justify-center items-center z-50 p-6 animate-fade-in">
-                    <div className="card max-w-lg w-full p-8 relative overflow-visible bg-[#0c0821] border-white/10 animate-scale-in">
+                    <div className="card max-w-lg w-full p-8 relative overflow-visible bg-finance-800 border-white/10 animate-scale-in">
                         <div className="absolute -top-10 -right-10 p-20 bg-finance-primary/5 rounded-full blur-3xl" />
 
-                        <h2 className="text-2xl font-black mb-8 text-white uppercase tracking-tighter flex items-center gap-3">
+                        <h2 className="text-2xl font-black mb-8 text-finance-text uppercase tracking-tighter flex items-center gap-3">
                             {editEventId ? <Pencil size={24} className="text-finance-primary" /> : <Plus size={24} className="text-finance-primary" />}
                             {editEventId ? t('edit_event') : t('schedule_manual_event')}
                         </h2>

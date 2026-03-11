@@ -3,10 +3,14 @@ import { Link } from 'react-router-dom';
 import { Mail, ArrowLeft, CheckCircle2, AlertCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import appLogo from '../assets/logo.png';
+import appLogoLight from '../assets/logo claro.png';
+import { useTheme } from '../context/ThemeContext';
 import { useLanguage } from '../context/LanguageContext';
 
 export default function ForgotPassword() {
     const { t } = useLanguage();
+    const { theme } = useTheme();
+    const isLight = theme === 'light';
     const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(false);
     const [status, setStatus] = useState(null); // 'success' | 'error'
@@ -41,7 +45,7 @@ export default function ForgotPassword() {
                 {/* Logo */}
                 <div className="text-center mb-8">
                     <div className="flex justify-center mb-4">
-                        <img src={appLogo} alt="Mente Billete" className="h-16 w-auto object-contain" />
+                        <img src={isLight ? appLogoLight : appLogo} alt="Mente Billete" className="h-16 w-auto object-contain" />
                     </div>
                     <h1 className="text-2xl font-bold text-finance-text mb-1">{t('recovery_title')}</h1>
                     <p className="text-finance-muted text-sm">
