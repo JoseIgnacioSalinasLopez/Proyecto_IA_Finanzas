@@ -11,15 +11,15 @@ export default function NotificationsDropdown({ notifications, onClose, onClear 
         const diffInSeconds = Math.floor((now - date) / 1000);
 
         if (diffInSeconds < 60) return language === 'en' ? 'JUST NOW' : 'JUSTO AHORA';
-        
+
         const diffInMinutes = Math.floor(diffInSeconds / 60);
-        if (diffInMinutes < 60) return language === 'en' ? `HACE ${diffInMinutes} MIN` : `HACE ${diffInMinutes} MIN`;
-        
+        if (diffInMinutes < 60) return language === 'en' ? `${diffInMinutes} MIN AGO` : `HACE ${diffInMinutes} MIN`;
+
         const diffInHours = Math.floor(diffInMinutes / 60);
-        if (diffInHours < 24) return language === 'en' ? `HACE ${diffInHours} HOURS` : `HACE ${diffInHours} HORAS`;
-        
+        if (diffInHours < 24) return language === 'en' ? `${diffInHours} HOURS AGO` : `HACE ${diffInHours} HORAS`;
+
         const diffInDays = Math.floor(diffInHours / 24);
-        return language === 'en' ? `HACE ${diffInDays} DAYS` : `HACE ${diffInDays} DÍAS`;
+        return language === 'en' ? `${diffInDays} DAYS AGO` : `HACE ${diffInDays} DÍAS`;
     };
 
     return (
@@ -30,7 +30,7 @@ export default function NotificationsDropdown({ notifications, onClose, onClear 
                     <Bell size={16} className="text-finance-primary" />
                     <h3 className="text-xs font-black uppercase tracking-widest">{t('notifications')}</h3>
                 </div>
-                <button 
+                <button
                     onClick={onClose}
                     className="text-slate-500 hover:text-white transition-colors"
                 >
@@ -46,14 +46,13 @@ export default function NotificationsDropdown({ notifications, onClose, onClear 
                             <div key={n.id} className="p-4 hover:bg-white/5 transition-colors group cursor-pointer">
 
                                 <div className="flex gap-3">
-                                    <div className={`mt-0.5 rounded-lg p-1.5 ${
-                                        n.type === 'alert' ? 'bg-red-500/20 text-red-500' : 
-                                        n.type === 'success' ? 'bg-emerald-500/20 text-emerald-500' : 
-                                        'bg-finance-primary/20 text-finance-primary'
-                                    }`}>
-                                        {n.type === 'alert' ? <AlertTriangle size={14} /> : 
-                                         n.type === 'success' ? <CheckCircle size={14} /> : 
-                                         <Info size={14} />}
+                                    <div className={`mt-0.5 rounded-lg p-1.5 ${n.type === 'alert' ? 'bg-red-500/20 text-red-500' :
+                                            n.type === 'success' ? 'bg-emerald-500/20 text-emerald-500' :
+                                                'bg-finance-primary/20 text-finance-primary'
+                                        }`}>
+                                        {n.type === 'alert' ? <AlertTriangle size={14} /> :
+                                            n.type === 'success' ? <CheckCircle size={14} /> :
+                                                <Info size={14} />}
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <p className="text-sm font-bold text-white mb-0.5 leading-tight">{n.title}</p>
@@ -79,7 +78,7 @@ export default function NotificationsDropdown({ notifications, onClose, onClear 
             {/* Footer */}
             {notifications.length > 0 && (
                 <div className="p-3 bg-white/5 border-t border-white/5 text-center">
-                    <button 
+                    <button
                         onClick={onClear}
                         className="text-[10px] font-black uppercase tracking-widest text-finance-muted hover:text-finance-primary transition-colors"
                     >

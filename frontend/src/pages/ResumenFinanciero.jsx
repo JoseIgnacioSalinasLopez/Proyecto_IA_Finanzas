@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import api from '../services/api';
 import { Plus, Trash2, Pencil, Search, X, Download, Calendar, Filter, FileText, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import PieChart from '../components/charts/PieChart';
@@ -158,7 +158,7 @@ function exportToCSV(transactions, t, language) {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', `AUDITORIA_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `${t('csv_filename_prefix')}${new Date().toISOString().split('T')[0]}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -193,13 +193,13 @@ function exportToPDF(transactions, stats, t, language) {
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
     doc.setTextColor(0, 212, 255);
-    doc.text('SISTEMA TRANSACCIONAL PATRIMONIAL', 15, 30);
+    doc.text(t('pdf_subtitle'), 15, 30);
 
     // Metadata
     doc.setTextColor(158, 163, 176);
     doc.setFontSize(8);
     doc.text(`${t('pdf_generated_at')}: ${now.toLocaleDateString(locale)} ${now.toLocaleTimeString(locale)}`, pageW - 15, 20, { align: 'right' });
-    doc.text(`HASH DE INTEGRIDAD: ${Math.random().toString(16).substr(2, 16).toUpperCase()}`, pageW - 15, 28, { align: 'right' });
+    doc.text(`${t('pdf_hash')} ${Math.random().toString(16).substr(2, 16).toUpperCase()}`, pageW - 15, 28, { align: 'right' });
 
     // ── Resumen Ejecutivo ────────────────────────────────────────────
     let y = 60;
@@ -284,11 +284,11 @@ function exportToPDF(transactions, stats, t, language) {
         doc.rect(0, pageH - 12, pageW, 12, 'F');
         doc.setFontSize(7.5);
         doc.setTextColor(158, 163, 176);
-        doc.text('REPORTE GENERADO MEDIANTE PROTOCOLO ELITE MENTE BILLETE', 15, pageH - 5);
-        doc.text(`CERTIFICADO DIGITAL PAG ${p} / ${pageCount}`, pageW - 15, pageH - 5, { align: 'right' });
+        doc.text(t('pdf_footer_msg'), 15, pageH - 5);
+        doc.text(`${t('pdf_page_cert')} ${p} / ${pageCount}`, pageW - 15, pageH - 5, { align: 'right' });
     }
 
-    doc.save(`AUDITORIA_ELITE_${now.toISOString().split('T')[0]}.pdf`);
+    doc.save(`${t('pdf_filename_prefix')}${now.toISOString().split('T')[0]}.pdf`);
 }
 
 
@@ -310,6 +310,8 @@ export default function ResumenFinanciero() {
     const [customDateEnd, setCustomDateEnd] = useState('');
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
+    const [chartPeriod, setChartPeriod] = useState('30days'); // '7days' | '30days'
+
 
     const showToast = (message, type = 'success') => setToast({ message, type });
     const closeToast = () => setToast(null);
@@ -448,6 +450,13 @@ export default function ResumenFinanciero() {
         return t('filter_all');
     };
 
+    // Filtrar timeline para la gráfica de barras
+    const filteredTimeline = useMemo(() => {
+        if (!stats || !stats.timeline) return [];
+        if (chartPeriod === '7days') return stats.timeline.slice(-7);
+        return stats.timeline.slice(-30);
+    }, [stats?.timeline, chartPeriod]);
+
     if (loading) return (
         <div className="min-h-screen p-6 flex items-center justify-center">
             <div className="text-center">
@@ -463,18 +472,35 @@ export default function ResumenFinanciero() {
         datasets: [{ label: t('expense_distribution'), data: stats.expensesByCategory.map(c => c.amount), backgroundColor: stats.expensesByCategory.map(c => c.color), borderColor: '#161b22', borderWidth: 2 }]
     };
 
-    const timelineData = {
-        labels: stats.timeline.map(tKey => tKey.date),
-        datasets: [
-            { label: t('income_label'), data: stats.timeline.map(tKey => tKey.income), backgroundColor: '#00D4FF', borderColor: '#00D4FF', fill: false, tension: 0.3 },
-            { label: t('expense_label'), data: stats.timeline.map(tKey => tKey.expense), backgroundColor: '#E600E6', borderColor: '#E600E6', fill: false, tension: 0.3 },
-        ]
-    };
-
-
     const savingsRate = stats.summary.totalIncome > 0
         ? ((stats.summary.balance / stats.summary.totalIncome) * 100).toFixed(1)
         : 0;
+
+    const timelineData = {
+        labels: filteredTimeline.map(tKey => {
+            const [, m, d] = tKey.date.split('-');
+            // Mostramos mes/día más amigable
+            return `${d}/${m}`;
+        }),
+        datasets: [
+            {
+                label: t('income_label'),
+                data: filteredTimeline.map(tKey => tKey.income),
+                backgroundColor: '#00D4FF',
+                borderRadius: 4,
+                barPercentage: 0.6,
+                categoryPercentage: 0.8
+            },
+            {
+                label: t('expense_label'),
+                data: filteredTimeline.map(tKey => tKey.expense),
+                backgroundColor: '#E600E6',
+                borderRadius: 4,
+                barPercentage: 0.6,
+                categoryPercentage: 0.8
+            },
+        ]
+    };
 
     return (
         <div className="min-h-full p-0 text-white animate-fade-in relative z-10">
@@ -546,10 +572,29 @@ export default function ResumenFinanciero() {
                 </div>
 
                 {/* Gráficos */}
-                <div className="col-span-12 lg:col-span-8 card p-6 h-[320px]">
-                    <BarChart data={timelineData} title={`${t('movement_history')} — ${t('income_vs_expense_day')}`} />
+                <div className="col-span-12 lg:col-span-8 card p-6 min-h-[360px] flex flex-col">
+                    <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-base font-bold text-finance-muted">{t('movement_history')}</h3>
+                        <div className="flex bg-black/40 rounded-xl p-1 border border-white/5">
+                            <button
+                                onClick={() => setChartPeriod('7days')}
+                                className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${chartPeriod === '7days' ? 'bg-[#00D4FF]/20 text-[#00D4FF] shadow-[0_0_10px_rgba(0,212,255,0.2)]' : 'text-[#9EA3B0] hover:text-white'}`}
+                            >
+                                {t('filter_week')}
+                            </button>
+                            <button
+                                onClick={() => setChartPeriod('30days')}
+                                className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${chartPeriod === '30days' ? 'bg-[#00D4FF]/20 text-[#00D4FF] shadow-[0_0_10px_rgba(0,212,255,0.2)]' : 'text-[#9EA3B0] hover:text-white'}`}
+                            >
+                                {t('filter_30_days')}
+                            </button>
+                        </div>
+                    </div>
+                    <div className="flex-1 relative min-h-[250px]">
+                        <BarChart data={timelineData} title="" />
+                    </div>
                 </div>
-                <div className="col-span-12 lg:col-span-4 card p-6 h-[320px]">
+                <div className="col-span-12 lg:col-span-4 card p-6 min-h-[360px]">
                     {stats.expensesByCategory.length > 0
                         ? <PieChart data={expensesData} title={t('expense_distribution')} />
                         : (

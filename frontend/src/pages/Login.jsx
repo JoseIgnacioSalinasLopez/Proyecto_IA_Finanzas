@@ -97,17 +97,17 @@ export default function Login() {
 
     return (
         <div className="min-h-screen flex items-center justify-center p-6 overflow-hidden relative bg-[#05011a]">
-            
+
             {/* Capa 1: Gradiente Animado Épico (Fondo base) */}
             <div className="absolute inset-0 epic-bg-animate z-0"></div>
 
             {/* Capa 2: Imagen de Fondo (La "Pintura" del fondo) */}
-            <div 
+            <div
                 className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-50 transition-transform duration-1000"
-                style={{ 
+                style={{
                     backgroundImage: `url(${fondoLogin})`,
                     transform: isExpanded ? 'scale(1.05)' : 'scale(1.0)', // Se aleja/acerca sutilmente
-                    filter: 'brightness(0.7) contrast(1.1)' 
+                    filter: 'brightness(0.7) contrast(1.1)'
                 }}
             ></div>
 
@@ -117,8 +117,8 @@ export default function Login() {
             {/* Background Particles & Sparkles */}
             <div className="absolute inset-0 z-0 pointer-events-none">
                 {[...Array(25)].map((_, i) => (
-                    <div 
-                        key={i} 
+                    <div
+                        key={i}
                         className={`particle ${i % 4 === 0 ? 'particle-yellow' : 'particle-cyan'}`}
                         style={{
                             width: i % 4 === 0 ? '3px' : '4px',
@@ -140,15 +140,14 @@ export default function Login() {
             <div className="absolute bottom-1/4 -right-20 w-80 h-80 bg-epic-cyan/20 blur-[100px] rounded-full"></div>
 
             {/* Card Principal Épica */}
-            <div 
+            <div
                 className={`w-full max-w-[440px] epic-border-card transition-all duration-700 ease-out animate-entrance ${isExpanded ? 'scale-100 shadow-[0_20px_60px_rgba(0,0,0,0.6)]' : 'scale-95 hover:scale-100'}`}
                 onMouseEnter={() => setIsExpanded(true)}
-                onMouseLeave={() => setIsExpanded(false)}
                 onClick={() => setIsExpanded(true)}
             >
                 <div className={`${isExpanded ? 'p-10' : 'p-2'} relative z-20 transition-all duration-500`}>
                     {/* Encabezado Principal / Compact Holder */}
-                    <div 
+                    <div
                         className={`text-center transition-all duration-700 ${!isExpanded ? 'cursor-pointer' : 'mb-6'}`}
                         onClick={() => setIsExpanded(true)}
                     >
@@ -162,7 +161,8 @@ export default function Login() {
                             </div>
                         ) : (
                             <div className="animate-fade-in text-center">
-                                <div className="flex justify-center mb-6 cursor-pointer transform hover:rotate-6 transition-transform">
+                                {/* Se eliminaron las clases de rotación y transformación */}
+                                <div className="flex justify-center mb-6 cursor-pointer">
                                     <img src={appLogo} alt="Logo" className="h-16 w-auto drop-shadow-[0_0_20px_rgba(0,212,255,0.6)]" />
                                 </div>
                                 <h1 className="text-5xl font-black tracking-tighter leading-tight mb-3 bg-clip-text text-transparent bg-gradient-to-r from-[#8C30F5] via-[#4F46E5] to-[#2E6FF2] drop-shadow-sm">
@@ -178,7 +178,7 @@ export default function Login() {
                     {/* Contenedor Expandible */}
                     <div className={`expandable-container ${isExpanded ? 'is-expanded' : ''}`}>
                         <div className={`overflow-hidden ${isExpanded ? 'pt-4' : 'pt-0'} ${error ? 'animate-shake' : ''}`}>
-                            
+
                             {error && (
                                 <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-xl mb-6 text-xs flex items-center gap-3">
                                     <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></div>
@@ -187,7 +187,7 @@ export default function Login() {
                             )}
                             {/* Contenedores de Formularios Aislados */}
                             <div className={`w-full relative ${isExpanded ? 'min-h-[350px]' : 'min-h-0'}`}>
-                                
+
                                 {/* FORMULARIO: LOGIN */}
                                 {currentView === 'login' && (
                                     <div className="animate-fade-in" id="login-form">
@@ -214,8 +214,8 @@ export default function Login() {
                                                     required
                                                 />
                                                 <label className="text-slate-400">{t('change_password')}</label>
-                                                <button 
-                                                    type="button" 
+                                                <button
+                                                    type="button"
                                                     onClick={() => setShowPassword(!showPassword)}
                                                     className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors"
                                                     tabIndex="-1"
@@ -225,14 +225,14 @@ export default function Login() {
                                             </div>
 
                                             <div className="flex justify-between items-center px-1">
-                                                <button 
+                                                <button
                                                     type="button"
                                                     onClick={(e) => { e.stopPropagation(); toggleView('forgot'); }}
                                                     className="text-[10px] font-bold text-slate-500 hover:text-white transition-colors tracking-widest uppercase"
                                                 >
                                                     {t('forgot_pwd_q_elite')}
                                                 </button>
-                                                <button 
+                                                <button
                                                     type="button"
                                                     onClick={(e) => { e.stopPropagation(); toggleView('register'); }}
                                                     className="text-[10px] font-bold text-red-500 hover:text-red-400 transition-colors tracking-widest uppercase"
@@ -274,10 +274,10 @@ export default function Login() {
                                             <div className="space-y-5">
                                                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest text-center">{language === 'en' ? 'Step 1 of 2 — Personal Info' : 'Paso 1 de 2 — Info Personal'}</p>
                                                 <div className="floating-label-group">
-                                                    <input 
-                                                        type="text" 
-                                                        placeholder=" " 
-                                                        className="w-full bg-black/40 border border-white/5 rounded-2xl px-4 py-4 text-white focus:outline-none transition-all placeholder-transparent" 
+                                                    <input
+                                                        type="text"
+                                                        placeholder=" "
+                                                        className="w-full bg-black/40 border border-white/5 rounded-2xl px-4 py-4 text-white focus:outline-none transition-all placeholder-transparent"
                                                         value={fullName}
                                                         onChange={(e) => setFullName(e.target.value)}
                                                         onKeyDown={(e) => e.key === 'Enter' && handleNextStep(e)}
@@ -285,17 +285,17 @@ export default function Login() {
                                                     <label className="text-slate-400">{t('full_name')}</label>
                                                 </div>
                                                 <div className="floating-label-group">
-                                                    <input 
-                                                        type="email" 
-                                                        placeholder=" " 
-                                                        className="w-full bg-black/40 border border-white/5 rounded-2xl px-4 py-4 text-white focus:outline-none transition-all placeholder-transparent" 
+                                                    <input
+                                                        type="email"
+                                                        placeholder=" "
+                                                        className="w-full bg-black/40 border border-white/5 rounded-2xl px-4 py-4 text-white focus:outline-none transition-all placeholder-transparent"
                                                         value={email}
                                                         onChange={(e) => setEmail(e.target.value)}
                                                         onKeyDown={(e) => e.key === 'Enter' && handleNextStep(e)}
                                                     />
                                                     <label className="text-slate-400">{t('email_address')}</label>
                                                 </div>
-                                                <button 
+                                                <button
                                                     type="button"
                                                     onClick={handleNextStep}
                                                     className="btn-epic w-full uppercase tracking-[0.2rem] text-xs py-4 text-[#00D4FF] font-black rounded-2xl flex items-center justify-center gap-2"
@@ -326,13 +326,12 @@ export default function Login() {
                                                     <input
                                                         type={showConfirmPassword ? 'text' : 'password'}
                                                         placeholder=" "
-                                                        className={`w-full bg-black/40 border rounded-2xl px-4 py-4 pr-12 text-white focus:outline-none transition-all placeholder-transparent ${
-                                                            confirmPassword && confirmPassword !== password 
-                                                                ? 'border-red-500/50' 
-                                                                : confirmPassword && confirmPassword === password 
-                                                                    ? 'border-emerald-500/50' 
-                                                                    : 'border-white/5'
-                                                        }`}
+                                                        className={`w-full bg-black/40 border rounded-2xl px-4 py-4 pr-12 text-white focus:outline-none transition-all placeholder-transparent ${confirmPassword && confirmPassword !== password
+                                                            ? 'border-red-500/50'
+                                                            : confirmPassword && confirmPassword === password
+                                                                ? 'border-emerald-500/50'
+                                                                : 'border-white/5'
+                                                            }`}
                                                         value={confirmPassword}
                                                         onChange={(e) => setConfirmPassword(e.target.value)}
                                                         required
@@ -343,14 +342,14 @@ export default function Login() {
                                                     </button>
                                                 </div>
                                                 <div className="flex gap-2">
-                                                    <button 
+                                                    <button
                                                         type="button"
                                                         onClick={(e) => { e.stopPropagation(); setRegisterStep(1); setError(''); }}
                                                         className="flex-1 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-white border border-white/5 rounded-2xl hover:border-white/20 transition-all"
                                                     >
                                                         {language === 'en' ? 'Back' : 'Atrás'}
                                                     </button>
-                                                    <button 
+                                                    <button
                                                         type="submit"
                                                         disabled={loading}
                                                         className="flex-[2] btn-epic py-4 text-[#00D4FF] font-black rounded-2xl uppercase tracking-[0.15em] text-xs flex items-center justify-center gap-2"
@@ -379,10 +378,10 @@ export default function Login() {
                                                 {t('recover_desc_elite')}
                                             </p>
                                             <div className="floating-label-group">
-                                                <input 
-                                                    type="email" 
-                                                    placeholder=" " 
-                                                    className="w-full bg-black/40 border border-white/5 rounded-2xl px-4 py-4 text-white" 
+                                                <input
+                                                    type="email"
+                                                    placeholder=" "
+                                                    className="w-full bg-black/40 border border-white/5 rounded-2xl px-4 py-4 text-white"
                                                     value={email}
                                                     onChange={(e) => setEmail(e.target.value)}
                                                 />

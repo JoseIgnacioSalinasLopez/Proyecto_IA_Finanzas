@@ -356,22 +356,7 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
 
     return (
         <div className="text-white overflow-hidden flex flex-col h-full font-sans">
-            <div className="flex justify-between items-center mb-6 pb-4 border-b border-white/5">
-                <div>
-                    <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[11px] bg-emerald-500/20 text-emerald-400 px-2.5 py-1 rounded-lg uppercase font-bold tracking-widest border border-emerald-500/30">
-                            {t('system_ok')}
-                        </span>
-                        <span className="text-[10px] text-finance-muted uppercase font-mono tracking-tighter ml-2 hidden sm:inline">
-                            | {new Date().toLocaleDateString(language === 'en' ? 'en-US' : 'es-MX', { month: 'long', year: 'numeric' }).toUpperCase()}
-                        </span>
-                    </div>
-                </div>
-                <div className="text-right hidden sm:block">
-                    <p className="text-[10px] text-finance-muted uppercase font-mono tracking-tighter">{t('terminal_id')}</p>
-                    <p className="text-xs font-mono text-finance-primary">8842-MB-PRIME</p>
-                </div>
-            </div>
+
 
             <div className="grid grid-cols-1 2xl:grid-cols-12 gap-8 flex-1 overflow-hidden">
                 <div className="2xl:col-span-5 space-y-8 flex flex-col justify-start 2xl:border-r border-white/5 2xl:pr-6 overflow-y-auto custom-scrollbar">
@@ -425,8 +410,8 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                                     <div className="h-1.5 bg-black/40 rounded-full overflow-hidden border border-white/5">
                                         <div
                                             className={`h-full transition-all duration-1000 ${b.percentage > 90 ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.4)]' :
-                                                    b.percentage > 70 ? 'bg-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.4)]' :
-                                                        'bg-finance-primary shadow-[0_0_10px_rgba(0,212,255,0.4)]'
+                                                b.percentage > 70 ? 'bg-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.4)]' :
+                                                    'bg-finance-primary shadow-[0_0_10px_rgba(0,212,255,0.4)]'
                                                 }`}
                                             style={{ width: `${b.percentage}%` }}
                                         ></div>
@@ -580,20 +565,6 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                         )}
                     </div>
                 </div>
-            </div>
-
-            <div className="mt-8 pt-6 border-t border-white/5 flex justify-between items-center text-[10px] text-finance-muted font-black tracking-widest">
-                <div className="flex gap-6">
-                    <span className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]" />
-                        {t('system_ok')}
-                    </span>
-                    <span className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]" />
-                        {t('db_connected')}
-                    </span>
-                </div>
-                <div className="hidden sm:block opacity-50 uppercase tracking-[0.2em]">{t('terminal_id')} 8842-CORE-OS</div>
             </div>
 
             {showEventModal && (

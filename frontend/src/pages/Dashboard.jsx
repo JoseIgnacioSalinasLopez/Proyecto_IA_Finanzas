@@ -69,7 +69,7 @@ export default function Dashboard() {
     const groupTransactionsByDate = (transactions) => {
         const groups = {
             today: [],
-            earlier: []
+            yesterday: []
         };
 
         const now = new Date();
@@ -88,9 +88,9 @@ export default function Dashboard() {
             const txStartOfDay = new Date(txDateObj.getFullYear(), txDateObj.getMonth(), txDateObj.getDate()).getTime();
 
             if (txStartOfDay === startOfToday) {
-                groups.today.push(tx);
-            } else {
-                groups.earlier.push(tx);
+                if (groups.today.length < 5) groups.today.push(tx);
+            } else if (txStartOfDay === startOfYesterday) {
+                if (groups.yesterday.length < 5) groups.yesterday.push(tx);
             }
         });
 
@@ -237,7 +237,7 @@ export default function Dashboard() {
                                                         <div className="w-1.5 h-1.5 rounded-full bg-finance-primary animate-pulse shadow-[0_0_5px_#00d4ff]" />
                                                     </div>
                                                     <span className="text-[10px] font-black uppercase tracking-widest text-finance-primary/60 bg-finance-primary/5 px-2 py-0.5 rounded-md border border-finance-primary/10">
-                                                        {key === 'today' ? t('today_label') : t('earlier_label')}
+                                                        {key === 'today' ? t('today_label') : t('yesterday_label')}
                                                     </span>
                                                 </div>
 
