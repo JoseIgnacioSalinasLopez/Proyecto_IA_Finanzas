@@ -23,15 +23,17 @@ export const getHistory = async (req, res, next) => {
 
 export const chat = async (req, res, next) => {
     try {
-        const { message, sessionId = 'principal' } = req.body;
+        // AHORA RECIBIMOS EL ARCHIVO EN BASE64 Y SU TIPO
+        const { message, sessionId = 'principal', fileBase64, fileMimeType } = req.body;
         const userId = req.user.id;
 
-        if (!message?.trim()) {
-            return res.status(400).json({ success: false, message: 'El mensaje no puede estar vacío.' });
+        // Validamos que haya un mensaje O un archivo
+        if (!message?.trim() && !fileBase64) {
+            return res.status(400).json({ success: false, message: 'El mensaje o el archivo no pueden estar vacíos.' });
         }
 
-        // 1. Guardar mensaje del usuario
-        await supabase.from('chat_messages').insert([{ user_id: userId, role: 'user', content: message, session_id: sessionId }]);
+        // 1. Guardar mensaje del usuario (si solo mandó foto, ponemos un texto por defecto)
+        await supabase.from('chat_messages').insert([{ user_id: userId, role: 'user', content: message || "*(Documento adjunto)*", session_id: sessionId }]);
 
         // 2. Extraer contexto financiero
         const stats = await statsService.getStats(userId);
@@ -76,6 +78,9 @@ Formato JSON esperado: { "intent": "registrar_movimiento", "type": "expense", "a
 REGLA B: RESPUESTAS DETALLADAS (Simulador, Inversiones, Dudas y Gastos Hormiga)
 Para cualquier consulta, análisis o simulación, DEBES estructurar el campo "reply" en formato Markdown siguiendo EXACTAMENTE esta plantilla ideal:
 
+REGLA C: ESCANEO DE TICKETS, PDFS E IMÁGENES
+Si el usuario adjunta una imagen o PDF (un ticket, recibo, factura, menú, tabla), analízalo visualmente. Extrae el monto total, deduce de qué trata (ej. comida, gasolina, salud) y regístralo automáticamente. En tu respuesta (reply), detalla qué fue lo que leíste en el documento de forma amigable.
+
 **[Título corto y amigable del tema]**
 
 [Breve explicación en 1 o 2 líneas fáciles de leer].
@@ -99,7 +104,14 @@ Formato JSON esperado: { "intent": "conversacion", "reply": "Tu mensaje estructu
             generationConfig: { responseMimeType: "application/json" }
         });
 
-        const result = await model.generateContent(`Mensaje del usuario: ${message}`);
+        const promptParts = [`Mensaje del usuario: ${message || 'Analiza este documento por favor.'}`];
+        if (fileBase64 && fileMimeType) {
+            promptParts.push({
+                inlineData: { data: fileBase64, mimeType: fileMimeType }
+            });
+        }
+
+        const result = await model.generateContent(promptParts);
         const rawText = result.response.text().replace(/```json/gi, '').replace(/```/g, '').trim();
         const aiResponse = JSON.parse(rawText);
 
