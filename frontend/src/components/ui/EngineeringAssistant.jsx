@@ -22,6 +22,7 @@ import api from '../../services/api';
 import { useLanguage } from '../../context/LanguageContext';
 import DatePickerElite from './DatePickerElite';
 import { motion, AnimatePresence } from 'framer-motion';
+import AnimatedCounter from './AnimatedCounter';
 
 
 const PriorityBadge = ({ level }) => {
@@ -360,19 +361,21 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
 
 
             <div className="grid grid-cols-1 2xl:grid-cols-12 gap-8 flex-1 overflow-hidden">
-                <div className="2xl:col-span-5 space-y-8 flex flex-col justify-start 2xl:border-r border-white/5 2xl:pr-6 overflow-y-auto custom-scrollbar">
+                <div className="2xl:col-span-5 space-y-8 flex flex-col justify-start 2xl:border-r border-black/5 dark:border-white/5 2xl:pr-6 overflow-y-auto custom-scrollbar">
                     {/* Survival Engine */}
                     <section>
                         <div className="flex items-center gap-2 mb-4 text-finance-text">
                             <Zap size={14} className="text-finance-neon" />
                             <h3 className="text-xs font-bold uppercase tracking-wider">{t('survival_engine')}</h3>
                         </div>
-                        <div className="bg-white/5 backdrop-blur-md p-4 rounded-xl border border-white/5">
+                        <div className="bg-white soft-ui-bg dark:bg-white/5 backdrop-blur-md p-4 rounded-xl border border-black/5 soft-ui-border dark:border-white/5">
                             <p className="text-[10px] text-finance-muted mb-1">{t('safe_daily_rate')}</p>
                             <div className="flex items-baseline gap-1">
-                                <span className="text-2xl font-mono font-bold text-finance-neon">
-                                    ${Number(summary?.dailyBurnRate || 0).toFixed(2)}
-                                </span>
+                                <AnimatedCounter
+                                    amount={Number(summary?.dailyBurnRate || 0)}
+                                    className="text-2xl font-mono font-bold text-finance-neon"
+                                    decimals={2}
+                                />
                                 <span className="text-xs text-finance-neon/60">{t('per_day')}</span>
                             </div>
                             <div className="grid grid-cols-2 gap-4 mt-4">
@@ -399,20 +402,24 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                             <PieChart size={14} className="text-finance-primary" />
                             <h3 className="text-xs font-bold uppercase tracking-wider">{t('budget_allocation')}</h3>
                         </div>
-                        <div className="bg-white/5 backdrop-blur-md p-4 rounded-2xl border border-white/10 space-y-4 max-h-[300px] overflow-y-auto custom-scrollbar">
+                        <div className="bg-white soft-ui-bg dark:bg-white/5 backdrop-blur-md p-4 rounded-2xl border border-black/5 soft-ui-border dark:border-white/10 space-y-4 max-h-[300px] overflow-y-auto custom-scrollbar">
                             {budgetAnalysis?.length > 0 ? budgetAnalysis.map((b, idx) => (
                                 <div key={idx} className="relative group">
                                     <div className="flex justify-between items-end mb-2">
                                         <p className="text-xs font-bold uppercase tracking-wider text-finance-text">{b.category || t('uncategorized')}</p>
                                         <div className="text-right">
-                                            <p className="text-sm font-mono font-black text-finance-text">${b.spent.toLocaleString()} <span className="text-[10px] text-finance-muted font-normal">/ ${b.limit.toLocaleString()}</span></p>
+                                            <div className="flex items-baseline justify-end gap-1">
+                                                <AnimatedCounter amount={b.spent} className="text-sm font-mono font-black text-finance-text" />
+                                                <span className="text-[10px] text-finance-muted font-normal">/</span>
+                                                <AnimatedCounter amount={b.limit} className="text-[10px] text-finance-muted font-normal" />
+                                            </div>
                                         </div>
                                     </div>
-                                    <div className="h-1.5 bg-black/40 rounded-full overflow-hidden border border-white/5">
+                                    <div className="h-1.5 bg-white soft-ui-bg dark:bg-black/40 rounded-full overflow-hidden border border-black/5 soft-ui-border dark:border-white/5">
                                         <div
-                                            className={`h-full transition-all duration-1000 ${b.percentage > 90 ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.4)]' :
-                                                b.percentage > 70 ? 'bg-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.4)]' :
-                                                    'bg-finance-primary shadow-[0_0_10px_rgba(0,212,255,0.4)]'
+                                            className={`h-full transition-all duration-1000 ${b.percentage > 90 ? 'bg-red-500 dark:shadow-[0_0_10px_rgba(239,68,68,0.4)]' :
+                                                b.percentage > 70 ? 'bg-orange-500 dark:shadow-[0_0_10px_rgba(249,115,22,0.4)]' :
+                                                    'bg-finance-primary dark:shadow-[0_0_10px_rgba(0,212,255,0.4)]'
                                                 }`}
                                             style={{ width: `${b.percentage}%` }}
                                         ></div>
@@ -444,7 +451,7 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                             )}
                         </div>
                         {goals?.length > 0 ? (
-                            <div className="bg-white/5 backdrop-blur-md p-4 rounded-2xl border border-white/10 flex items-center gap-4 relative overflow-hidden group">
+                            <div className="bg-white soft-ui-bg dark:bg-white/5 backdrop-blur-md p-4 rounded-2xl border border-black/5 soft-ui-border dark:border-white/10 flex items-center gap-4 relative overflow-hidden group">
                                 {/* Botones de acción - Visibles y posicionados arriba a la derecha */}
                                 <div className="absolute top-3 right-3 flex items-center gap-3 z-10">
                                     <button
@@ -463,22 +470,26 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                                     </button>
                                 </div>
 
-                                <div className="w-12 h-12 bg-gradient-to-br from-finance-primary/20 to-finance-neon/10 rounded-xl flex items-center justify-center text-finance-primary shadow-[0_0_15px_rgba(0,212,255,0.1)]">
+                                <div className="w-12 h-12 bg-gradient-to-br from-finance-primary/20 to-finance-neon/10 rounded-xl flex items-center justify-center text-finance-primary dark:shadow-[0_0_15px_rgba(0,212,255,0.1)]">
                                     <Target size={24} />
                                 </div>
                                 <div className="flex-1 min-w-0 pr-12">
-                                    <p className="text-sm font-bold mb-2 truncate uppercase tracking-tight text-finance-text">{goals[currentGoalIndex].name}</p>
-                                    <div className="h-2 bg-black/20 dark:bg-black/40 rounded-full mb-2 overflow-hidden border border-white/5">
+                                    <div className="flex justify-between items-center mb-1.5">
+                                        <p className="text-sm font-bold truncate uppercase tracking-tight text-finance-text">{goals[currentGoalIndex].name}</p>
+                                        <span className="text-finance-primary text-xs font-black ml-2 shrink-0">
+                                            {((goals[currentGoalIndex].current_amount / goals[currentGoalIndex].target_amount) * 100).toFixed(0)}%
+                                        </span>
+                                    </div>
+                                    <div className="h-2 bg-white soft-ui-bg dark:bg-black/40 rounded-full mb-2 overflow-hidden border border-black/5 soft-ui-border dark:border-white/5">
                                         <div
-                                            className="h-full bg-finance-primary shadow-[0_0_10px_rgba(0,212,255,0.4)] transition-all duration-1000"
+                                            className="h-full bg-finance-primary dark:shadow-[0_0_10px_rgba(0,212,255,0.4)] transition-all duration-1000"
                                             style={{ width: `${Math.min((goals[currentGoalIndex].current_amount / goals[currentGoalIndex].target_amount) * 100, 100)}%` }}
                                         ></div>
                                     </div>
-                                    <div className="flex justify-between text-[11px] text-finance-muted font-mono font-bold">
-                                        <span className="text-finance-text">${Number(goals[currentGoalIndex].current_amount || 0).toLocaleString()} / ${Number(goals[currentGoalIndex].target_amount || 0).toLocaleString()}</span>
-                                        <span className="text-finance-primary">
-                                            {((goals[currentGoalIndex].current_amount / goals[currentGoalIndex].target_amount) * 100).toFixed(0)}%
-                                        </span>
+                                    <div className="flex items-center gap-1 text-[11px] text-finance-muted font-mono font-bold">
+                                        <AnimatedCounter amount={goals[currentGoalIndex].current_amount || 0} className="text-finance-text" />
+                                        <span className="text-finance-muted">/</span>
+                                        <AnimatedCounter amount={goals[currentGoalIndex].target_amount || 0} className="text-finance-text" />
                                     </div>
                                 </div>
                             </div>
@@ -517,7 +528,7 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                         {timelineData.length > 0 ? timelineData.map((item) => (
                             <div key={item.id} className="relative group/item px-1 flex gap-4">
                                 <div className="flex flex-col items-center">
-                                    <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center bg-black/40 z-10 transition-all duration-500
+                                    <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center bg-white soft-ui-bg dark:bg-black/40 z-10 transition-all duration-500
                                         ${item.status === 'expired' ? 'border-red-500 text-red-500 shadow-[0_0_10px_rgba(239,68,68,0.3)]' :
                                             item.status === 'today' ? 'border-orange-500 text-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.3)]' :
                                                 'border-finance-primary text-finance-primary shadow-[0_0_10px_rgba(0,212,255,0.2)]'}`}>
@@ -529,10 +540,10 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                                 <div className={`flex-1 p-4 rounded-2xl border transition-all duration-300 relative overflow-hidden
                                     ${item.status === 'expired' ? 'bg-red-500/5 border-red-500/20' :
                                         item.status === 'today' ? 'bg-orange-500/10 border-orange-500/30' :
-                                            'bg-white/5 border-white/5 hover:border-white/10'}`}>
+                                            'bg-white soft-ui-bg border-black/5 soft-ui-border dark:bg-white/5 dark:border-white/5 hover:border-black/10 dark:hover:border-white/10'}`}>
 
                                     {deleteConfirmId === item.id ? (
-                                        <div className="absolute inset-0 bg-finance-900 z-20 flex items-center justify-between px-6 animate-fade-in">
+                                        <div className="absolute inset-0 bg-slate-100 dark:bg-finance-900 z-20 flex items-center justify-between px-6 animate-fade-in">
                                             <span className="text-xs font-bold text-red-400">{t('delete_event_confirm')}</span>
                                             <div className="flex gap-3">
                                                 <button onClick={() => setDeleteConfirmId(null)} className="text-[10px] uppercase font-black text-finance-muted hover:text-white">{t('keep_action')}</button>
@@ -569,7 +580,7 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                                                     {item.description}
                                                 </p>
                                                 <span className={`text-base font-mono font-black ${item.status === 'expired' ? 'text-red-500' : 'text-finance-text'}`}>
-                                                    {item.amount > 0 ? `$${item.amount.toLocaleString()}` : ''}
+                                                    {item.amount > 0 ? <AnimatedCounter amount={item.amount} className={item.status === 'expired' ? 'text-red-500' : 'text-finance-text'} /> : ''}
                                                 </span>
                                             </div>
                                         </>
@@ -593,14 +604,14 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="fixed inset-0 bg-black/80 backdrop-blur-xl flex justify-center items-center z-50 p-6"
+                        className="fixed inset-0 bg-white/40 dark:bg-black/80 backdrop-blur-xl flex justify-center items-center z-50 p-6"
                     >
                         <motion.div
                             initial={{ scale: 0.95, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.95, opacity: 0 }}
                             transition={{ duration: 0.2, type: 'spring', bounce: 0.2 }}
-                            className="card max-w-lg w-full p-8 relative overflow-visible bg-finance-800 border-white/10"
+                            className="card max-w-lg w-full p-8 relative overflow-visible bg-white soft-ui-bg dark:bg-finance-800 border-black/5 soft-ui-border dark:border-white/10"
                         >
                             <div className="absolute -top-10 -right-10 p-20 bg-finance-primary/5 rounded-full blur-3xl" />
 
@@ -615,14 +626,14 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                                     <input
                                         type="text"
                                         required
-                                        className="input-field !bg-white/5 focus:!bg-white/10"
+                                        className="input-field soft-ui-input dark:!bg-white/5 focus:!bg-white dark:focus:!bg-white/10"
                                         placeholder={t('event_title_placeholder')}
                                         value={eventFormData.title}
                                         onChange={e => setEventFormData({ ...eventFormData, title: e.target.value })}
                                     />
                                 </div>
 
-                                <div className="flex items-center gap-4 p-4 bg-white/5 rounded-2xl border border-white/5">
+                                <div className="flex items-center gap-4 p-4 bg-slate-200/30 dark:bg-white/5 rounded-2xl border border-black/5 dark:border-white/5">
                                     <div className={`p-2 rounded-lg transition-colors ${eventFormData.is_recurring ? 'bg-finance-primary/20 text-finance-primary' : 'bg-white/5 text-finance-muted'}`}>
                                         <Bell size={20} />
                                     </div>
@@ -633,7 +644,7 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                                     <button
                                         type="button"
                                         onClick={() => setEventFormData({ ...eventFormData, is_recurring: !eventFormData.is_recurring })}
-                                        className={`w-12 h-6 rounded-full transition-all relative ${eventFormData.is_recurring ? 'bg-finance-primary' : 'bg-white/10'}`}
+                                        className={`w-12 h-6 rounded-full transition-all relative ${eventFormData.is_recurring ? 'bg-finance-primary' : 'bg-slate-300 dark:bg-white/10'}`}
                                     >
                                         <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-all ${eventFormData.is_recurring ? 'left-7' : 'left-1'}`} />
                                     </button>
@@ -673,7 +684,7 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                                                 type="number"
                                                 min="1" max="31"
                                                 required
-                                                className="input-field border-white/5 bg-white/5 focus:bg-white/10"
+                                                className="input-field border-black/5 dark:border-white/5 bg-slate-200/50 dark:bg-white/5 focus:bg-slate-200 dark:focus:bg-white/10"
                                                 placeholder="Ej: 8"
                                                 value={eventFormData.payment_day}
                                                 onChange={e => setEventFormData({ ...eventFormData, payment_day: e.target.value })}
@@ -685,7 +696,7 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                                                 type="number"
                                                 min="1" max="31"
                                                 required
-                                                className="input-field border-white/5 bg-white/5 focus:bg-white/10"
+                                                className="input-field border-black/5 dark:border-white/5 bg-slate-200/50 dark:bg-white/5 focus:bg-slate-200 dark:focus:bg-white/10"
                                                 placeholder="Ej: 15"
                                                 value={eventFormData.deadline_day}
                                                 onChange={e => setEventFormData({ ...eventFormData, deadline_day: e.target.value })}
@@ -704,8 +715,8 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                                                 onClick={() => setEventFormData({ ...eventFormData, priority: p })}
                                                 className={`flex-1 py-3 px-2 rounded-xl border text-[10px] font-black uppercase tracking-widest transition-all
                                                     ${eventFormData.priority === p ?
-                                                        (p === 'critical' ? 'bg-red-500 border-red-500 text-white shadow-[0_0_15px_rgba(239,68,68,0.4)]' : p === 'important' ? 'bg-orange-500 border-orange-500 text-white shadow-[0_0_15px_rgba(249,115,22,0.4)]' : 'bg-finance-primary border-finance-primary text-black shadow-[0_0_15px_rgba(0,212,255,0.4)]') :
-                                                        'bg-white/5 border-white/10 text-finance-muted hover:border-white/20'}`}
+                                                        (p === 'critical' ? 'bg-red-500 border-red-500 text-white dark:shadow-[0_0_15px_rgba(239,68,68,0.4)]' : p === 'important' ? 'bg-orange-500 border-orange-500 text-white dark:shadow-[0_0_15px_rgba(249,115,22,0.4)]' : 'bg-finance-primary border-finance-primary text-black dark:shadow-[0_0_15px_rgba(0,212,255,0.4)]') :
+                                                        'bg-slate-200/50 dark:bg-white/5 border-black/5 dark:border-white/10 text-finance-muted hover:border-black/20 dark:hover:border-white/20'}`}
                                             >
                                                 {t(`priority_${p}`)}
                                             </button>

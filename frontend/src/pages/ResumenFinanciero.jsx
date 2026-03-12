@@ -1,15 +1,16 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import api from '../services/api';
-import { Plus, Trash2, Pencil, Search, X, Download, Calendar, Filter, FileText, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { Filter, Calendar, TrendingUp, Download, Eye, Tag, FileText, ArrowUpRight, ArrowDownRight, Activity, Zap, CheckCircle2, Shield, AlertTriangle, Plus, Search, Pencil, Trash2, X } from 'lucide-react';
 import PieChart from '../components/charts/PieChart';
 import BarChart from '../components/charts/BarChart';
-import LineChart from '../components/charts/LineChart';
+import { useAuthContext } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import Toast from '../components/ui/Toast';
+import GlobalLoader from '../components/ui/GlobalLoader';
+import AnimatedCounter from '../components/ui/AnimatedCounter';
+import DatePickerElite from '../components/ui/DatePickerElite';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { useLanguage } from '../context/LanguageContext';
-import DatePickerElite from '../components/ui/DatePickerElite';
-import GlobalLoader from '../components/ui/GlobalLoader';
 
 const EMPTY_FORM = { amount: '', type: 'expense', category_id: '', description: '', date: new Date().toISOString().split('T')[0] };
 
@@ -56,22 +57,20 @@ function TransactionForm({ formData, setFormData, categories, onSubmit, onClose,
                 <label className="block text-sm mb-2 text-finance-muted font-semibold uppercase tracking-wide">
                     {t('movement_type')}
                 </label>
-                <div className="flex gap-3" role="group" aria-label={t('movement_type')}>
+                <div className="flex gap-3 p-1 bg-black/30 rounded-2xl border border-white/5" role="group" aria-label={t('movement_type')}>
                     {['expense', 'income'].map(tKey => (
                         <button key={tKey} type="button"
                             onClick={() => setFormData({ ...formData, type: tKey, category_id: '' })}
                             aria-pressed={formData.type === tKey}
-                            className={`flex-1 py-3 rounded-xl font-bold text-sm border-2 transition-all ${formData.type === tKey
+                            className={`flex-1 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${formData.type === tKey
                                 ? tKey === 'expense'
-                                    ? 'bg-red-500/20 border-red-500 text-red-400 shadow-[0_0_12px_rgba(239,68,68,0.2)]'
-                                    : 'bg-emerald-500/20 border-emerald-500 text-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.2)]'
-                                : 'bg-black/20 border-white/10 text-finance-muted hover:border-white/30'
+                                    ? 'bg-red-500/20 border border-red-500/60 text-red-400 shadow-[0_0_16px_rgba(239,68,68,0.25)]'
+                                    : 'bg-emerald-500/20 border border-emerald-500/60 text-emerald-400 shadow-[0_0_16px_rgba(52,211,153,0.25)]'
+                                : 'bg-transparent border border-transparent text-finance-muted hover:text-finance-text hover:bg-white/5'
                                 }`}
                         >
-                            <div className="flex items-center justify-center gap-2">
-                                {tKey === 'expense' ? <ArrowDownRight size={16} /> : <ArrowUpRight size={16} />}
-                                {t(tKey === 'expense' ? 'expense_label' : 'income_label')}
-                            </div>
+                            {tKey === 'expense' ? <ArrowDownRight size={16} /> : <ArrowUpRight size={16} />}
+                            {t(tKey === 'expense' ? 'expense_label' : 'income_label')}
                         </button>
                     ))}
                 </div>
@@ -126,7 +125,7 @@ function TransactionForm({ formData, setFormData, categories, onSubmit, onClose,
                 </button>
                 <button type="submit"
                     className="btn-primary px-6 py-2.5">
-                    {isEditing ? `✓ ${t('update_button')}` : `✓ ${t('save')}`}
+                    {isEditing ? `✓ ${t('update_button')} ` : `✓ ${t('save')} `}
                 </button>
             </div>
         </form>
@@ -449,11 +448,18 @@ export default function ResumenFinanciero() {
         return t('filter_all');
     };
 
-    // Filtrar timeline para la gráfica de barras
+    // Filtrar timeline para la gráfica de barras por días reales de calendario
     const filteredTimeline = useMemo(() => {
         if (!stats || !stats.timeline) return [];
-        if (chartPeriod === '7days') return stats.timeline.slice(-7);
-        return stats.timeline.slice(-30);
+        const now = new Date();
+        const days = chartPeriod === '7days' ? 7 : 30;
+        const cutoff = new Date(now);
+        cutoff.setDate(cutoff.getDate() - days);
+        cutoff.setHours(0, 0, 0, 0);
+        return stats.timeline.filter(entry => {
+            const entryDate = new Date(entry.date);
+            return entryDate >= cutoff;
+        });
     }, [stats?.timeline, chartPeriod]);
 
     if (loading) return <GlobalLoader fullScreen={true} />;
@@ -512,7 +518,7 @@ export default function ResumenFinanciero() {
                             exportToPDF(filteredTx, stats, t, language);
                             showToast(t('generating_pdf'));
                         }}
-                        className="flex items-center gap-2 px-4 py-2 bg-transparent border border-white/60 dark:border-white/80 hover:bg-white/10 text-[#00D4FF] rounded-xl text-sm font-bold transition-all"
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all border border-[#00D4FF]/40 text-[#00D4FF] bg-[#00D4FF]/5 hover:bg-[#00D4FF]/15 hover:border-[#00D4FF]/70 hover:shadow-[0_0_12px_rgba(0,212,255,0.25)] active:scale-95"
                         title={t('export_pdf')}
                     >
                         <FileText size={16} />
@@ -525,7 +531,7 @@ export default function ResumenFinanciero() {
                             exportToCSV(filteredTx, t, language);
                             showToast(t('exporting_tx'));
                         }}
-                        className="flex items-center gap-2 px-4 py-2 bg-transparent border border-white/60 dark:border-white/80 hover:bg-white/10 text-[#00D4FF] rounded-xl text-sm font-bold transition-all"
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all border border-[#00D4FF]/40 text-[#00D4FF] bg-[#00D4FF]/5 hover:bg-[#00D4FF]/15 hover:border-[#00D4FF]/70 hover:shadow-[0_0_12px_rgba(0,212,255,0.25)] active:scale-95"
                         title={t('export_csv')}
                     >
                         <Download size={16} />
@@ -533,7 +539,7 @@ export default function ResumenFinanciero() {
                     </button>
                     {/* Nuevo Movimiento */}
                     <button onClick={openCreate}
-                        className="bg-[#00D4FF] hover:opacity-90 active:scale-95 text-black font-bold py-2.5 px-4 rounded-xl flex items-center gap-2 transition-all shadow-lg shadow-[#00D4FF]/20">
+                        className="btn-epic py-2 px-4 text-sm gap-2 rounded-xl flex items-center font-bold">
                         <Plus size={18} /> {t('add_movement')}
                     </button>
                 </div>
@@ -543,40 +549,49 @@ export default function ResumenFinanciero() {
                 {/* Tarjetas de Resumen */}
                 <div className="col-span-12 md:col-span-4 card p-6 hover:border-[#00D4FF]/20 transition-all flex flex-col justify-center">
                     <p className="text-finance-muted text-xs uppercase font-semibold tracking-wide mb-2">{t('net_balance')}</p>
-                    <h3 className={`text-3xl font-bold ${stats.summary.balance >= 0 ? 'text-finance-primary' : 'text-red-400'}`}>
-                        ${stats.summary.balance.toLocaleString(language === 'en' ? 'en-US' : 'es-MX', { minimumFractionDigits: 2 })}
-                    </h3>
+                    <AnimatedCounter
+                        amount={stats.summary.balance}
+                        className={`text-3xl font-bold ${stats.summary.balance >= 0 ? 'text-finance-primary' : 'text-red-400'}`}
+                    />
                     <div className={`text-xs mt-2 font-semibold flex items-center gap-1 ${Number(savingsRate) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
                         {savingsRate >= 0 ? '▲' : '▼'} {Math.abs(savingsRate)}% {t('savings_rate')}
                     </div>
                 </div>
                 <div className="col-span-12 md:col-span-4 card p-6 flex flex-col justify-center">
                     <p className="text-finance-muted text-xs uppercase font-semibold tracking-wide mb-2">{t('total_income')}</p>
-                    <h3 className="text-3xl font-bold text-emerald-400">
-                        ${stats.summary.totalIncome.toLocaleString(language === 'en' ? 'en-US' : 'es-MX', { minimumFractionDigits: 2 })}
-                    </h3>
+                    <AnimatedCounter
+                        amount={stats.summary.totalIncome}
+                        className="text-3xl font-bold text-emerald-400"
+                    />
                 </div>
                 <div className="col-span-12 md:col-span-4 card p-6 flex flex-col justify-center">
                     <p className="text-finance-muted text-xs uppercase font-semibold tracking-wide mb-2">{t('total_expense')}</p>
-                    <h3 className="text-3xl font-bold text-red-400">
-                        ${stats.summary.totalExpense.toLocaleString(language === 'en' ? 'en-US' : 'es-MX', { minimumFractionDigits: 2 })}
-                    </h3>
+                    <AnimatedCounter
+                        amount={stats.summary.totalExpense}
+                        className="text-3xl font-bold text-red-400"
+                    />
                 </div>
 
                 {/* Gráficos */}
                 <div className="col-span-12 lg:col-span-8 card p-6 min-h-[360px] flex flex-col">
                     <div className="flex justify-between items-center mb-4">
                         <h3 className="text-base font-bold text-finance-text dark:text-finance-muted">{t('movement_history')}</h3>
-                        <div className="flex bg-black/10 dark:bg-black/40 rounded-xl p-1 border border-black/5 dark:border-white/5">
+                        <div className="flex bg-white soft-ui-bg dark:bg-black/30 rounded-xl p-1 border border-black/10 soft-ui-border dark:border-white/5 gap-1 shadow-sm dark:shadow-none">
                             <button
                                 onClick={() => setChartPeriod('7days')}
-                                className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${chartPeriod === '7days' ? 'bg-[#00D4FF]/20 text-finance-primary shadow-[0_0_10px_rgba(0,212,255,0.2)]' : 'text-finance-muted hover:text-white'}`}
+                                className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${chartPeriod === '7days'
+                                    ? 'bg-finance-primary text-black shadow-[0_0_12px_rgba(0,212,255,0.4)]'
+                                    : 'text-finance-muted hover:text-finance-text dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'
+                                    }`}
                             >
                                 {t('filter_week')}
                             </button>
                             <button
                                 onClick={() => setChartPeriod('30days')}
-                                className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${chartPeriod === '30days' ? 'bg-[#00D4FF]/20 text-finance-primary shadow-[0_0_10px_rgba(0,212,255,0.2)]' : 'text-finance-muted hover:text-white'}`}
+                                className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${chartPeriod === '30days'
+                                    ? 'bg-finance-primary text-black shadow-[0_0_12px_rgba(0,212,255,0.4)]'
+                                    : 'text-finance-muted hover:text-finance-text dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'
+                                    }`}
                             >
                                 {t('filter_30_days')}
                             </button>
@@ -599,7 +614,7 @@ export default function ResumenFinanciero() {
                 </div>
 
                 {/* Tabla de Movimientos */}
-                <div className="col-span-12 lg:col-span-8 card p-5 flex flex-col bg-white/5 backdrop-blur-md">
+                <div className="col-span-12 lg:col-span-8 card p-5 flex flex-col">
                     <div className="flex flex-col gap-3 mb-4">
                         <div className="flex flex-col sm:flex-row justify-between gap-3">
                             <h3 className="text-base font-bold text-finance-text">{t('movement_history')}</h3>
@@ -611,7 +626,7 @@ export default function ResumenFinanciero() {
                                         type="text"
                                         placeholder={t('search_placeholder')}
                                         aria-label={t('search_placeholder')}
-                                        className="pl-8 pr-3 py-2 rounded-xl bg-black/5 dark:bg-black/40 border border-black/10 dark:border-white/10 text-sm text-finance-text dark:text-white focus:outline-none focus:border-[#4F46E5] w-36 transition-colors"
+                                        className="pl-8 pr-3 py-2 rounded-xl bg-white soft-ui-input dark:bg-black/40 border border-black/10 dark:border-white/10 text-sm text-finance-text dark:text-white focus:outline-none focus:border-finance-primary w-36 transition-colors shadow-sm dark:shadow-none"
                                         value={search}
                                         onChange={e => setSearch(e.target.value)}
                                     />
@@ -626,7 +641,7 @@ export default function ResumenFinanciero() {
                                     {[['all', t('filter_all')], ['income', t('total_income')], ['expense', t('total_expense')]].map(([val, label]) => (
                                         <button key={val} onClick={() => setFilter(val)}
                                             aria-pressed={filter === val}
-                                            className={`px-3 py-2 rounded-xl text-xs font-bold transition-all ${filter === val ? 'btn-primary py-2 text-black' : 'bg-black/10 dark:bg-black/20 text-finance-muted hover:text-finance-text dark:hover:text-white border border-black/5 dark:border-white/10'}`}>
+                                            className={`px-3 py-2 rounded-xl text-xs font-bold transition-all ${filter === val ? 'btn-primary py-2 text-black shadow-md' : 'bg-white soft-ui-bg text-finance-muted hover:text-finance-text border border-black/10 soft-ui-border dark:bg-black/20 dark:border-white/10 shadow-sm hover:shadow-md transition-shadow'}`}>
                                             {label}
                                         </button>
                                     ))}
@@ -641,7 +656,7 @@ export default function ResumenFinanciero() {
                                 <button key={val}
                                     onClick={() => { setDateFilter(val); if (val === 'custom') setShowDatePicker(true); else setShowDatePicker(false); }}
                                     aria-pressed={dateFilter === val}
-                                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${dateFilter === val ? 'bg-[#00D4FF]/20 text-finance-primary border border-[#00D4FF]/40' : 'bg-black/10 dark:bg-black/20 text-finance-muted hover:text-finance-text dark:hover:text-white border border-black/5 dark:border-white/10'}`}>
+                                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${dateFilter === val ? 'bg-finance-primary/20 text-finance-primary border border-finance-primary/40 shadow-sm' : 'bg-white soft-ui-bg text-finance-muted hover:text-finance-text border border-black/10 soft-ui-border dark:bg-black/20 dark:border-white/10 shadow-sm'}`}>
                                     {label}
                                 </button>
                             ))}
@@ -672,10 +687,10 @@ export default function ResumenFinanciero() {
                         )}
                     </div>
 
-                    <div className="overflow-x-auto flex-1 overflow-y-auto max-h-[380px]" style={{ scrollbarWidth: 'thin', scrollbarColor: '#00D4FF transparent' }}>
+                    <div className="overflow-x-auto flex-1 overflow-y-auto max-h-[380px]">
                         <table className="w-full text-left border-collapse min-w-[480px]">
-                            <thead className="sticky top-0 bg-white dark:bg-black/60 backdrop-blur-md z-10">
-                                <tr className="border-b border-black/5 dark:border-white/10 text-finance-muted text-xs uppercase">
+                            <thead className="sticky top-0 bg-white soft-ui-header dark:bg-black/60 backdrop-blur-md dark:backdrop-blur-md z-10 border-b border-black/10 dark:border-white/10">
+                                <tr className="text-finance-text dark:text-finance-muted text-[10px] uppercase tracking-wider">
                                     <th className="p-3 font-semibold">{t('date_label')}</th>
                                     <th className="p-3 font-semibold">{t('description_label')}</th>
                                     <th className="p-3 font-semibold">{t('categories')}</th>
@@ -686,21 +701,28 @@ export default function ResumenFinanciero() {
                             <tbody>
                                 {filteredTx.map(tx => (
                                     <tr key={tx.id} className="border-b border-black/5 dark:border-white/5 hover:bg-black/5 dark:hover:bg-white/4 transition-colors text-finance-text dark:text-white">
-                                        <td className="p-3 text-sm text-finance-muted dark:text-finance-muted">
+                                        <td className="p-3 text-sm text-slate-500 dark:text-finance-muted font-medium">
                                             {/* Fix date offset: parse string directly instead of using constructor */}
                                             {(() => {
                                                 const [y, m, d] = tx.date.split('T')[0].split('-');
                                                 return language === 'en' ? `${m}/${d}/${y}` : `${d}/${m}/${y}`;
                                             })()}
                                         </td>
-                                        <td className="p-3 text-sm font-medium max-w-[160px] truncate">{tx.description || '—'}</td>
+                                        <td className="p-3 text-sm font-bold text-finance-text dark:text-white max-w-[160px] truncate">{tx.description || '—'}</td>
                                         <td className="p-3">
-                                            <span className="px-2 py-1 rounded-md text-xs bg-black/5 dark:bg-black/40 border border-black/5 dark:border-white/10 text-finance-muted whitespace-nowrap">
+                                            <span
+                                                className="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider whitespace-nowrap border"
+                                                style={{
+                                                    backgroundColor: `${tx.categories?.color || '#818cf8'}15`,
+                                                    color: tx.categories?.color || '#818cf8',
+                                                    borderColor: `${tx.categories?.color || '#818cf8'}30`
+                                                }}
+                                            >
                                                 {tx.categories?.name || t('no_category')}
                                             </span>
                                         </td>
                                         <td className={`p-3 text-sm font-bold ${tx.type === 'income' ? 'text-emerald-400' : 'text-red-400'}`}>
-                                            {tx.type === 'income' ? '+' : '-'}${Number(tx.amount).toLocaleString(language === 'en' ? 'en-US' : 'es-MX', { minimumFractionDigits: 2 })}
+                                            {tx.type === 'income' ? '+' : '-'}<AnimatedCounter amount={Number(tx.amount)} className="inline" />
                                         </td>
                                         <td className="p-3 text-right">
                                             {/* Acciones siempre visibles */}
@@ -734,10 +756,10 @@ export default function ResumenFinanciero() {
                         <span>{filteredTx.length} {t('transactions').toLowerCase()} {dateFilter !== 'all' ? `· ${getDateFilterLabel()}` : ''}</span>
                         {filteredTx.length > 0 && (
                             <div className="flex gap-3 mt-2 sm:mt-0">
-                                <button onClick={() => exportToCSV(filteredTx, t, language)} className="flex items-center gap-1 px-3 py-1.5 bg-transparent border border-white/60 dark:border-white/80 hover:bg-white/10 text-[#00D4FF] rounded-lg text-xs font-bold transition-all">
+                                <button onClick={() => exportToCSV(filteredTx, t, language)} className="flex items-center gap-1 px-3 py-1.5 border border-[#00D4FF]/40 text-[#00D4FF] bg-[#00D4FF]/5 hover:bg-[#00D4FF]/15 rounded-lg text-xs font-bold transition-all">
                                     <Download size={12} /> CSV
                                 </button>
-                                <button onClick={() => exportToPDF(filteredTx, stats, t, language)} className="flex items-center gap-1 px-3 py-1.5 bg-transparent border border-white/60 dark:border-white/80 hover:bg-white/10 text-[#00D4FF] rounded-lg text-xs font-bold transition-all">
+                                <button onClick={() => exportToPDF(filteredTx, stats, t, language)} className="flex items-center gap-1 px-3 py-1.5 border border-[#00D4FF]/40 text-[#00D4FF] bg-[#00D4FF]/5 hover:bg-[#00D4FF]/15 rounded-lg text-xs font-bold transition-all">
                                     <FileText size={12} /> PDF
                                 </button>
                             </div>
@@ -756,32 +778,35 @@ export default function ResumenFinanciero() {
                         </div>
 
                         <div className="space-y-4">
-                            <div className="flex justify-between items-center p-3 bg-black/5 dark:bg-white/5 rounded-xl border border-black/5 dark:border-white/5">
+                            <div className="flex justify-between items-center p-3 bg-slate-100/50 dark:bg-white/5 rounded-xl border border-black/5 dark:border-white/5">
                                 <span className="text-xs text-finance-muted">{t('monthly_income')}</span>
-                                <span className="font-bold text-emerald-400">
-                                    ${(stats?.summary?.totalIncome || 0).toLocaleString(language === 'en' ? 'en-US' : 'es-MX', { minimumFractionDigits: 2 })}
-                                </span>
+                                <AnimatedCounter
+                                    amount={stats?.summary?.totalIncome || 0}
+                                    className="font-bold text-emerald-400"
+                                />
                             </div>
 
-                            <div className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5">
+                            <div className="flex justify-between items-center p-3 bg-slate-100/50 dark:bg-white/5 rounded-xl border border-black/5 dark:border-white/5">
                                 <span className="text-xs text-finance-muted">{t('monthly_expenses')}</span>
-                                <span className="font-bold text-red-400">
-                                    ${(stats?.summary?.totalSpentThisMonth || 0).toLocaleString(language === 'en' ? 'en-US' : 'es-MX', { minimumFractionDigits: 2 })}
-                                </span>
+                                <AnimatedCounter
+                                    amount={stats?.summary?.totalSpentThisMonth || 0}
+                                    className="font-bold text-red-400"
+                                />
                             </div>
 
                             <div className="pt-4 border-t border-black/10 dark:border-white/10">
                                 <div className="flex justify-between items-center px-1">
                                     <span className="text-xs font-bold text-finance-text dark:text-white uppercase tracking-wider">{t('monthly_savings')}</span>
-                                    <span className={`text-lg font-black ${(stats?.summary?.totalIncome - stats?.summary?.totalSpentThisMonth) >= 0 ? 'text-finance-primary drop-shadow-[0_0_8px_rgba(0,212,255,0.4)]' : 'text-red-500'}`}>
-                                        ${((stats?.summary?.totalIncome || 0) - (stats?.summary?.totalSpentThisMonth || 0)).toLocaleString(language === 'en' ? 'en-US' : 'es-MX', { minimumFractionDigits: 2 })}
-                                    </span>
+                                    <AnimatedCounter
+                                        amount={(stats?.summary?.totalIncome || 0) - (stats?.summary?.totalSpentThisMonth || 0)}
+                                        className={`text-lg font-black ${(stats?.summary?.totalIncome - stats?.summary?.totalSpentThisMonth) >= 0 ? 'text-finance-primary drop-shadow-[0_0_8px_rgba(0,212,255,0.4)]' : 'text-red-500'}`}
+                                    />
                                 </div>
                             </div>
 
                             {/* Categoría más gastada del mes */}
                             {stats.monthlyExpensesByCategory?.length > 0 && (
-                                <div className="mt-6 p-4 bg-black/5 dark:bg-black/20 rounded-2xl border border-black/5 dark:border-white/5">
+                                <div className="mt-6 p-4 bg-white soft-ui-bg dark:bg-black/20 rounded-2xl border border-black/10 soft-ui-border dark:border-white/5">
                                     <p className="text-[10px] text-finance-muted uppercase font-bold tracking-[0.15em] mb-2">{t('most_spent_category')}</p>
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2">
@@ -790,9 +815,11 @@ export default function ResumenFinanciero() {
                                                 {stats.monthlyExpensesByCategory.sort((a, b) => b.amount - a.amount)[0].name}
                                             </span>
                                         </div>
-                                        <span className="text-sm font-black text-finance-text dark:text-white">
-                                            ${stats.monthlyExpensesByCategory.sort((a, b) => b.amount - a.amount)[0].amount.toLocaleString(language === 'en' ? 'en-US' : 'es-MX')}
-                                        </span>
+                                        <AnimatedCounter
+                                            amount={stats.monthlyExpensesByCategory.sort((a, b) => b.amount - a.amount)[0].amount}
+                                            className="text-sm font-black text-finance-text dark:text-white"
+                                            decimals={0}
+                                        />
                                     </div>
                                 </div>
                             )}
@@ -821,10 +848,10 @@ export default function ResumenFinanciero() {
                             <h2 id="delete-modal-title" className="text-lg font-bold">{t('delete_confirm')}</h2>
                         </div>
                         <p className="text-[#9EA3B0] text-sm mb-2">{t('delete_warning')}</p>
-                        <div className="p-3 bg-black/5 dark:bg-black/40 border border-black/5 dark:border-white/5 rounded-xl mb-5 text-sm">
+                        <div className="p-3 border border-black/5 dark:border-white/5 rounded-xl mb-5 text-sm">
                             <p className="font-semibold text-finance-text dark:text-white">{showDeleteConfirm.description || t('no_description')}</p>
                             <p className={`font-bold mt-0.5 ${showDeleteConfirm.type === 'income' ? 'text-emerald-400' : 'text-red-400'}`}>
-                                {showDeleteConfirm.type === 'income' ? '+' : '-'}${Number(showDeleteConfirm.amount).toLocaleString(language === 'en' ? 'en-US' : 'es-MX', { minimumFractionDigits: 2 })}
+                                {showDeleteConfirm.type === 'income' ? '+' : '-'}<AnimatedCounter amount={Number(showDeleteConfirm.amount)} className="inline" />
                             </p>
                         </div>
                         <div className="flex gap-3">

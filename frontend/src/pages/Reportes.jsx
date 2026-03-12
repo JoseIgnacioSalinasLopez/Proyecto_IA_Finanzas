@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../services/api';
 import { useLanguage } from '../context/LanguageContext';
+import { useTheme } from '../context/ThemeContext';
 import {
     Chart as ChartJS,
     Tooltip,
@@ -13,9 +14,10 @@ import {
     Filler
 } from 'chart.js';
 import { Line } from 'react-chartjs-2';
-import { Download, FileText, Calendar, Filter, ChevronLeft, ChevronRight, X, AlertCircle } from 'lucide-react';
+import { Download, FileText } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import AnimatedCounter from '../components/ui/AnimatedCounter'; // Added from diff
 import Toast from '../components/ui/Toast';
 import GlobalLoader from '../components/ui/GlobalLoader';
 
@@ -32,10 +34,12 @@ ChartJS.register(
 
 export default function Reportes() {
     const { t, language } = useLanguage();
+    const { showBalances } = useTheme(); // Added from diff
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(true);
     const [exporting, setExporting] = useState(false);
     const [toast, setToast] = useState(null);
+    const [dateRange, setDateRange] = useState('month'); // month, quarter, year, allst] = useState(null); // Added from diff
 
     const showToast = (message, type = 'success') => setToast({ message, type });
     const closeToast = () => setToast(null);
@@ -260,7 +264,7 @@ export default function Reportes() {
                 <div className="flex items-center gap-3">
                     <button
                         onClick={exportToCSV}
-                        className="flex items-center gap-2 px-4 py-2 bg-transparent border border-white/60 dark:border-white/80 hover:bg-white/10 text-[#00D4FF] rounded-xl text-sm font-bold transition-all"
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all border border-[#00D4FF]/40 text-[#00D4FF] bg-[#00D4FF]/5 hover:bg-[#00D4FF]/15 hover:border-[#00D4FF]/70 hover:shadow-[0_0_12px_rgba(0,212,255,0.25)] active:scale-95"
                     >
                         <Download size={18} />
                         CSV
@@ -268,7 +272,7 @@ export default function Reportes() {
                     <button
                         onClick={exportToPDF}
                         disabled={exporting}
-                        className="flex items-center gap-2 px-4 py-2 bg-transparent border border-white/60 dark:border-white/80 hover:bg-white/10 text-[#00D4FF] rounded-xl text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all border border-[#00D4FF]/40 text-[#00D4FF] bg-[#00D4FF]/5 hover:bg-[#00D4FF]/15 hover:border-[#00D4FF]/70 hover:shadow-[0_0_12px_rgba(0,212,255,0.25)] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         {exporting ? (
                             <div className="w-4 h-4 border-2 border-[#00D4FF]/30 border-t-[#00D4FF] rounded-full animate-spin" />
@@ -283,23 +287,32 @@ export default function Reportes() {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Main Timeline Chart */}
-                <div className="lg:col-span-2 card p-5 flex flex-col min-h-[500px] bg-white/5">
+                <div className="lg:col-span-2 card p-5 flex flex-col min-h-[500px] bg-white soft-ui-bg">
                     <h2 className="text-sm font-bold text-finance-muted uppercase tracking-wider mb-6">{t('wealth_evolution')}</h2>
                     <div className="flex-1 min-h-[300px]">
                         <Line data={lineData} options={chartOptions} />
                     </div>
-                    <div className="mt-6 pt-6 border-t border-white/5 grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="mt-6 pt-6 border-t border-black/5 soft-ui-border grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div className="text-center">
                             <p className="text-[10px] text-finance-muted uppercase tracking-widest mb-1">{t('max_income')}</p>
-                            <p className="text-emerald-400 font-bold text-lg">${Math.max(...stats.timeline.map(d => d.income), 0).toLocaleString(language === 'en' ? 'en-US' : 'es-MX')}</p>
+                            <AnimatedCounter
+                                amount={Math.max(...stats.timeline.map(d => d.income), 0)}
+                                className="text-emerald-400 font-bold text-lg"
+                            />
                         </div>
                         <div className="text-center">
                             <p className="text-[10px] text-finance-muted uppercase tracking-widest mb-1">{t('max_expense')}</p>
-                            <p className="text-red-400 font-bold text-lg">${Math.max(...stats.timeline.map(d => d.expense), 0).toLocaleString(language === 'en' ? 'en-US' : 'es-MX')}</p>
+                            <AnimatedCounter
+                                amount={Math.max(...stats.timeline.map(d => d.expense), 0)}
+                                className="text-red-400 font-bold text-lg"
+                            />
                         </div>
                         <div className="text-center">
                             <p className="text-[10px] text-finance-muted uppercase tracking-widest mb-1">{t('daily_avg')}</p>
-                            <p className="text-finance-primary font-bold text-lg">${stats.summary.dailyBurnRate.toLocaleString(language === 'en' ? 'en-US' : 'es-MX')}</p>
+                            <AnimatedCounter
+                                amount={stats.summary.dailyBurnRate}
+                                className="text-finance-primary font-bold text-lg"
+                            />
                         </div>
                         <div className="text-center">
                             <p className="text-[10px] text-finance-muted uppercase tracking-widest mb-1">{t('risk_level_label')}</p>
@@ -315,7 +328,7 @@ export default function Reportes() {
 
                 {/* Stats Summary Panel */}
                 <div className="lg:col-span-1 space-y-6">
-                    <div className="card p-5 space-y-4">
+                    <div className="card p-5 space-y-4 bg-white soft-ui-bg">
                         <h2 className="text-sm font-bold text-finance-muted uppercase tracking-wider">{t('key_metrics')}</h2>
                         <div className="space-y-4">
                             {[
@@ -323,11 +336,14 @@ export default function Reportes() {
                                 { label: t('projected_savings'), value: stats.summary.balance * 0.2, color: 'text-emerald-400' },
                                 { label: t('reserve_days'), value: stats.summary.bufferTime, suffix: ` ${t('days').toLowerCase()}`, color: 'text-orange-400' }
                             ].map((item, i) => (
-                                <div key={i} className="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5">
+                                <div key={i} className="flex justify-between items-center p-3 bg-white soft-ui-bg rounded-xl border border-black/5 soft-ui-border">
                                     <span className="text-xs text-finance-muted font-medium">{item.label}</span>
-                                    <span className={`font-bold ${item.color}`}>
-                                        {item.suffix ? `${item.value}${item.suffix}` : `$${item.value.toLocaleString(language === 'en' ? 'en-US' : 'es-MX')}`}
-                                    </span>
+                                    <AnimatedCounter
+                                        amount={item.value}
+                                        className={`font-bold ${item.color}`}
+                                        suffix={item.suffix || ''}
+                                        prefix={item.suffix ? '' : '$'}
+                                    />
                                 </div>
                             ))}
                         </div>

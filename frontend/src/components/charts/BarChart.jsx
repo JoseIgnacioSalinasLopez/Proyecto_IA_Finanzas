@@ -1,6 +1,7 @@
 import { useMemo, useRef } from 'react';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
+import { useTheme } from '../../context/ThemeContext';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -16,7 +17,8 @@ const glowPlugin = {
     beforeDatasetsDraw: (chart) => {
         const ctx = chart.ctx;
         ctx.save();
-        ctx.shadowColor = 'rgba(0, 212, 255, 0.3)';
+        const isDark = chart.config.options.scales.y.ticks.color?.includes('255'); // Simple dark check
+        ctx.shadowColor = isDark ? 'rgba(0, 212, 255, 0.3)' : 'rgba(0, 212, 255, 0.15)';
         ctx.shadowBlur = 10;
         ctx.shadowOffsetX = 0;
         ctx.shadowOffsetY = 4;
@@ -28,6 +30,18 @@ const glowPlugin = {
 
 export default function BarChart({ data, title = 'Comparativa' }) {
     const chartRef = useRef(null);
+    const { theme } = useTheme();
+    const isDark = theme === 'dark';
+
+    // Theme-adaptive colors
+    const tickColor = isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(30, 30, 60, 0.6)';
+    const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.07)';
+    const legendColor = isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(30, 30, 60, 0.7)';
+    const titleColor = isDark ? '#FFFFFF' : '#1e1e3c';
+    const tooltipBg = isDark ? 'rgba(13, 6, 50, 0.95)' : 'rgba(255,255,255,0.97)';
+    const tooltipTitle = isDark ? '#FFFFFF' : '#1e1e3c';
+    const tooltipBody = isDark ? 'rgba(255,255,255,0.8)' : 'rgba(30,30,60,0.8)';
+    const tooltipBorder = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
 
     const styledData = useMemo(() => {
         if (!data || !data.datasets) return data;
@@ -45,7 +59,6 @@ export default function BarChart({ data, title = 'Comparativa' }) {
                         if (!chartArea) return color;
                         const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
 
-                        // Si el color es un string hex/rgb, intentar gradiente transparente
                         const baseColor = typeof color === 'string' ? color : '#00D4FF';
                         const isHex = baseColor.startsWith('#');
                         gradient.addColorStop(0, isHex ? hexToRgba(baseColor, 0.95) : baseColor);
@@ -59,23 +72,19 @@ export default function BarChart({ data, title = 'Comparativa' }) {
                     categoryPercentage: 0.7,
                 };
             })
-
         };
     }, [data]);
 
     const options = {
         responsive: true,
         maintainAspectRatio: false,
-        interaction: {
-            mode: 'index',
-            intersect: false,
-        },
+        interaction: { mode: 'index', intersect: false },
         plugins: {
             legend: {
                 position: 'top',
                 align: 'end',
                 labels: {
-                    color: 'rgba(255, 255, 255, 0.5)',
+                    color: legendColor,
                     usePointStyle: true,
                     boxWidth: 8,
                     font: { family: "'Inter', sans-serif", size: 12, weight: '500' }
@@ -84,16 +93,16 @@ export default function BarChart({ data, title = 'Comparativa' }) {
             title: {
                 display: !!title,
                 text: title,
-                color: '#FFFFFF',
+                color: titleColor,
                 align: 'start',
                 font: { family: "'Inter', sans-serif", size: 16, weight: 'bold' },
                 padding: { bottom: 20 }
             },
             tooltip: {
-                backgroundColor: 'var(--chart-tooltip-bg)',
-                titleColor: '#FFFFFF',
-                bodyColor: 'rgba(255, 255, 255, 0.8)',
-                borderColor: 'rgba(255, 255, 255, 0.1)',
+                backgroundColor: tooltipBg,
+                titleColor: tooltipTitle,
+                bodyColor: tooltipBody,
+                borderColor: tooltipBorder,
                 borderWidth: 1,
                 padding: 14,
                 cornerRadius: 12,
@@ -104,7 +113,7 @@ export default function BarChart({ data, title = 'Comparativa' }) {
                         let label = context.dataset.label || '';
                         if (label) label += ': ';
                         if (context.parsed.y !== null) {
-                            label += new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(context.parsed.y);
+                            label += new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(context.parsed.y);
                         }
                         return label;
                     }
@@ -114,17 +123,14 @@ export default function BarChart({ data, title = 'Comparativa' }) {
         scales: {
             y: {
                 stacked: true,
-                grid: {
-                    color: 'rgba(255, 255, 255, 0.1)',
-                    drawBorder: false,
-                },
-                ticks: { color: 'rgba(255, 255, 255, 0.5)', font: { family: "'Inter', sans-serif", weight: '600' } },
+                grid: { color: gridColor, drawBorder: false },
+                ticks: { color: tickColor, font: { family: "'Inter', sans-serif", weight: '600' } },
                 beginAtZero: true
             },
             x: {
                 stacked: true,
                 grid: { display: false, drawBorder: false },
-                ticks: { color: 'rgba(255, 255, 255, 0.5)', font: { family: "'Inter', sans-serif", weight: '600' } }
+                ticks: { color: tickColor, font: { family: "'Inter', sans-serif", weight: '600' } }
             }
         }
     };

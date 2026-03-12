@@ -4,6 +4,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { Target, Plus, Trash2, TrendingDown, AlertCircle, Info, Pencil } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import GlobalLoader from '../components/ui/GlobalLoader';
+import AnimatedCounter from '../components/ui/AnimatedCounter';
 
 export default function Presupuestos() {
     const { t } = useLanguage();
@@ -93,11 +94,18 @@ export default function Presupuestos() {
                 <div className="flex justify-between items-end mb-4">
                     <div>
                         <p className="text-xs font-bold text-finance-muted uppercase tracking-widest mb-1">{t('global_budget')}</p>
-                        <h2 className="text-3xl font-black text-finance-text">${totalSpent.toLocaleString()} <span className="text-finance-muted font-normal text-lg">/ ${totalBudget.toLocaleString()}</span></h2>
+                        <div className="flex items-baseline gap-2">
+                            <AnimatedCounter amount={totalSpent} className="text-3xl font-black text-finance-text" />
+                            <span className="text-finance-muted font-normal text-lg">/</span>
+                            <AnimatedCounter amount={totalBudget} className="text-lg text-finance-muted" />
+                        </div>
                     </div>
                     <div className="text-right">
                         <p className="text-xs text-finance-muted mb-1 font-medium">{t('available')}</p>
-                        <p className={`text-xl font-bold ${remains > 0 ? 'text-emerald-400' : 'text-red-400'}`}>${remains.toLocaleString()}</p>
+                        <AnimatedCounter
+                            amount={remains}
+                            className={`text-xl font-bold ${remains > 0 ? 'text-emerald-400' : 'text-red-400'}`}
+                        />
                     </div>
                 </div>
                 <div className="h-4 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
@@ -183,7 +191,10 @@ export default function Presupuestos() {
                                             </div>
                                             <div>
                                                 <h4 className="font-bold text-finance-text">{b.categories?.name}</h4>
-                                                <p className="text-[10px] text-finance-muted font-bold uppercase tracking-widest">{t('limit_prefix')}${Number(b.amount_limit).toLocaleString()}</p>
+                                                <div className="flex items-center gap-1">
+                                                    <span className="text-[10px] text-finance-muted font-bold uppercase tracking-widest">{t('limit_prefix')}</span>
+                                                    <AnimatedCounter amount={b.amount_limit} className="text-[10px] text-finance-muted font-bold" />
+                                                </div>
                                             </div>
                                         </div>
                                         <div className="flex items-center gap-1">
@@ -203,7 +214,10 @@ export default function Presupuestos() {
                                     </div>
                                     <div className="space-y-2">
                                         <div className="flex justify-between text-[11px] font-bold">
-                                            <span className="text-finance-muted">{t('spent_prefix')}${spentInCat.toLocaleString()}</span>
+                                            <div className="flex items-center gap-1">
+                                                <span className="text-finance-muted">{t('spent_prefix')}</span>
+                                                <AnimatedCounter amount={spentInCat} className="text-finance-muted" />
+                                            </div>
                                             <span className={perc > 100 ? 'text-red-400' : perc > 80 ? 'text-orange-400' : 'text-finance-primary'}>
                                                 {perc.toFixed(1)}%
                                             </span>

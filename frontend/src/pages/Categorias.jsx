@@ -14,6 +14,7 @@ export default function Categorias() {
     const [activeTab, setActiveTab] = useState('expense'); // 'expense' or 'income'
     const [search, setSearch] = useState('');
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
+    const [formData, setFormData] = useState({ name: '', color: '#00D4FF', type: 'expense' });
 
     useEffect(() => { fetchCategories(); }, []);
 
@@ -116,7 +117,7 @@ export default function Categorias() {
             </div>
 
             {/* Tabs de Gastos/Ingresos */}
-            <div className="flex gap-2 p-1 bg-black/20 rounded-xl w-full max-w-sm">
+            <div className="flex gap-2 p-1 bg-black/20 soft-ui-bg soft-ui-border rounded-xl w-full max-w-sm">
                 <button
                     onClick={() => setActiveTab('expense')}
                     className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all ${activeTab === 'expense' ? 'bg-finance-primary text-white shadow-lg' : 'text-finance-muted hover:text-finance-text dark:hover:text-white hover:bg-white/5'}`}
@@ -137,7 +138,7 @@ export default function Categorias() {
                 <input
                     type="text"
                     placeholder={t('search_categories')}
-                    className="input-field pl-11 text-sm"
+                    className="input-field soft-ui-input pl-11 text-sm"
                     value={search}
                     onChange={e => setSearch(e.target.value)}
                 />
@@ -153,7 +154,7 @@ export default function Categorias() {
                 {filteredCategories.map((cat, idx) => (
                     <div
                         key={cat.id}
-                        className={`card flex items-center justify-between gap-3 p-4 hover:border-finance-primary/30 hover:-translate-y-0.5 transition-all duration-200 group animate-fade-in-up ${cat.is_editable === false ? 'border-dashed border-white/10 opacity-90' : ''}`}
+                        className={`card flex items-center justify-between gap-3 p-4 bg-white soft-ui-bg soft-ui-border hover:border-finance-primary/30 hover:-translate-y-0.5 transition-all duration-200 group animate-fade-in-up ${cat.is_editable === false ? 'border-dashed border-white/10 opacity-90' : ''}`}
                         style={{ animationDelay: `${idx * 40}ms` }}
                     >
                         <div className="flex items-center gap-3 min-w-0">
@@ -214,7 +215,7 @@ export default function Categorias() {
                     aria-modal="true"
                     aria-labelledby="cat-modal-title"
                 >
-                    <div className="card p-6 w-full max-w-sm border-white/10 shadow-2xl animate-scale-in">
+                    <div className="card p-6 w-full max-w-sm border-white/10 soft-ui-border shadow-2xl animate-scale-in bg-white soft-ui-bg dark:bg-finance-800">
                         <div className="flex justify-between items-center mb-5">
                             <h2 id="cat-modal-title" className="text-xl font-bold">
                                 {editingCat ? t('edit_category') : t('add_category')}
@@ -258,7 +259,7 @@ export default function Categorias() {
                                     type="text"
                                     required
                                     autoFocus
-                                    className="input-field"
+                                    className="input-field soft-ui-input"
                                     placeholder={t('example_categories')}
                                     value={formData.name}
                                     onChange={e => setFormData({ ...formData, name: e.target.value })}
@@ -288,7 +289,7 @@ export default function Categorias() {
                                     />
                                     <input
                                         type="text"
-                                        className="input-field flex-1 font-mono text-sm uppercase"
+                                        className="input-field soft-ui-input flex-1 font-mono text-sm uppercase"
                                         value={formData.color}
                                         onChange={e => setFormData({ ...formData, color: e.target.value })}
                                         placeholder="#00D4FF"

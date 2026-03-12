@@ -4,6 +4,7 @@ import api from '../services/api';
 import { useAuth } from '../hooks/useAuth';
 import { Save, User, Phone, MapPin, Briefcase, ShieldCheck, TrendingUp, Wallet, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import AnimatedCounter from '../components/ui/AnimatedCounter';
 
 export default function Perfil() {
     const { user } = useAuth();
@@ -67,7 +68,7 @@ export default function Perfil() {
                     </div>
 
                     <div className="text-center md:text-left">
-                        <h1 className="text-4xl font-black text-white tracking-tight mb-2 uppercase">{user?.name}</h1>
+                        <h1 className="text-4xl font-black text-finance-text tracking-tight mb-2 uppercase">{user?.name}</h1>
                         <div className="flex flex-wrap justify-center md:justify-start gap-4 text-finance-muted font-medium text-sm">
                             <span className="flex items-center gap-1.5"><Briefcase size={14} className="text-finance-primary" /> {t('verified_account')}</span>
                             <span className="flex items-center gap-1.5"><Clock size={14} className="text-finance-primary" /> {t('member_since')} {new Date(user?.created_at).toLocaleDateString(language === 'en' ? 'en-US' : 'es-MX', { year: 'numeric', month: 'long' })}</span>
@@ -160,21 +161,24 @@ export default function Perfil() {
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="card bg-finance-primary/5 border-finance-primary/10 p-6">
                             <div className="text-xs font-black text-finance-muted uppercase tracking-tighter mb-1">{t('total_balance')}</div>
-                            <div className={`text-2xl font-black ${balance >= 0 ? 'text-white' : 'text-red-400'}`}>
-                                ${balance.toLocaleString()}
-                            </div>
+                            <AnimatedCounter
+                                amount={balance}
+                                className={`text-2xl font-black ${balance >= 0 ? 'text-white' : 'text-red-400'}`}
+                            />
                         </div>
                         <div className="card bg-emerald-500/5 border-emerald-500/10 p-6">
                             <div className="text-xs font-black text-finance-muted uppercase tracking-tighter mb-1">{t('total_income')}</div>
-                            <div className="text-2xl font-black text-emerald-400">
-                                ${income.toLocaleString()}
-                            </div>
+                            <AnimatedCounter
+                                amount={income}
+                                className="text-2xl font-black text-emerald-400"
+                            />
                         </div>
                         <div className="card bg-red-500/5 border-red-500/10 p-6">
                             <div className="text-xs font-black text-finance-muted uppercase tracking-tighter mb-1">{t('total_expense')}</div>
-                            <div className="text-2xl font-black text-red-400">
-                                ${expense.toLocaleString()}
-                            </div>
+                            <AnimatedCounter
+                                amount={expense}
+                                className="text-2xl font-black text-red-400"
+                            />
                         </div>
                     </div>
                 </div>
@@ -183,7 +187,7 @@ export default function Perfil() {
                 <div className="space-y-8">
                     {/* Security Status Card */}
                     <div className="card bg-white/5 border-white/5 p-6">
-                        <h4 className="text-sm font-black text-white uppercase tracking-widest mb-6 flex items-center gap-2">
+                        <h4 className="text-sm font-black text-finance-text uppercase tracking-widest mb-6 flex items-center gap-2">
                             <ShieldCheck size={16} className="text-finance-primary" />
                             {t('security_status')}
                         </h4>
@@ -208,7 +212,7 @@ export default function Perfil() {
                                     <CheckCircle2 size={14} className="text-emerald-400" />
                                     <span>{t('encryption_ok') || 'Cifrado de grado bancario'}</span>
                                 </div>
-                                <div className="flex items-center gap-3 text-xs text-white/30">
+                                <div className="flex items-center gap-3 text-xs text-finance-muted/50">
                                     <AlertCircle size={14} />
                                     <span>{t('backup_pending') || 'Copia de seguridad semanal'}</span>
                                 </div>
@@ -221,7 +225,7 @@ export default function Perfil() {
                         <div className="absolute top-0 right-0 p-4 opacity-5">
                             <TrendingUp size={80} />
                         </div>
-                        <h4 className="text-sm font-black text-white uppercase tracking-widest mb-6 flex items-center gap-2">
+                        <h4 className="text-sm font-black text-finance-text uppercase tracking-widest mb-6 flex items-center gap-2">
                             <TrendingUp size={16} className="text-finance-neon" />
                             {t('activity_overview')}
                         </h4>
@@ -237,7 +241,7 @@ export default function Perfil() {
                                     </div>
                                     <div>
                                         <div className="text-[10px] text-finance-muted uppercase font-black tracking-tighter">{item.label}</div>
-                                        <div className="text-sm font-bold text-white">{item.value}</div>
+                                        <div className="text-sm font-bold text-finance-text">{item.value}</div>
                                     </div>
                                 </div>
                             ))}

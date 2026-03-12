@@ -5,6 +5,7 @@ import { toast } from 'react-hot-toast';
 import { useLanguage } from '../context/LanguageContext';
 import DatePickerElite from '../components/ui/DatePickerElite';
 import GlobalLoader from '../components/ui/GlobalLoader';
+import AnimatedCounter from '../components/ui/AnimatedCounter';
 
 function calcMonthlySavingsNeeded(goal) {
     const target = Number(goal.target_amount) || 0;
@@ -161,11 +162,11 @@ export default function Metas() {
 
                     return (
                         <div key={goal.id}
-                            className={`card p-5 flex flex-col transition-all duration-300 card-glow hover:-translate-y-1 active:scale-[0.98] cursor-pointer animate-fade-in-up bg-white/5 ${isComplete
+                            className={`card p-5 flex flex-col transition-all duration-300 card-glow hover:-translate-y-1 active:scale-[0.98] cursor-pointer animate-fade-in-up bg-white soft-ui-bg ${isComplete
                                 ? 'border-emerald-500/40 shadow-[0_0_20px_rgba(52,211,153,0.1)]'
                                 : isExpired
                                     ? 'border-red-500/30 shadow-[0_0_20px_rgba(239,68,68,0.05)]'
-                                    : 'border-white/5'
+                                    : 'border-white/5 soft-ui-border'
                                 }`}
                             style={{ animationDelay: `${idx * 60}ms` }}
                         >
@@ -211,7 +212,7 @@ export default function Metas() {
                                         {progress.toFixed(0)}%
                                     </span>
                                 </div>
-                                <div className="h-2.5 bg-black/40 border border-white/5 rounded-full overflow-hidden">
+                                <div className="h-2.5 bg-slate-100 dark:bg-black/40 border border-black/5 dark:border-white/5 rounded-full overflow-hidden">
                                     <div
                                         className={`h-full rounded-full transition-all duration-700 ${isComplete ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.4)]' : isExpired ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.4)]' : 'bg-finance-primary shadow-[0_0_8px_rgba(0,212,255,0.4)]'}`}
                                         style={{ width: `${progress}%` }}
@@ -222,11 +223,17 @@ export default function Metas() {
                             <div className="grid grid-cols-2 gap-3 py-3 border-t border-white/5 mt-auto">
                                 <div>
                                     <p className="text-[10px] text-finance-muted uppercase tracking-wider mb-0.5">{t('target_amount')}</p>
-                                    <p className="text-sm font-bold">${target.toLocaleString(language === 'en' ? 'en-US' : 'es-MX')}</p>
+                                    <AnimatedCounter
+                                        amount={target}
+                                        className="text-sm font-bold"
+                                    />
                                 </div>
                                 <div className="text-right">
                                     <p className="text-[10px] text-finance-muted uppercase tracking-wider mb-0.5">{t('current_amount')}</p>
-                                    <p className="text-sm font-bold text-finance-primary">${current.toLocaleString(language === 'en' ? 'en-US' : 'es-MX')}</p>
+                                    <AnimatedCounter
+                                        amount={current}
+                                        className="text-sm font-bold text-finance-primary"
+                                    />
                                 </div>
                             </div>
 
@@ -234,7 +241,7 @@ export default function Metas() {
                                 <div className="flex items-start gap-2 mt-2 px-3 py-2 bg-finance-primary/5 border border-white/5 rounded-xl">
                                     <Lightbulb size={13} className="text-finance-primary flex-shrink-0 mt-0.5" />
                                     <p className="text-[11px] text-finance-muted">
-                                        {t('monthly_suggested')}: <span className="text-finance-primary font-bold">${monthlySavings}/{language === 'en' ? 'mo' : 'mes'}</span>
+                                        {t('monthly_suggested')}: <AnimatedCounter amount={monthlySavings} className="text-finance-primary font-bold" suffix={`/${language === 'en' ? 'mo' : 'mes'}`} />
                                     </p>
                                 </div>
                             )}
@@ -256,7 +263,7 @@ export default function Metas() {
             {/* Modal Crear/Editar */}
             {showModal && (
                 <div className="fixed inset-0 bg-black/65 backdrop-blur-md flex justify-center items-center z-50 p-4" onClick={(e) => e.target === e.currentTarget && setShowModal(false)}>
-                    <div className="card p-6 w-full max-w-md border-white/10 animate-scale-in bg-finance-800 overflow-visible">
+                    <div className="card p-6 w-full max-w-md border-white/10 soft-ui-border animate-scale-in bg-white soft-ui-bg dark:bg-finance-800 overflow-visible">
                         <h2 className="text-xl font-bold mb-5 text-finance-text">{editingGoal ? t('edit_goal') : t('add_goal')}</h2>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div>

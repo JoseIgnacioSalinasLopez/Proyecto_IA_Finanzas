@@ -1,6 +1,7 @@
 import { useMemo, useRef } from 'react';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js';
 import { Line } from 'react-chartjs-2';
+import { useTheme } from '../../context/ThemeContext';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
@@ -30,6 +31,18 @@ const glowPlugin = {
 
 export default function LineChart({ data, title = 'Evolución' }) {
     const chartRef = useRef(null);
+    const { theme } = useTheme();
+    const isDark = theme === 'dark';
+
+    const tickColor = isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(30, 30, 60, 0.6)';
+    const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.07)';
+    const legendColor = isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(30, 30, 60, 0.7)';
+    const titleColor = isDark ? '#FFFFFF' : '#1e1e3c';
+    const tooltipBg = isDark ? 'rgba(13, 6, 50, 0.95)' : 'rgba(255,255,255,0.97)';
+    const tooltipTitle = isDark ? '#FFFFFF' : '#1e1e3c';
+    const tooltipBody = isDark ? 'rgba(255,255,255,0.8)' : 'rgba(30,30,60,0.8)';
+    const tooltipBorder = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+    const pointBg = isDark ? '#0B022D' : '#ffffff';
 
     const styledData = useMemo(() => {
         if (!data || !data.datasets) return data;
@@ -38,7 +51,6 @@ export default function LineChart({ data, title = 'Evolución' }) {
             ...data,
             datasets: data.datasets.map((ds) => {
                 const color = ds.borderColor || '#00D4FF';
-
                 return {
                     ...ds,
                     borderColor: color,
@@ -47,8 +59,6 @@ export default function LineChart({ data, title = 'Evolución' }) {
                         const { ctx, chartArea } = chart;
                         if (!chartArea) return 'rgba(0,0,0,0)';
                         const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-
-                        // Intentar crear un gradiente basado en el color de borde
                         const baseColor = typeof color === 'string' ? color : '#00D4FF';
                         const isHex = baseColor.startsWith('#');
                         gradient.addColorStop(0, isHex ? hexToRgba(baseColor, 0.4) : baseColor.replace(')', ', 0.4)').replace('rgb', 'rgba'));
@@ -57,33 +67,29 @@ export default function LineChart({ data, title = 'Evolución' }) {
                     },
                     fill: true,
                     tension: 0.5,
-                    pointBackgroundColor: '#0B022D',
+                    pointBackgroundColor: pointBg,
                     pointBorderColor: color,
                     pointBorderWidth: 2,
                     pointHoverBackgroundColor: color,
-                    pointHoverBorderColor: '#fff',
+                    pointHoverBorderColor: isDark ? '#fff' : '#1e1e3c',
                     pointHoverRadius: 6,
                     pointRadius: 0,
                     borderWidth: 3,
                 };
             })
-
         };
-    }, [data]);
+    }, [data, isDark, pointBg]);
 
     const options = {
         responsive: true,
         maintainAspectRatio: false,
-        interaction: {
-            mode: 'index',
-            intersect: false,
-        },
+        interaction: { mode: 'index', intersect: false },
         plugins: {
             legend: {
                 position: 'top',
                 align: 'end',
                 labels: {
-                    color: 'rgba(255, 255, 255, 0.5)',
+                    color: legendColor,
                     usePointStyle: true,
                     boxWidth: 8,
                     font: { family: "'Inter', sans-serif", size: 12, weight: '500' }
@@ -92,26 +98,26 @@ export default function LineChart({ data, title = 'Evolución' }) {
             title: {
                 display: !!title,
                 text: title,
-                color: '#FFFFFF',
+                color: titleColor,
                 align: 'start',
                 font: { family: "'Inter', sans-serif", size: 16, weight: 'bold' },
                 padding: { bottom: 20 }
             },
             tooltip: {
-                backgroundColor: 'var(--chart-tooltip-bg)',
-                borderColor: 'rgba(255, 255, 255, 0.1)',
+                backgroundColor: tooltipBg,
+                borderColor: tooltipBorder,
                 borderWidth: 1,
                 padding: 14,
                 cornerRadius: 12,
-                titleColor: '#FFFFFF',
-                bodyColor: 'rgba(255, 255, 255, 0.8)',
+                titleColor: tooltipTitle,
+                bodyColor: tooltipBody,
                 usePointStyle: true,
                 callbacks: {
                     label: function (context) {
                         let label = context.dataset.label || '';
                         if (label) label += ': ';
                         if (context.parsed.y !== null) {
-                            label += new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(context.parsed.y);
+                            label += new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(context.parsed.y);
                         }
                         return label;
                     }
@@ -120,22 +126,17 @@ export default function LineChart({ data, title = 'Evolución' }) {
         },
         scales: {
             y: {
-                grid: {
-                    color: 'rgba(255, 255, 255, 0.1)',
-                    drawBorder: false,
-                },
+                grid: { color: gridColor, drawBorder: false },
                 ticks: {
-                    color: 'rgba(255, 255, 255, 0.5)',
+                    color: tickColor,
                     font: { family: "'Inter', sans-serif", weight: '600' },
-                    callback: function (value) {
-                        return '$' + value;
-                    }
+                    callback: function (value) { return '$' + value; }
                 },
                 beginAtZero: true
             },
             x: {
                 grid: { display: false, drawBorder: false },
-                ticks: { color: 'rgba(255, 255, 255, 0.5)', font: { family: "'Inter', sans-serif", weight: '600' } }
+                ticks: { color: tickColor, font: { family: "'Inter', sans-serif", weight: '600' } }
             }
         }
     };

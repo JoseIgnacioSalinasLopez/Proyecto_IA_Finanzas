@@ -37,7 +37,7 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #0B022D;
+  background: var(--scrollbar-track);
 }
 
 /* ─── Neon SaaS Variables ─────────────────────────────────────────── */
@@ -98,23 +98,38 @@ body {
   --neon-purple: var(--epic-purple);
   --neon-blue: var(--epic-blue);
   --neon-glow: rgba(0, 251, 255, 0.5);
+
+  /* Scrollbar Variables (Dark) */
+  --scrollbar-track: #0B022D;
+  --scrollbar-thumb: rgba(255, 255, 255, 0.15);
+  --scrollbar-thumb-hover: rgba(0, 212, 255, 0.4);
 }
 
 /* ─── Light Mode Overrides (Soft & Aesthetic) ────────────────────── */
 .light-mode {
-  --bg-main: #f4f4f5;
-  /* Zinc-100: Soft and neutral */
-  --bg-card: #fafafa;
-  /* Neutral-50: Off-white for better contrast */
-  --text-main: #0f172a;
+  --bg-main: #f1f5f9;
+  /* Slate-100: Soft blue-ish gray background */
+  --bg-card: #f8fafc;
+  /* Slate-50: Off-white cards */
+  --text-main: #334155;
+  /* Slate-700: Gentle contrast */
   --text-muted: #64748b;
+  /* Slate-500 */
 
-  --epic-purple: #9333ea;
+  --epic-purple: #7c3aed;
   --epic-cyan: #0ea5e9;
-  --epic-indigo: #3b82f6;
-  --epic-white: #0f172a;
+  --epic-indigo: #4f46e5;
+  --epic-white: #1e293b;
 
   --neon-glow: rgba(14, 165, 233, 0.1);
+
+  /* Scrollbar Variables (Light) - Global Cyan Style requested by User */
+  --scrollbar-track: rgba(0, 0, 0, 0.05);
+  /* Very subtle track */
+  --scrollbar-thumb: #00D4FF;
+  /* Vibrant Cyan */
+  --scrollbar-thumb-hover: #00fbff;
+  /* Brighter Cyan on hover */
 
   /* Chart Variables (Light) */
   --chart-text: #475569;
@@ -236,15 +251,44 @@ body {
   color: #0ea5e9;
 }
 
+/* ─── Soft UI Utility Classes (Force Light Mode Quality) ──────────── */
+.light-mode .soft-ui-bg {
+  background-color: #ffffff !important;
+}
+
+.light-mode .soft-ui-border {
+  border-color: rgba(0, 0, 0, 0.1) !important;
+}
+
+.light-mode .soft-ui-header {
+  background-color: #ffffff !important;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.05) !important;
+  color: #1e293b !important;
+}
+
+.light-mode .soft-ui-input {
+  background-color: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.15) !important;
+  color: #334155 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+
+.light-mode .soft-ui-card-alt {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+  border: 1px solid rgba(0, 0, 0, 0.05) !important;
+  backdrop-filter: blur(10px);
+}
+
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--scrollbar-thumb);
   border-radius: 99px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 212, 255, 0.4);
+  background: var(--scrollbar-thumb-hover);
 }
+
 
 /* ─── Utility Classes ──────────────────────────────────────────────── */
 @layer utilities {
@@ -459,8 +503,8 @@ body {
 /* ─── Epic Rotating Border ───────────────────────────────────────── */
 .epic-border-card {
   position: relative;
-  background: #0d0d2b;
-  /* Dark premium background as in the reference image */
+  background: var(--bg-card);
+  /* Use variable instead of hardcoded #0d0d2b */
   backdrop-filter: blur(20px);
   border-radius: 20px;
   overflow: hidden;
@@ -494,7 +538,7 @@ body {
   content: '';
   position: absolute;
   inset: 2px;
-  background: #0d0d2b;
+  background: var(--bg-card);
   border-radius: 17px;
   z-index: -1;
 }
@@ -628,7 +672,7 @@ body {
   top: 0;
   font-size: 0.75rem;
   color: #00D4FF;
-  background: #11111d;
+  background: var(--bg-card);
   padding: 0 8px;
 }
 

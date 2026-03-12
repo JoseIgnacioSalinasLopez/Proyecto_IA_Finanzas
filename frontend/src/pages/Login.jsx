@@ -4,7 +4,8 @@ import { useLanguage } from '../context/LanguageContext';
 import appLogo from '../assets/logo.png';
 import appLogoLight from '../assets/logo claro.png';
 import { useTheme } from '../context/ThemeContext';
-import fondoLogin from '../assets/fondo-login2.jpg';
+import fondoLogin from '../assets/fondo-login.png';
+import fondoLoginLight from '../assets/fondo-login-claro.png';
 import { useAuth } from '../hooks/useAuth';
 import { ChevronRight, Mail, Lock, User, RefreshCw, Eye, EyeOff } from 'lucide-react';
 
@@ -100,23 +101,23 @@ export default function Login() {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center p-6 overflow-hidden relative bg-[#05011a]">
+        <div className="min-h-screen flex items-center justify-center p-6 overflow-hidden relative bg-finance-900 transition-colors duration-500">
 
             {/* Capa 1: Gradiente Animado Épico (Fondo base) */}
             <div className="absolute inset-0 epic-bg-animate z-0"></div>
 
             {/* Capa 2: Imagen de Fondo (La "Pintura" del fondo) */}
             <div
-                className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-50 transition-transform duration-1000"
+                className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-50 transition-all duration-1000"
                 style={{
-                    backgroundImage: `url(${fondoLogin})`,
+                    backgroundImage: `url(${isLight ? fondoLoginLight : fondoLogin})`,
                     transform: isExpanded ? 'scale(1.05)' : 'scale(1.0)', // Se aleja/acerca sutilmente
-                    filter: 'brightness(0.7) contrast(1.1)'
+                    filter: isLight ? 'brightness(1.0) contrast(1.0)' : 'brightness(0.7) contrast(1.1)'
                 }}
             ></div>
 
-            {/* Dark Overlay for Image Background Contrast */}
-            <div className="absolute inset-0 bg-black/40 z-0"></div>
+            {/* Dark/Light Overlay for Image Background Contrast */}
+            <div className={`absolute inset-0 z-0 transition-colors duration-1000 ${isLight ? 'bg-slate-200/40 backdrop-blur-[2px]' : 'bg-black/40'}`}></div>
 
             {/* Background Particles & Sparkles */}
             <div className="absolute inset-0 z-0 pointer-events-none">
@@ -159,7 +160,7 @@ export default function Login() {
                             <div className="neomorp-inner group py-2 flex flex-col items-center justify-center animate-pulse-slow">
                                 <div className="flex items-center gap-4">
                                     <div className="w-2 h-2 rounded-full bg-[#00D4FF] shadow-[0_0_10px_#00D4FF] animate-ping"></div>
-                                    <h1 className="text-xl font-black text-white uppercase tracking-[0.3em] group-hover:tracking-[0.4em] transition-all">{t('start_session')}</h1>
+                                    <h1 className="text-xl font-black text-finance-text uppercase tracking-[0.3em] group-hover:tracking-[0.4em] transition-all">{t('start_session')}</h1>
                                     <div className="w-3 h-3 bg-[#8C30F5] rounded-sm rotate-45 shadow-[0_0_10px_#8C30F5]"></div>
                                 </div>
                             </div>
@@ -200,24 +201,24 @@ export default function Login() {
                                                 <input
                                                     type="email"
                                                     placeholder=" "
-                                                    className="w-full bg-black/40 border border-white/5 rounded-2xl px-4 py-4 text-white focus:outline-none transition-all placeholder-transparent"
+                                                    className="input-field placeholder-transparent"
                                                     value={email}
                                                     onChange={(e) => setEmail(e.target.value)}
                                                     required
                                                 />
-                                                <label className="text-slate-400">{t('email_address')}</label>
+                                                <label className="text-finance-muted">{t('email_address')}</label>
                                             </div>
 
                                             <div className="floating-label-group relative">
                                                 <input
                                                     type={showPassword ? "text" : "password"}
                                                     placeholder=" "
-                                                    className="w-full bg-black/40 border border-white/5 rounded-2xl px-4 py-4 pr-12 text-white focus:outline-none transition-all placeholder-transparent"
+                                                    className="input-field pr-12 placeholder-transparent"
                                                     value={password}
                                                     onChange={(e) => setPassword(e.target.value)}
                                                     required
                                                 />
-                                                <label className="text-slate-400">{t('change_password')}</label>
+                                                <label className="text-finance-muted">{t('change_password')}</label>
                                                 <button
                                                     type="button"
                                                     onClick={() => setShowPassword(!showPassword)}
@@ -232,7 +233,7 @@ export default function Login() {
                                                 <button
                                                     type="button"
                                                     onClick={(e) => { e.stopPropagation(); toggleView('forgot'); }}
-                                                    className="text-[10px] font-bold text-slate-500 hover:text-white transition-colors tracking-widest uppercase"
+                                                    className="text-[10px] font-bold text-finance-muted hover:text-finance-text transition-colors tracking-widest uppercase"
                                                 >
                                                     {t('forgot_pwd_q_elite')}
                                                 </button>
@@ -281,23 +282,23 @@ export default function Login() {
                                                     <input
                                                         type="text"
                                                         placeholder=" "
-                                                        className="w-full bg-black/40 border border-white/5 rounded-2xl px-4 py-4 text-white focus:outline-none transition-all placeholder-transparent"
+                                                        className="input-field placeholder-transparent"
                                                         value={fullName}
                                                         onChange={(e) => setFullName(e.target.value)}
                                                         onKeyDown={(e) => e.key === 'Enter' && handleNextStep(e)}
                                                     />
-                                                    <label className="text-slate-400">{t('full_name')}</label>
+                                                    <label className="text-finance-muted">{t('full_name')}</label>
                                                 </div>
                                                 <div className="floating-label-group">
                                                     <input
                                                         type="email"
                                                         placeholder=" "
-                                                        className="w-full bg-black/40 border border-white/5 rounded-2xl px-4 py-4 text-white focus:outline-none transition-all placeholder-transparent"
+                                                        className="input-field placeholder-transparent"
                                                         value={email}
                                                         onChange={(e) => setEmail(e.target.value)}
                                                         onKeyDown={(e) => e.key === 'Enter' && handleNextStep(e)}
                                                     />
-                                                    <label className="text-slate-400">{t('email_address')}</label>
+                                                    <label className="text-finance-muted">{t('email_address')}</label>
                                                 </div>
                                                 <button
                                                     type="button"
@@ -314,14 +315,14 @@ export default function Login() {
                                                     <input
                                                         type={showPassword ? 'text' : 'password'}
                                                         placeholder=" "
-                                                        className="w-full bg-black/40 border border-white/5 rounded-2xl px-4 py-4 pr-12 text-white focus:outline-none transition-all placeholder-transparent"
+                                                        className="input-field pr-12 placeholder-transparent"
                                                         value={password}
                                                         onChange={(e) => setPassword(e.target.value)}
                                                         required
                                                         minLength={6}
                                                         autoFocus
                                                     />
-                                                    <label className="text-slate-400">{language === 'en' ? 'Password' : 'Contraseña'}</label>
+                                                    <label className="text-finance-muted">{language === 'en' ? 'Password' : 'Contraseña'}</label>
                                                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors" tabIndex="-1">
                                                         {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
                                                     </button>
@@ -330,17 +331,17 @@ export default function Login() {
                                                     <input
                                                         type={showConfirmPassword ? 'text' : 'password'}
                                                         placeholder=" "
-                                                        className={`w-full bg-black/40 border rounded-2xl px-4 py-4 pr-12 text-white focus:outline-none transition-all placeholder-transparent ${confirmPassword && confirmPassword !== password
+                                                        className={`input-field pr-12 placeholder-transparent ${confirmPassword && confirmPassword !== password
                                                             ? 'border-red-500/50'
                                                             : confirmPassword && confirmPassword === password
                                                                 ? 'border-emerald-500/50'
-                                                                : 'border-white/5'
+                                                                : ''
                                                             }`}
                                                         value={confirmPassword}
                                                         onChange={(e) => setConfirmPassword(e.target.value)}
                                                         required
                                                     />
-                                                    <label className="text-slate-400">{language === 'en' ? 'Confirm Password' : 'Confirmar Contraseña'}</label>
+                                                    <label className="text-finance-muted">{language === 'en' ? 'Confirm Password' : 'Confirmar Contraseña'}</label>
                                                     <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors" tabIndex="-1">
                                                         {showConfirmPassword ? <EyeOff size={17} /> : <Eye size={17} />}
                                                     </button>
@@ -385,11 +386,11 @@ export default function Login() {
                                                 <input
                                                     type="email"
                                                     placeholder=" "
-                                                    className="w-full bg-black/40 border border-white/5 rounded-2xl px-4 py-4 text-white"
+                                                    className="input-field placeholder-transparent"
                                                     value={email}
                                                     onChange={(e) => setEmail(e.target.value)}
                                                 />
-                                                <label className="text-slate-400">{t('email_address')}</label>
+                                                <label className="text-finance-muted">{t('email_address')}</label>
                                             </div>
                                             <button className="btn-epic w-full uppercase tracking-[0.2rem] text-xs py-4 text-[#00D4FF] font-black rounded-2xl">{t('send_link')}</button>
                                         </div>
@@ -408,7 +409,7 @@ export default function Login() {
 
             {/* Hint */}
             {!isExpanded && (
-                <p className="absolute bottom-10 text-[10px] text-epic-cyan font-black uppercase tracking-[0.5em] animate-pulse drop-shadow-[0_0_10px_rgba(0,212,255,0.8)] z-30">
+                <p className="absolute bottom-10 text-[10px] text-finance-primary font-black uppercase tracking-[0.5em] animate-pulse drop-shadow-[0_0_10px_rgba(0,212,255,0.8)] z-30">
                     {t('interact')}
                 </p>
             )}

@@ -1,35 +1,18 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
-import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
 import SpotlightCard from './SpotlightCard';
+import AnimatedCounter from './AnimatedCounter';
 
-export default function SummaryCard({ title, amount, icon, type, trend, delay = 0, showBalances = true }) {
-    const { t, language } = useLanguage();
-
-    // Framer Motion Animation Values
-    const count = useMotionValue(0);
-    const rounded = useTransform(count, (latest) =>
-        `$${latest.toLocaleString(language === 'en' ? 'en-US' : 'es-MX', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2,
-        })}`
-    );
-
-    useEffect(() => {
-        const controls = animate(count, Number(amount) || 0, {
-            duration: 1.5,
-            ease: "easeOut",
-        });
-        return controls.stop;
-    }, [amount, count]);
+export default function SummaryCard({ title, amount, icon, type, trend, delay = 0 }) {
+    const { t } = useLanguage();
 
     const getIconColors = () => {
         switch (type) {
-            case 'income': return 'text-emerald-400 bg-emerald-400/15 shadow-[0_0_20px_rgba(52,211,153,0.3)] border border-emerald-400/20';
-            case 'expense': return 'text-red-400 bg-red-400/15 shadow-[0_0_20px_rgba(248,113,113,0.3)] border border-red-400/20';
-            case 'balance': return 'text-finance-primary bg-finance-primary/15 shadow-[0_0_20px_rgba(0,212,255,0.4)] border border-finance-primary/20';
-            default: return 'text-finance-muted bg-finance-muted/10';
+            case 'income': return 'text-emerald-400 bg-emerald-400/15 dark:shadow-[0_0_20px_rgba(52,211,153,0.3)] border border-emerald-400/20';
+            case 'expense': return 'text-red-400 bg-red-400/15 dark:shadow-[0_0_20px_rgba(248,113,113,0.3)] border border-red-400/20';
+            case 'balance': return 'text-finance-primary bg-finance-primary/15 dark:shadow-[0_0_20px_rgba(0,212,255,0.4)] border border-finance-primary/20';
+            default: return 'text-finance-muted bg-white soft-ui-bg soft-ui-border dark:bg-finance-muted/10';
         }
     };
 
@@ -64,15 +47,10 @@ export default function SummaryCard({ title, amount, icon, type, trend, delay = 
                 <div className="flex-1 min-w-0">
                     <h3 className="text-xs font-semibold text-finance-muted mb-1 uppercase tracking-wide">{title}</h3>
 
-                    {showBalances ? (
-                        <motion.p className={`text-2xl font-bold tracking-tight truncate ${getAmountColor()}`}>
-                            {rounded}
-                        </motion.p>
-                    ) : (
-                        <p className={`text-2xl font-bold tracking-tight truncate ${getAmountColor()}`}>
-                            ****
-                        </p>
-                    )}
+                    <AnimatedCounter
+                        amount={amount}
+                        className={`text-2xl font-bold tracking-tight truncate ${getAmountColor()}`}
+                    />
 
                     {/* Indicador de tendencia vs mes anterior */}
                     {hasTrend && (

@@ -1,5 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  darkMode: 'class',
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -8,8 +9,8 @@ export default {
     extend: {
       colors: {
         finance: {
-          900: 'var(--bg-main)', /* Variable background */
-          800: 'var(--bg-card)', /* Variable card background */
+          900: 'var(--bg-main)',
+          800: 'var(--bg-card)',
           700: 'rgba(255, 255, 255, 0.03)',
           text: 'var(--text-main)',
           muted: 'var(--text-muted)',

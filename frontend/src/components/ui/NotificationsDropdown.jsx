@@ -23,16 +23,16 @@ export default function NotificationsDropdown({ notifications, onClose, onClear 
     };
 
     return (
-        <div className="absolute right-0 top-full mt-3 w-80 bg-[#11111d] border border-white/10 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] z-50 overflow-hidden animate-scale-in origin-top-right backdrop-blur-xl">
+        <div className="absolute right-0 top-full mt-3 w-80 bg-finance-900 border border-white/10 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.8)] z-50 overflow-hidden animate-scale-in origin-top-right backdrop-blur-xl">
             {/* Header */}
             <div className="p-4 border-b border-white/5 flex items-center justify-between bg-white/5">
                 <div className="flex items-center gap-2">
                     <Bell size={16} className="text-finance-primary" />
-                    <h3 className="text-xs font-black uppercase tracking-widest">{t('notifications')}</h3>
+                    <h3 className="text-xs font-black uppercase tracking-widest text-finance-text">{t('notifications')}</h3>
                 </div>
                 <button
                     onClick={onClose}
-                    className="text-slate-500 hover:text-white transition-colors"
+                    className="text-finance-muted hover:text-finance-text transition-colors"
                 >
                     <X size={16} />
                 </button>
@@ -47,17 +47,17 @@ export default function NotificationsDropdown({ notifications, onClose, onClear 
 
                                 <div className="flex gap-3">
                                     <div className={`mt-0.5 rounded-lg p-1.5 ${n.type === 'alert' ? 'bg-red-500/20 text-red-500' :
-                                            n.type === 'success' ? 'bg-emerald-500/20 text-emerald-500' :
-                                                'bg-finance-primary/20 text-finance-primary'
+                                        n.type === 'success' ? 'bg-emerald-500/20 text-emerald-500' :
+                                            'bg-finance-primary/20 text-finance-primary'
                                         }`}>
                                         {n.type === 'alert' ? <AlertTriangle size={14} /> :
                                             n.type === 'success' ? <CheckCircle size={14} /> :
                                                 <Info size={14} />}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-bold text-white mb-0.5 leading-tight">{n.title}</p>
-                                        <p className="text-[11px] text-slate-400 leading-normal">{n.message}</p>
-                                        <p className="text-[9px] text-slate-500 mt-2 font-mono uppercase">
+                                        <p className="text-sm font-bold text-finance-text mb-0.5 leading-tight">{n.title}</p>
+                                        <p className="text-[11px] text-finance-muted leading-normal">{n.message}</p>
+                                        <p className="text-[9px] text-finance-muted/70 mt-2 font-mono uppercase">
                                             {formatRelativeTime(n.created_at)}
                                         </p>
                                     </div>
@@ -68,9 +68,9 @@ export default function NotificationsDropdown({ notifications, onClose, onClear 
                 ) : (
                     <div className="p-10 text-center">
                         <div className="w-12 h-12 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-3">
-                            <Bell size={20} className="text-slate-600" />
+                            <Bell size={20} className="text-finance-muted/50" />
                         </div>
-                        <p className="text-xs text-slate-500 font-medium italic">{t('no_notifications')}</p>
+                        <p className="text-xs text-finance-muted font-medium italic">{t('no_notifications')}</p>
                     </div>
                 )}
             </div>

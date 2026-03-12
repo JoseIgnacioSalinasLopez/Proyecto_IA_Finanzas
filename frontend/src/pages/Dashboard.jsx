@@ -7,6 +7,7 @@ import EngineeringAssistant from '../components/ui/EngineeringAssistant';
 import { supabase } from '../lib/supabase';
 import { useAuthContext } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useTheme } from '../context/ThemeContext';
 import GlobalLoader from '../components/ui/GlobalLoader';
 import SpotlightCard from '../components/ui/SpotlightCard';
 
@@ -31,10 +32,10 @@ import { DashboardSkeleton, ListSkeleton } from '../components/ui/SkeletonLoader
 export default function Dashboard() {
     const { user } = useAuthContext();
     const { t, language } = useLanguage();
+    const { showBalances, toggleBalances } = useTheme();
     const [stats, setStats] = useState(null);
     const [recentTransactions, setRecentTransactions] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [showBalances, setShowBalances] = useState(true);
 
     const fetchDashboardData = useCallback(async () => {
         try {
@@ -129,7 +130,7 @@ export default function Dashboard() {
                 </div>
 
                 <button
-                    onClick={() => setShowBalances(!showBalances)}
+                    onClick={toggleBalances}
                     className="p-2 mb-1 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-[#00fbff]/30 text-finance-muted hover:text-[#00fbff] transition-all shadow-sm flex items-center gap-2 group"
                     title={showBalances ? 'Ocultar saldos' : 'Mostrar saldos'}
                 >
@@ -139,9 +140,9 @@ export default function Dashboard() {
 
             {/* Tarjetas de resumen */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <SummaryCard title={t('total_balance')} amount={summary.balance} icon={<Wallet size={22} />} type="balance" delay={0} showBalances={showBalances} />
-                <SummaryCard title={t('monthly_income')} amount={summary.totalIncome} icon={<ArrowUpRight size={22} />} type="income" delay={80} showBalances={showBalances} />
-                <SummaryCard title={t('monthly_expenses')} amount={summary.totalExpense} icon={<ArrowDownRight size={22} />} type="expense" delay={160} showBalances={showBalances} />
+                <SummaryCard title={t('total_balance')} amount={summary.balance} icon={<Wallet size={22} />} type="balance" delay={0} />
+                <SummaryCard title={t('monthly_income')} amount={summary.totalIncome} icon={<ArrowUpRight size={22} />} type="income" delay={80} />
+                <SummaryCard title={t('monthly_expenses')} amount={summary.totalExpense} icon={<ArrowDownRight size={22} />} type="expense" delay={160} />
             </div>
 
             {/* Resumen de Presupuesto Mensual */}
@@ -192,7 +193,7 @@ export default function Dashboard() {
                 </SpotlightCard>
 
                 {/* Movimientos Recientes (Elite Timeline Style) */}
-                <div className="card animate-fade-in-up h-full flex flex-col border-white/5 bg-white/5" style={{ animationDelay: '300ms' }}>
+                <div className="card animate-fade-in-up h-full flex flex-col border-black/5 soft-ui-border dark:border-white/5 bg-white soft-ui-bg dark:bg-white/5" style={{ animationDelay: '300ms' }}>
                     <div className="flex justify-between items-center mb-6 border-b border-white/5 pb-4 px-1">
                         <h2 className="text-sm font-black text-finance-muted uppercase tracking-[0.2em] flex items-center gap-2">
                             <div className="w-1.5 h-6 bg-finance-primary rounded-full shadow-[0_0_8px_rgba(0,212,255,0.5)]" />
@@ -216,17 +217,17 @@ export default function Dashboard() {
                             return (
                                 <div className="space-y-6 relative ml-2 mt-4 pb-4">
                                     {/* Línea vertical de tiempo Sólida para que se note */}
-                                    <div className="absolute left-[11px] top-3 bottom-0 w-[2px] bg-gradient-to-b from-[#00fbff]/80 via-[#00fbff]/30 to-transparent" />
+                                    <div className="absolute left-[11px] top-3 bottom-0 w-[2px] bg-gradient-to-b from-finance-primary/80 via-finance-primary/20 to-transparent shadow-[0_0_8px_rgba(0,212,255,0.2)]" />
 
                                     {Object.entries(groups).map(([key, txs]) => {
                                         if (txs.length === 0) return null;
                                         return (
                                             <div key={key} className="space-y-4">
                                                 <div className="flex items-center gap-3 relative z-10">
-                                                    <div className="w-[24px] h-[24px] rounded-full bg-finance-900 border border-[#00fbff]/50 flex items-center justify-center shadow-[0_0_10px_rgba(0,251,255,0.2)]">
-                                                        <div className="w-1.5 h-1.5 rounded-full bg-[#00fbff] shadow-[0_0_8px_#00fbff]" />
+                                                    <div className="w-[24px] h-[24px] rounded-full bg-finance-900 border border-finance-primary/50 flex items-center justify-center shadow-[0_0_10px_rgba(0,212,255,0.2)]">
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-finance-primary shadow-[0_0_8px_rgba(0,212,255,0.8)]" />
                                                     </div>
-                                                    <span className="text-[10px] font-black uppercase tracking-widest text-[#00fbff]/80 bg-[#00fbff]/10 px-2 py-0.5 rounded-md border border-[#00fbff]/20">
+                                                    <span className="text-[10px] font-black uppercase tracking-widest text-finance-primary/80 bg-finance-primary/10 px-2 py-0.5 rounded-md border border-finance-primary/20">
                                                         {key === 'today' ? t('today_label') : t('yesterday_label')}
                                                     </span>
                                                 </div>
@@ -235,10 +236,10 @@ export default function Dashboard() {
                                                     {txs.map((tx) => (
                                                         <div
                                                             key={tx.id}
-                                                            className="relative flex justify-between items-center p-3 sm:p-4 bg-white/[0.03] rounded-2xl border border-white/5 hover:border-[#00fbff]/20 hover:bg-white/[0.05] transition-all duration-300 group"
+                                                            className="relative flex justify-between items-center p-3 sm:p-4 bg-white soft-ui-bg dark:bg-white/[0.03] rounded-2xl border border-black/5 soft-ui-border dark:border-white/5 hover:border-finance-primary/20 hover:bg-black/10 dark:hover:bg-white/[0.05] transition-all duration-300 group"
                                                         >
                                                             {/* Mini conector horizontal sólido */}
-                                                            <div className="absolute -left-6 top-1/2 w-6 h-[1px] bg-[#00fbff]/40" />
+                                                            <div className="absolute -left-6 top-1/2 w-6 h-[1px] bg-finance-primary/40" />
 
                                                             <div className="flex items-center gap-4 min-w-0">
                                                                 <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 ${tx.type === 'income' ? 'bg-emerald-500/10 text-emerald-400 shadow-[inset_0_0_12px_rgba(52,211,153,0.05)]' : 'bg-red-500/10 text-red-400 shadow-[inset_0_0_12px_rgba(248,113,113,0.05)]'}`}>
@@ -251,11 +252,11 @@ export default function Dashboard() {
                                                                     <div className="flex items-center gap-2 mt-1.5 font-bold">
                                                                         {tx.categories?.name && (
                                                                             <span
-                                                                                className="text-[10px] uppercase font-bold tracking-tight px-2 py-0.5 rounded-lg border shadow-sm transition-all"
+                                                                                className="px-2 py-0.5 rounded-lg text-[10px] font-black uppercase tracking-wider whitespace-nowrap border transition-all"
                                                                                 style={{
-                                                                                    color: tx.categories.color || '#9EA3B0',
-                                                                                    borderColor: tx.categories.color ? `${tx.categories.color}A0` : 'rgba(255,255,255,0.1)',
-                                                                                    backgroundColor: tx.categories.color ? `${tx.categories.color}20` : 'rgba(255,255,255,0.05)',
+                                                                                    backgroundColor: `${tx.categories?.color || '#818cf8'}15`,
+                                                                                    color: tx.categories?.color || '#818cf8',
+                                                                                    borderColor: `${tx.categories?.color || '#818cf8'}30`
                                                                                 }}
                                                                             >
                                                                                 {tx.categories.name}

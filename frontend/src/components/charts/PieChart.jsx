@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, Title } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
+import { useTheme } from '../../context/ThemeContext';
 
 ChartJS.register(ArcElement, Tooltip, Legend, Title);
 
@@ -18,24 +19,21 @@ const centerTextPlugin = {
 
         const dataset = chart.data.datasets[0];
         const sum = dataset.data.reduce((a, b) => a + Number(b), 0);
+        const formattedTotal = '$' + sum.toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
-        const formattedTotal = '$' + sum.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-
-        // Responsive styles from CSS variables
         const style = getComputedStyle(document.documentElement);
-        const titleColor = style.getPropertyValue('--chart-title').trim() || "#FFFFFF";
-        const textColor = style.getPropertyValue('--chart-text').trim() || "#9EA3B0";
+        const titleColor = style.getPropertyValue('--chart-title').trim() || '#1e1e3c';
+        const textColor = style.getPropertyValue('--chart-text').trim() || '#6b7280';
 
-        ctx.font = "600 24px Inter, sans-serif";
-        ctx.textBaseline = "middle";
+        ctx.font = '600 24px Inter, sans-serif';
+        ctx.textBaseline = 'middle';
         ctx.fillStyle = titleColor;
-
         const textWidth = ctx.measureText(formattedTotal).width;
         ctx.fillText(formattedTotal, centerX - textWidth / 2, centerY + 10);
 
-        ctx.font = "500 13px Inter, sans-serif";
+        ctx.font = '500 13px Inter, sans-serif';
         ctx.fillStyle = textColor;
-        const labelText = "Total";
+        const labelText = 'Total';
         const labelWidth = ctx.measureText(labelText).width;
         ctx.fillText(labelText, centerX - labelWidth / 2, centerY - 15);
         ctx.save();
@@ -45,12 +43,11 @@ const centerTextPlugin = {
 const pieGlowPlugin = {
     id: 'pieGlow',
     beforeDatasetsDraw: (chart) => {
-        const ctx = chart.ctx;
-        ctx.save();
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
-        ctx.shadowBlur = 15;
-        ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = 8;
+        chart.ctx.save();
+        chart.ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+        chart.ctx.shadowBlur = 15;
+        chart.ctx.shadowOffsetX = 0;
+        chart.ctx.shadowOffsetY = 8;
     },
     afterDatasetsDraw: (chart) => {
         chart.ctx.restore();
@@ -58,10 +55,20 @@ const pieGlowPlugin = {
 };
 
 export default function PieChart({ data, title = 'Distribución' }) {
+    const { theme } = useTheme();
+    const isDark = theme === 'dark';
+
+    const legendColor = isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(30, 30, 60, 0.75)';
+    const titleColor = isDark ? '#FFFFFF' : '#1e1e3c';
+    const tooltipBg = isDark ? 'rgba(13, 6, 50, 0.95)' : 'rgba(255,255,255,0.97)';
+    const tooltipTitle = isDark ? '#FFFFFF' : '#1e1e3c';
+    const tooltipBody = isDark ? 'rgba(255,255,255,0.8)' : 'rgba(30,30,60,0.8)';
+    const tooltipBorder = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+
     const styledData = useMemo(() => {
         if (!data || !data.datasets) return data;
         const style = getComputedStyle(document.documentElement);
-        const borderColor = style.getPropertyValue('--chart-border').trim() || '#130B42';
+        const borderColor = style.getPropertyValue('--chart-border').trim() || (isDark ? '#130B42' : '#ffffff');
 
         return {
             ...data,
@@ -70,43 +77,46 @@ export default function PieChart({ data, title = 'Distribución' }) {
                 return {
                     ...ds,
                     backgroundColor: ds.data ? ds.data.map((_, i) => palette[i % palette.length]) : ds.backgroundColor,
-                    borderWidth: 4,
+                    borderWidth: 3,
                     borderColor: borderColor,
                     hoverOffset: 20,
-                    spacing: 4,
+                    spacing: 3,
                     borderRadius: 8,
-                }
+                };
             })
         };
-    }, [data]);
+    }, [data, isDark]);
 
     const options = {
         responsive: true,
         maintainAspectRatio: false,
-        cutout: '75%',
+        cutout: '72%',
+        layout: { padding: { right: 10 } },
         plugins: {
             legend: {
                 position: 'right',
                 labels: {
-                    color: 'rgba(255, 255, 255, 0.5)',
+                    color: legendColor,
                     usePointStyle: true,
-                    padding: 20,
-                    font: { family: "'Inter', sans-serif", size: 12, weight: '500' }
+                    pointStyleWidth: 8,
+                    padding: 14,
+                    boxWidth: 8,
+                    font: { family: "'Inter', sans-serif", size: 11, weight: '500' }
                 }
             },
             title: {
                 display: !!title,
                 text: title,
-                color: '#FFFFFF',
+                color: titleColor,
                 align: 'start',
-                font: { family: "'Inter', sans-serif", size: 16, weight: 'bold' },
-                padding: { bottom: 20 }
+                font: { family: "'Inter', sans-serif", size: 14, weight: 'bold' },
+                padding: { bottom: 16 }
             },
             tooltip: {
-                backgroundColor: 'var(--chart-tooltip-bg)',
-                titleColor: '#FFFFFF',
-                bodyColor: 'rgba(255, 255, 255, 0.8)',
-                borderColor: 'rgba(255, 255, 255, 0.1)',
+                backgroundColor: tooltipBg,
+                titleColor: tooltipTitle,
+                bodyColor: tooltipBody,
+                borderColor: tooltipBorder,
                 borderWidth: 1,
                 padding: 14,
                 cornerRadius: 12,

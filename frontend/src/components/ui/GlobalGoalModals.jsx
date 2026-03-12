@@ -4,6 +4,7 @@ import { X } from 'lucide-react';
 import api from '../../services/api';
 import { useLanguage } from '../../context/LanguageContext';
 import DatePickerElite from './DatePickerElite';
+import AnimatedCounter from './AnimatedCounter';
 
 export default function GlobalGoalModals() {
     const { t, language } = useLanguage();
@@ -157,7 +158,7 @@ export default function GlobalGoalModals() {
                                 />
                             </div>
                             <div className="flex justify-between text-xs text-finance-muted mb-2">
-                                <span>{t('target_amount')}: ${Number(progressModal.goal.target_amount).toLocaleString(language === 'en' ? 'en-US' : 'es-MX')}</span>
+                                <span>{t('target_amount')}: <AnimatedCounter amount={Number(progressModal.goal.target_amount)} className="text-finance-primary font-bold" /></span>
                             </div>
                             <div className="flex gap-3 pt-2">
                                 <button onClick={() => setProgressModal(null)} className="btn-secondary flex-1">{t('cancel')}</button>
