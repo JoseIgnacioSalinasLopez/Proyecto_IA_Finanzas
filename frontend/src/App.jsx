@@ -79,9 +79,9 @@ const DashboardLayout = ({ children }) => {
           aria-hidden="true"
         />
       )}
-      <div className="flex-1 flex flex-col relative overflow-hidden min-w-0 z-10">
+      <div className="flex-1 flex flex-col relative overflow-hidden min-w-0 z-10 w-full">
         <Navbar onMenuClick={() => setMobileSidebarOpen(true)} />
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 pb-24 md:pb-6 relative z-10 w-full mb-16 md:mb-0">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 pb-24 md:pb-10 relative z-10 w-full mb-16 md:mb-0">
           <PageTransition>
             {children}
           </PageTransition>
