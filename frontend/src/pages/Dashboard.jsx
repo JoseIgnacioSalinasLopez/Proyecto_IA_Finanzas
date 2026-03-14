@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import api from '../services/api';
 import SummaryCard from '../components/ui/SummaryCard';
-import { ArrowDownRight, ArrowUpRight, Wallet, Plus, X, ChevronDown, ChevronUp, Target, Calendar, Eye, EyeOff } from 'lucide-react';
+import { ArrowDownRight, ArrowUpRight, Wallet, Plus, X, ChevronDown, ChevronUp, Target, Calendar, Eye, EyeOff, Zap, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import EngineeringAssistant from '../components/ui/EngineeringAssistant';
 import { supabase } from '../lib/supabase';
@@ -115,7 +115,8 @@ export default function Dashboard() {
         return <GlobalLoader fullScreen={true} />;
     }
 
-    const { summary } = stats || { summary: { totalIncome: 0, totalExpense: 0, balance: 0, totalBudget: 0, totalSpentThisMonth: 0 } };
+    const { summary } = stats || { summary: { totalIncome: 0, totalExpense: 0, balance: 0, liquidBalance: 0, totalGoalSavings: 0, totalInvestments: 0, totalBudget: 0, totalSpentThisMonth: 0 } };
+    const hasInvestments = summary.totalInvestments > 0;
 
     return (
         <div className="space-y-6 relative">
@@ -139,10 +140,11 @@ export default function Dashboard() {
             </div>
 
             {/* Tarjetas de resumen */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <SummaryCard title={t('total_balance')} amount={summary.balance} icon={<Wallet size={22} />} type="balance" delay={0} />
                 <SummaryCard title={t('monthly_income')} amount={summary.totalIncome} icon={<ArrowUpRight size={22} />} type="income" delay={80} />
                 <SummaryCard title={t('monthly_expenses')} amount={summary.totalExpense} icon={<ArrowDownRight size={22} />} type="expense" delay={160} />
+                <SummaryCard title={t('liquid_balance')} amount={summary.liquidBalance} icon={<Zap size={22} className="text-[#00fbff]" />} type="income" delay={240} />
             </div>
 
             {/* Resumen de Presupuesto Mensual */}

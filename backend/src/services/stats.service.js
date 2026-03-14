@@ -106,11 +106,26 @@ export const getStats = async (userId, filters = {}) => {
     });
 
     // Fetch goals, events and debts (New: Debts)
-    const [{ data: goals }, { data: manualEvents }, { data: debts }] = await Promise.all([
+    const [{ data: goals }, { data: manualEvents }, { data: debts }, { data: investmentCategories }] = await Promise.all([
         supabase.from('goals').select('*').eq('user_id', userId).order('deadline', { ascending: true }),
         supabase.from('timeline_events').select('*').eq('user_id', userId).order('date', { ascending: true }),
-        supabase.from('transactions').select('amount, description, date').eq('user_id', userId).eq('type', 'expense').ilike('description', '%deuda%') // Simple debt detection for now
+        supabase.from('transactions').select('amount, description, date').eq('user_id', userId).eq('type', 'expense').ilike('description', '%deuda%'), // Simple debt detection for now
+        supabase.from('categories').select('id').eq('user_id', userId).ilike('name', '%inversión%')
     ]);
+
+    const investmentCategoryIds = (investmentCategories || []).map(c => c.id);
+
+    // Cálculos de Ahorro e Inversiones
+    const totalGoalSavings = (goals || []).reduce((acc, g) => acc + Number(g.current_amount || 0), 0);
+    
+    let totalInvestments = 0;
+    allData.forEach(t => {
+        if (investmentCategoryIds.includes(t.category_id)) {
+            totalInvestments += Number(t.amount);
+        }
+    });
+
+    const liquidBalance = balance - totalGoalSavings - totalInvestments;
 
     // Recurrent Expenses Detection
     const subKeywords = ['netflix', 'spotify', 'disney', 'amazon', 'internet', 'teléfono', 'phone', 'cloud', 'seguro', 'gym', 'renta', 'luz', 'agua', 'gas'];
@@ -129,6 +144,9 @@ export const getStats = async (userId, filters = {}) => {
             totalIncome,
             totalExpense,
             balance: Number(balance.toFixed(2)),
+            liquidBalance: Number(liquidBalance.toFixed(2)),
+            totalGoalSavings: Number(totalGoalSavings.toFixed(2)),
+            totalInvestments: Number(totalInvestments.toFixed(2)),
             dailyBurnRate: Number(dailyBurnRate.toFixed(2)),
             projectedEndOfMonthBalance: Number(projectedEndOfMonthBalance.toFixed(2)),
             daysRemainingInMonth: daysRemaining,

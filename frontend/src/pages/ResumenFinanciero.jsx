@@ -546,29 +546,32 @@ export default function ResumenFinanciero() {
             </div>
 
             <div className="grid grid-cols-12 gap-5">
-                {/* Tarjetas de Resumen */}
-                <div className="col-span-12 md:col-span-4 card p-6 hover:border-[#00D4FF]/20 transition-all flex flex-col justify-center">
+                <div className="col-span-12 md:col-span-3 card p-6 hover:border-[#00D4FF]/20 transition-all flex flex-col justify-center">
                     <p className="text-finance-muted text-xs uppercase font-semibold tracking-wide mb-2">{t('net_balance')}</p>
                     <AnimatedCounter
                         amount={stats.summary.balance}
-                        className={`text-3xl font-bold ${stats.summary.balance >= 0 ? 'text-finance-primary' : 'text-red-400'}`}
+                        className={`text-2xl font-bold ${stats.summary.balance >= 0 ? 'text-finance-primary' : 'text-red-400'}`}
                     />
-                    <div className={`text-xs mt-2 font-semibold flex items-center gap-1 ${Number(savingsRate) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                        {savingsRate >= 0 ? '▲' : '▼'} {Math.abs(savingsRate)}% {t('savings_rate')}
-                    </div>
                 </div>
-                <div className="col-span-12 md:col-span-4 card p-6 flex flex-col justify-center">
+                <div className="col-span-12 md:col-span-3 card p-6 flex flex-col justify-center border-emerald-400/20">
                     <p className="text-finance-muted text-xs uppercase font-semibold tracking-wide mb-2">{t('total_income')}</p>
                     <AnimatedCounter
                         amount={stats.summary.totalIncome}
-                        className="text-3xl font-bold text-emerald-400"
+                        className="text-2xl font-bold text-emerald-400"
                     />
                 </div>
-                <div className="col-span-12 md:col-span-4 card p-6 flex flex-col justify-center">
+                <div className="col-span-12 md:col-span-3 card p-6 flex flex-col justify-center border-red-400/20">
                     <p className="text-finance-muted text-xs uppercase font-semibold tracking-wide mb-2">{t('total_expense')}</p>
                     <AnimatedCounter
                         amount={stats.summary.totalExpense}
-                        className="text-3xl font-bold text-red-400"
+                        className="text-2xl font-bold text-red-400"
+                    />
+                </div>
+                <div className="col-span-12 md:col-span-3 card p-6 flex flex-col justify-center border-finance-primary/20">
+                    <p className="text-finance-muted text-xs uppercase font-semibold tracking-wide mb-2">{t('liquid_balance')}</p>
+                    <AnimatedCounter
+                        amount={stats.summary.liquidBalance}
+                        className="text-2xl font-bold text-finance-text dark:text-white"
                     />
                 </div>
 
@@ -794,12 +797,20 @@ export default function ResumenFinanciero() {
                                 />
                             </div>
 
+                            <div className="flex justify-between items-center p-3 bg-slate-100/50 dark:bg-white/5 rounded-xl border border-black/5 dark:border-white/5">
+                                <span className="text-xs text-finance-muted font-bold">{t('liquid_balance').toUpperCase()}</span>
+                                <AnimatedCounter
+                                    amount={stats.summary.liquidBalance}
+                                    className="font-black text-[#00fbff] drop-shadow-[0_0_8px_rgba(0,212,255,0.4)]"
+                                />
+                            </div>
+
                             <div className="pt-4 border-t border-black/10 dark:border-white/10">
                                 <div className="flex justify-between items-center px-1">
                                     <span className="text-xs font-bold text-finance-text dark:text-white uppercase tracking-wider">{t('monthly_savings')}</span>
                                     <AnimatedCounter
-                                        amount={(stats?.summary?.totalIncome || 0) - (stats?.summary?.totalSpentThisMonth || 0)}
-                                        className={`text-lg font-black ${(stats?.summary?.totalIncome - stats?.summary?.totalSpentThisMonth) >= 0 ? 'text-finance-primary drop-shadow-[0_0_8px_rgba(0,212,255,0.4)]' : 'text-red-500'}`}
+                                        amount={stats.summary.totalIncome - stats.summary.totalExpense}
+                                        className={`text-lg font-black ${(stats.summary.totalIncome - stats.summary.totalExpense) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}
                                     />
                                 </div>
                             </div>

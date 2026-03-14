@@ -2,6 +2,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import * as statsService from '../services/stats.service.js';
 import * as transactionService from '../services/transaction.service.js';
 import { supabase } from '../config/supabaseClient.js';
+import { getMarketContext } from '../services/market.service.js';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
@@ -107,8 +108,11 @@ export const chat = async (req, res, next) => {
             content: message || "*(Documento adjunto)*" 
         }]);
 
-        // 2. Extraer contexto financiero
-        const stats = await statsService.getStats(userId);
+        // 2. Extraer contexto financiero y de mercado
+        const [stats, market] = await Promise.all([
+            statsService.getStats(userId),
+            getMarketContext()
+        ]);
         const topCategory = stats?.expensesByCategory?.[0];
         
         // Cálculo de días restantes del mes
@@ -121,11 +125,19 @@ export const chat = async (req, res, next) => {
 Eres el Asistente IA de MenteBillete. Tu misión es explicar las finanzas de forma tan sencilla, casual y amigable que hasta un niño o un adulto mayor puedan entenderlo sin dudar.
 
 DATOS FINANCIEROS DEL USUARIO:
-- Balance neto: $${stats?.summary?.balance?.toFixed(2) || 0}
+- Balance bruto total: $${stats?.summary?.balance?.toFixed(2) || 0}
+- Saldo Disponible Real (líquido): $${stats?.summary?.liquidBalance?.toFixed(2) || 0}
+- Ahorro acumulado en Metas: $${stats?.summary?.totalGoalSavings?.toFixed(2) || 0}
+- Inversiones totales: $${stats?.summary?.totalInvestments?.toFixed(2) || 0}
 - Ingresos: $${stats?.summary?.totalIncome?.toFixed(2) || 0} | Gastos: $${stats?.summary?.totalExpense?.toFixed(2) || 0}
 - Categoría con más gastos: ${topCategory ? `${topCategory.name}` : 'N/A'}
 - Presupuesto diario seguro actual: $${stats?.summary?.dailyBurnRate?.toFixed(2) || 0}
 - Días restantes del mes: ${daysLeftInMonth}
+
+DATOS DE MERCADO ACTUALES:
+- Bitcoin: $${market.crypto.bitcoin} USD
+- Ethereum: $${market.crypto.ethereum} USD
+- Tipo de cambio USD/MXN: ${market.forex.usd_mxn}
 
 REGLAS DE ORO:
 1. Responde SIEMPRE en un único bloque JSON.
@@ -134,6 +146,10 @@ REGLAS DE ORO:
 4. Si registras algo, usa el intent "registrar_movimiento".
 
 INTENTOS SOPORTADOS (json.intent): registrar_movimiento, analizar_impacto, deteccion_gastos, asesoramiento_inversion, identificador_deducible, conversacion.
+
+LÓGICA ESPECIAL (BARRIDO DE FIN DE MES):
+- Si quedan menos de 5 días para que termine el mes y el "Saldo Disponible" es mayor a 0, actúa como un "Arquitecto de Ahorro".
+- Sugiérele proactivamente al usuario mover ese excedente a una de sus Metas de Ahorro para "cerrar el mes con éxito".
 
 ESTRUCTURA JSON OBLIGATORIA:
 {

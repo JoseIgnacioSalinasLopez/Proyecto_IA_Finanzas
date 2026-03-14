@@ -1,5 +1,6 @@
 import { supabase } from '../config/supabaseClient.js';
 import { createNotification } from './notification.service.js';
+import { checkBudgetThreshold } from './budgetCheck.service.js';
 
 export const getTransactions = async (userId, filters = {}) => {
     let query = supabase
@@ -59,6 +60,11 @@ export const createTransaction = async (userId, dataPayload) => {
         'success'
     );
 
+    // Activar al Guardián de presupuestos si es un gasto
+    if (type === 'expense') {
+        checkBudgetThreshold(userId, category_id, amount);
+    }
+
     return data;
 };
 
@@ -79,6 +85,11 @@ export const updateTransaction = async (userId, transactionId, dataPayload) => {
         `Has modificado una transacción de $${Number(dataPayload.amount || data.amount).toLocaleString()}`,
         'info'
     );
+
+    // Activar al Guardián de presupuestos si es un gasto o cambió a gasto
+    if (data.type === 'expense') {
+        checkBudgetThreshold(userId, data.category_id, data.amount);
+    }
 
     return data;
 };

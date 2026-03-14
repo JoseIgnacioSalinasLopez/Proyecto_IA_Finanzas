@@ -156,6 +156,29 @@ export default function Reportes() {
                 }
             });
 
+            // ── Bloque 1.5: Auditoría Fiscal Inteligente (Auditor IQ) ──────
+            const deductibleCategories = [t('salud') || 'Salud', t('educacion') || 'Educación', t('inversiones') || 'Inversiones'];
+            const deductibleTotal = stats.expensesByCategory
+                .filter(c => deductibleCategories.some(dc => c.name.toLowerCase().includes(dc.toLowerCase())))
+                .reduce((sum, item) => sum + item.amount, 0);
+
+            if (deductibleTotal > 0) {
+                y = doc.lastAutoTable.finalY + 10;
+                doc.setFillColor(240, 249, 255); // Light Blue background for Auditor box
+                doc.setDrawColor(0, 212, 255);
+                doc.roundedRect(15, y, pageW - 30, 20, 3, 3, 'FD');
+
+                doc.setFontSize(10);
+                doc.setTextColor(11, 2, 45);
+                doc.setFont('helvetica', 'bold');
+                doc.text('AUDITOR IQ: POTENCIAL DEDUCIBLE', 20, y + 8);
+
+                doc.setFontSize(9);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(30, 41, 59);
+                doc.text(`He identificado $${deductibleTotal.toLocaleString(locale)} en gastos que podrían ser deducibles de impuestos.`, 20, y + 14);
+            }
+
             // ── Bloque 2: Distribución de Activos ───────────────────────────
             y = doc.lastAutoTable.finalY + 15;
             doc.setFontSize(14);

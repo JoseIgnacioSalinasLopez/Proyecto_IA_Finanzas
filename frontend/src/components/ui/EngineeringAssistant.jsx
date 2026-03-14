@@ -537,49 +537,49 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                                     <div className="w-[1px] flex-1 bg-white/10 my-1" />
                                 </div>
 
-                                <div className={`flex-1 p-4 rounded-2xl border transition-all duration-300 relative overflow-hidden
+                                <div className={`flex-1 p-3 sm:p-4 rounded-2xl border transition-all duration-300 relative overflow-hidden
                                     ${item.status === 'expired' ? 'bg-red-500/5 border-red-500/20' :
                                         item.status === 'today' ? 'bg-orange-500/10 border-orange-500/30' :
                                             'bg-white soft-ui-bg border-black/5 soft-ui-border dark:bg-white/5 dark:border-white/5 hover:border-black/10 dark:hover:border-white/10'}`}>
 
                                     {deleteConfirmId === item.id ? (
-                                        <div className="absolute inset-0 bg-slate-100 dark:bg-finance-900 z-20 flex items-center justify-between px-6 animate-fade-in">
-                                            <span className="text-xs font-bold text-red-400">{t('delete_event_confirm')}</span>
-                                            <div className="flex gap-3">
-                                                <button onClick={() => setDeleteConfirmId(null)} className="text-[10px] uppercase font-black text-finance-muted hover:text-white">{t('keep_action')}</button>
-                                                <button onClick={() => confirmDelete(item.id)} className="px-4 py-1.5 bg-red-500/20 text-red-500 rounded-lg text-[10px] font-black uppercase tracking-wider hover:bg-red-500 hover:text-white transition-all">{t('delete_action')}</button>
+                                        <div className="absolute inset-0 bg-slate-100 dark:bg-finance-900 z-20 flex items-center justify-between px-3 sm:px-6 animate-fade-in">
+                                            <span className="text-[10px] sm:text-xs font-bold text-red-400">{t('delete_event_confirm')}</span>
+                                            <div className="flex gap-2 sm:gap-3">
+                                                <button onClick={() => setDeleteConfirmId(null)} className="text-[9px] sm:text-[10px] uppercase font-black text-finance-muted hover:text-white">{t('keep_action')}</button>
+                                                <button onClick={() => confirmDelete(item.id)} className="px-3 py-1 sm:px-4 sm:py-1.5 bg-red-500/20 text-red-500 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-wider hover:bg-red-500 hover:text-white transition-all">{t('delete_action')}</button>
                                             </div>
                                         </div>
                                     ) : (
                                         <>
-                                            <div className="flex justify-between items-start mb-2">
-                                                <div className="min-w-0">
-                                                    <p className={`text-[10px] font-black uppercase tracking-tighter mb-0.5
+                                            <div className="flex justify-between items-start mb-1.5 sm:mb-2">
+                                                <div className="min-w-0 pr-2">
+                                                    <p className={`text-[8px] sm:text-[10px] font-black uppercase tracking-tighter mb-0.5
                                                         ${item.status === 'expired' ? 'text-red-500' :
                                                             item.status === 'today' ? 'text-orange-500' : 'text-finance-primary'}`}>
                                                         {item.time}
                                                     </p>
-                                                    <h4 className="text-sm font-bold truncate leading-tight uppercase tracking-tight text-finance-text">{item.title}</h4>
+                                                    <h4 className="text-xs sm:text-sm font-bold truncate leading-tight uppercase tracking-tight text-finance-text">{item.title}</h4>
                                                 </div>
-                                                <div className="flex items-center gap-2 opacity-100 transition-opacity">
+                                                <div className="flex items-center gap-1.5 shrink-0">
                                                     {item.isManual && (
-                                                        <>
+                                                        <div className="hidden sm:flex items-center gap-1">
                                                             <button onClick={() => handleEdit(item.id)} className="text-finance-muted hover:text-finance-primary p-1 opacity-50 hover:opacity-100" title={t('edit_label')}>
-                                                                <Pencil size={13} />
+                                                                <Pencil size={12} />
                                                             </button>
                                                             <button onClick={() => setDeleteConfirmId(item.id)} className="text-finance-muted hover:text-red-500 p-1 opacity-50 hover:opacity-100" title={t('delete_action')}>
-                                                                <Trash2 size={13} />
+                                                                <Trash2 size={12} />
                                                             </button>
-                                                        </>
+                                                        </div>
                                                     )}
                                                     <PriorityBadge level={item.priority} />
                                                 </div>
                                             </div>
-                                            <div className="flex justify-between items-end">
-                                                <p className="text-[11px] text-finance-muted max-w-[70%] leading-relaxed font-medium">
+                                            <div className="flex justify-between items-end gap-2">
+                                                <p className="text-[9px] sm:text-[11px] text-finance-muted max-w-[65%] leading-relaxed font-medium line-clamp-2">
                                                     {item.description}
                                                 </p>
-                                                <span className={`text-base font-mono font-black ${item.status === 'expired' ? 'text-red-500' : 'text-finance-text'}`}>
+                                                <span className={`text-sm sm:text-base font-mono font-black shrink-0 ${item.status === 'expired' ? 'text-red-500' : 'text-finance-text'}`}>
                                                     {item.amount > 0 ? <AnimatedCounter amount={item.amount} className={item.status === 'expired' ? 'text-red-500' : 'text-finance-text'} /> : ''}
                                                 </span>
                                             </div>

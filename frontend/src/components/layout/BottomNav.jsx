@@ -16,8 +16,8 @@ export default function BottomNav() {
     ];
 
     return (
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-finance-900/80 backdrop-blur-2xl border-t border-white/10 pb-safe shadow-[0_-4px_24px_rgba(0,0,0,0.3)] backdrop-saturate-150">
-            <div className="flex justify-around items-center h-16 px-2 relative">
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-finance-900/90 backdrop-blur-2xl border-t border-white/5 pb-safe shadow-[0_-8px_32px_rgba(0,0,0,0.4)] backdrop-saturate-150">
+            <div className="flex justify-around items-center h-14 sm:h-16 px-1 sm:px-2 relative">
                 {/* Left Links */}
                 {navLinks.map((link) => (
                     <NavLink
@@ -42,13 +42,13 @@ export default function BottomNav() {
                 ))}
 
                 {/* Center Quick Add Button */}
-                <div className="relative -top-5 flex justify-center w-full">
+                <div className="relative -top-4 sm:-top-5 flex justify-center w-full">
                     <button
                         onClick={() => window.dispatchEvent(new CustomEvent('open-quick-add'))}
-                        className="btn-epic w-14 h-14 rounded-full flex items-center justify-center shadow-[0_8px_30px_rgba(0,212,255,0.4)] transform hover:scale-105 transition-all duration-300"
+                        className="btn-epic w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center shadow-[0_8px_30px_rgba(0,212,255,0.4)] transform active:scale-95 transition-all duration-300"
                         aria-label="Añadir Rápido"
                     >
-                        <Plus size={24} strokeWidth={3} className="text-[#00D4FF]" />
+                        <Plus size={20} sm:size={24} strokeWidth={3} className="text-black" />
                     </button>
                 </div>
 
