@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Send, User, Sparkles, MessageSquare, Plus, Trash2, Search, Filter, Menu, X, Star } from 'lucide-react';
+import { Send, User, Sparkles, MessageSquare, Plus, Trash2, Search, Filter, Menu, X, Star, Mic, Paperclip, FileText } from 'lucide-react';
 import api from '../services/api';
-import iaLogo from '../assets/logo.png';
-import iaLogoLight from '../assets/logo claro.png';
-import { useTheme } from '../context/ThemeContext';
+import iaLogo from '../assets/Imagen pegada.png';
 import { useLanguage } from '../context/LanguageContext';
+import { useTheme } from '../context/ThemeContext';
 import {
     Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler
 } from 'chart.js';
@@ -30,39 +29,62 @@ function GrowthChart({ data }) {
     return <div className="h-16 w-full mt-2"><Line data={chartData} options={options} /></div>;
 }
 
+function TypingBubble() {
+    return (
+        <div className="flex justify-start">
+            <div className="flex max-w-[70%] gap-4 flex-row">
+                <div className="w-12 h-12 flex-shrink-0 rounded-full bg-[#11111d] border border-[#8C30F5]/50 flex items-center justify-center overflow-hidden p-0.5 shadow-[0_0_20px_rgba(140,48,245,0.6)]">
+                    <img src={iaLogo} alt="IA" className="w-full h-full object-cover rounded-full" />
+                </div>
+                <div className="p-[1.5px] rounded-2xl rounded-bl-sm bg-gradient-to-r from-[#00D4FF]/80 to-[#8C30F5]/80 shadow-[0_0_20px_rgba(0,212,255,0.4)]">
+                    <div className="p-4 rounded-[15px] rounded-bl-sm bg-[#05011a]/95 flex items-center gap-1.5 backdrop-blur-md">
+                        <span className="w-2 h-2 bg-[#00D4FF] rounded-full animate-bounce [animation-delay:0ms] shadow-[0_0_10px_rgba(0,212,255,0.8)]"></span>
+                        <span className="w-2 h-2 bg-[#00D4FF] rounded-full animate-bounce [animation-delay:150ms] shadow-[0_0_10px_rgba(0,212,255,0.8)]"></span>
+                        <span className="w-2 h-2 bg-[#00D4FF] rounded-full animate-bounce [animation-delay:300ms] shadow-[0_0_10px_rgba(0,212,255,0.8)]"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
 export default function ChatIA() {
     const { t } = useLanguage();
     const { theme } = useTheme();
-    const isLight = theme === 'light';
+    
+    // Sesiones y Mensajes
     const [sessions, setSessions] = useState([]);
     const [currentSessionId, setCurrentSessionId] = useState(null);
     const [messages, setMessages] = useState([]);
+    
+    // Estados de Input
     const [input, setInput] = useState('');
     const [isTyping, setIsTyping] = useState(false);
-    const [hasGemini, setHasGemini] = useState(true);
+    const [isListening, setIsListening] = useState(false);
+    const [attachedFile, setAttachedFile] = useState(null);
+    const [recognitionObj, setRecognitionObj] = useState(null);
+    
+    // UI Helpers
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [filterIntent, setFilterIntent] = useState('all');
-    const [stats, setStats] = useState(null);
     const [modal, setModal] = useState({ show: false, title: '', message: '', onConfirm: null });
-
+    
     const messagesEndRef = useRef(null);
     const inputRef = useRef(null);
+    const fileInputRef = useRef(null);
 
-    // 1. Cargar Sesiones y Stats
+    // 1. Cargar Sesiones
     const fetchData = async () => {
         try {
-            const [sessionsRes, statsRes] = await Promise.all([
-                api.get('/chat/sessions'),
-                api.get('/stats/dashboard')
-            ]);
-            setSessions(sessionsRes.data.data);
-            setStats(statsRes.data.data);
-            if (sessionsRes.data.data.length > 0 && !currentSessionId) {
-                setCurrentSessionId(sessionsRes.data.data[0].id);
+            const res = await api.get('/chat/sessions');
+            const sessionData = res.data.data;
+            setSessions(sessionData);
+            if (sessionData.length > 0 && !currentSessionId) {
+                setCurrentSessionId(sessionData[0].id);
             }
         } catch (error) {
-            console.error("Error fetching data:", error);
+            console.error("Error fetching sessions:", error);
         }
     };
 
@@ -147,81 +169,113 @@ export default function ChatIA() {
         );
     };
 
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        if (file.size > 5 * 1024 * 1024) return alert("El archivo es demasiado grande. Máximo 5MB.");
+
+        const reader = new FileReader();
+        reader.onloadend = () => {
+            setAttachedFile({
+                base64: reader.result.split(',')[1],
+                mimeType: file.type,
+                name: file.name,
+                preview: file.type.startsWith('image/') ? URL.createObjectURL(file) : null
+            });
+        };
+        reader.readAsDataURL(file);
+    };
+
+    const handleVoiceInput = () => {
+        if (isListening && recognitionObj) {
+            recognitionObj.stop();
+            setIsListening(false);
+            return;
+        }
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) return alert("Tu navegador no soporta el dictado nativo. Usa Chrome.");
+
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'es-ES';
+        recognition.continuous = true;
+        recognition.interimResults = true;
+
+        let currentText = input ? input + ' ' : '';
+        recognition.onstart = () => { setIsListening(true); setRecognitionObj(recognition); };
+        recognition.onresult = (e) => {
+            let interimText = '';
+            let finalAddedText = '';
+            for (let i = e.resultIndex; i < e.results.length; i++) {
+                const transcript = e.results[i][0].transcript;
+                if (e.results[i].isFinal) finalAddedText += transcript + ' ';
+                else interimText += transcript;
+            }
+            currentText += finalAddedText;
+            setInput(currentText + interimText);
+        };
+        recognition.onerror = () => { setIsListening(false); setRecognitionObj(null); };
+        recognition.onend = () => { setIsListening(false); setRecognitionObj(null); };
+        try { recognition.start(); } catch (error) { console.error(error); }
+    };
+
     const sendMessage = async (text) => {
         const userText = text.trim();
-        if (!userText) return;
+        if (!userText && !attachedFile) return;
 
-        setMessages(prev => [...prev, { role: 'user', content: userText, created_at: new Date() }]);
+        setMessages(prev => [...prev, { 
+            role: 'user', 
+            content: userText || "*(Documento adjunto)*", 
+            imageUrl: attachedFile?.preview || null,
+            created_at: new Date() 
+        }]);
+        
         setInput('');
+        const fileToSend = attachedFile;
+        setAttachedFile(null);
         setIsTyping(true);
 
         try {
-            if (hasGemini) {
-                try {
-                    const res = await api.post('/chat', { message: userText, sessionId: currentSessionId });
+            const payload = {
+                message: userText,
+                sessionId: currentSessionId,
+                fileBase64: fileToSend?.base64 || null,
+                fileMimeType: fileToSend?.mimeType || null
+            };
+            const res = await api.post('/chat', payload);
 
-                    if (sessions.find(s => s.id === (currentSessionId || res.data.sessionId))?.title === 'Nueva Conversación') {
-                        setTimeout(fetchData, 2000);
-                    }
-
-                    if (!currentSessionId) setCurrentSessionId(res.data.sessionId);
-
-                    setMessages(prev => [...prev, {
-                        role: 'assistant',
-                        content: res.data.reply,
-                        intent: res.data.intent,
-                        data: res.data.data,
-                        created_at: new Date()
-                    }]);
-                } catch (err) {
-                    if (err.response?.status === 429) {
-                        setHasGemini(false);
-                        const reply = localFallback(userText);
-                        setMessages(prev => [...prev, {
-                            role: 'assistant',
-                            content: `⚠️ **Modo Básico Activado**: Cuota de Gemini agotada. Seguiré en modo offline.\n\n${reply}`,
-                            created_at: new Date()
-                        }]);
-                    } else throw err;
-                }
-            } else {
-                const reply = localFallback(userText);
-                setMessages(prev => [...prev, { role: 'assistant', content: reply, created_at: new Date() }]);
+            // Si es nueva conversación, el título puede haber cambiado en el backend
+            if (sessions.find(s => s.id === currentSessionId)?.title === 'Nueva Conversación') {
+                setTimeout(fetchData, 2000);
             }
+
+            setMessages(prev => [...prev, {
+                role: 'assistant',
+                content: res.data.reply,
+                intent: res.data.intent,
+                data: res.data.data,
+                created_at: new Date()
+            }]);
         } catch (error) {
             console.error('Chat error:', error);
-            setMessages(prev => [...prev, { role: 'assistant', content: t('ai_error'), created_at: new Date() }]);
+            setMessages(prev => [...prev, { role: 'assistant', content: t('ai_error') }]);
         } finally {
             setIsTyping(false);
         }
     };
 
-    const localFallback = (text) => {
-        const txt = text.toLowerCase();
-        const summary = stats?.summary;
-
-        if (txt.includes('saldo') || txt.includes('dinero') || txt.includes('cuanto tengo')) {
-            if (!summary) return "Lo siento, no puedo acceder a tu saldo en este momento.";
-            return `Tu saldo actual es de **$${summary.balance.toLocaleString()}**. Tienes un colchón financiero de aproximadamente **${summary.bufferTime} días** basándome en tus gastos recientes.`;
-        }
-
-        if (txt.includes('gasto') || txt.includes('gastado') || txt.includes('mes')) {
-            if (!summary) return "En mi memoria local veo que tus gastos están controlados, pero no tengo la cifra exacta ahora mismo.";
-            return `Este mes has gastado **$${summary.totalSpentThisMonth.toLocaleString()}** de un presupuesto total de **$${summary.totalBudget.toLocaleString()}**. Vas al **${Math.round((summary.totalSpentThisMonth / summary.totalBudget) * 100)}%** de tu límite.`;
-        }
-
-        if (txt.includes('hola') || txt.includes('quien eres')) {
-            return "¡Hola! Soy tu asistente financiero en **Modo Básico**. Aunque Gemini está descansando, puedo darte info rápida sobre tu saldo y gastos actuales.";
-        }
-
-        return "Gemini está fuera de línea. Puedo responderte sobre tu **saldo**, **gastos del mes** o **bienvenida**, pero para análisis complejos necesitaremos esperar a que se restablezca la conexión.";
-    };
-
     const renderContent = (content) => {
         if (!content) return null;
-        return content.split('**').map((part, i) =>
-            i % 2 === 1 ? <strong key={part + i} className="text-[#00D4FF]">{part}</strong> : part
-        );
+        return content.split('\n').map((line, index) => {
+            if (line.trim() === '') return <div key={index} className="h-2"></div>;
+            return (
+                <p key={index} className="mb-1">
+                    {line.split('**').map((part, i) =>
+                        i % 2 === 1 ? <strong key={i} className="text-[#00D4FF] drop-shadow-[0_0_8px_rgba(0,212,255,0.6)]">{part}</strong> : part
+                    )}
+                </p>
+            );
+        });
     };
 
     const filteredMessages = messages.filter(m => {
@@ -230,183 +284,176 @@ export default function ChatIA() {
         return matchesSearch && matchesIntent;
     });
 
-    // Sub-componente de Modal Estilizado
-    const ConfirmModal = () => (
-        <div className={`fixed inset-0 z-[100] flex items-center justify-center p-4 transition-all duration-300 ${modal.show ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setModal({ ...modal, show: false })} />
-            <div className="relative bg-[#1a1a2e] border border-white/10 p-6 rounded-3xl shadow-2xl max-w-sm w-full transform transition-all scale-100 border-t-finance-primary/30">
-                <h3 className="text-lg font-bold text-white mb-2">{modal.title}</h3>
-                <p className="text-sm text-finance-muted mb-6 leading-relaxed">{modal.message}</p>
-                <div className="flex gap-3">
-                    <button onClick={() => setModal({ ...modal, show: false })} className="flex-1 px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white text-sm font-medium transition-all">Cancelar</button>
-                    <button onClick={modal.onConfirm} className="flex-1 px-4 py-2 rounded-xl bg-red-500/80 hover:bg-red-500 text-white text-sm font-medium transition-all">Confirmar</button>
-                </div>
-            </div>
-        </div>
-    );
-
     return (
-        <div className="flex h-[calc(100vh-8rem)] -m-4 md:-m-6 bg-[#0f0f1a] overflow-hidden rounded-3xl border border-white/5 shadow-2xl">
+        <div className="flex h-[calc(100vh-8rem)] -m-4 md:-m-6 bg-[#05011a] overflow-hidden rounded-3xl border border-white/5 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
             {/* SIDEBAR */}
-            <aside className={`${isSidebarOpen ? 'w-80' : 'w-0'} md:relative fixed inset-y-0 left-0 z-50 h-full bg-[#161625] border-r border-white/5 transition-all duration-300 flex flex-col overflow-hidden shadow-2xl md:shadow-none`}>
+            <aside className={`${isSidebarOpen ? 'w-80' : 'w-0'} md:relative fixed inset-y-0 left-0 z-50 h-full bg-[#0a0520] border-r border-white/5 transition-all duration-300 flex flex-col overflow-hidden shadow-2xl md:shadow-none`}>
                 <div className="p-4 flex flex-col h-full flex-shrink-0 w-80">
-                    <button onClick={handleNewChat} className="flex items-center gap-2 w-full bg-finance-primary/20 hover:bg-finance-primary/30 text-finance-primary border border-finance-primary/30 p-3 rounded-xl font-bold transition-all mb-4 overflow-hidden whitespace-nowrap">
-                        <Plus size={18} /> Nuevo Chat
-                    </button>
+                    <div className="relative rounded-xl p-[1.5px] bg-gradient-to-r from-[#8C30F5] to-[#00D4FF] shadow-[0_0_20px_rgba(0,212,255,0.3)] hover:shadow-[0_0_30px_rgba(0,212,255,0.6)] transition-all mb-4 cursor-pointer">
+                        <button onClick={handleNewChat} className="flex items-center gap-2 w-full bg-[#0a0520] text-white p-3 rounded-[10px] font-bold transition-all text-sm">
+                            <Plus size={18} /> Nuevo Chat
+                        </button>
+                    </div>
 
                     <div className="relative mb-4 flex-shrink-0">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-finance-muted" size={14} />
-                        <input type="text" placeholder="Buscar mensajes..." className="w-full bg-black/40 border border-white/10 rounded-lg pl-9 pr-4 py-2 text-xs focus:border-finance-primary outline-none" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+                        <input type="text" placeholder="Buscar mensajes..." className="w-full bg-black/40 border border-white/10 rounded-lg pl-9 pr-4 py-2 text-xs text-white focus:border-finance-primary outline-none" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
                     </div>
 
                     <div className="flex-1 overflow-y-auto space-y-1 scrollbar-hide">
                         {sessions.map(s => (
-                            <div key={s.id} onClick={() => { setCurrentSessionId(s.id); if (window.innerWidth < 768) setIsSidebarOpen(false); }} className={`group flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all ${currentSessionId === s.id ? 'bg-white/10 border border-white/10' : 'hover:bg-white/5 border border-transparent'}`}>
+                            <div key={s.id} onClick={() => { setCurrentSessionId(s.id); if (window.innerWidth < 768) setIsSidebarOpen(false); }} className={`group flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all border ${currentSessionId === s.id ? 'bg-white/10 border-white/20' : 'hover:bg-white/5 border-transparent'}`}>
                                 <div className="flex items-center gap-3 overflow-hidden">
-                                    <MessageSquare size={16} className={currentSessionId === s.id ? 'text-finance-primary' : 'text-finance-muted'} />
-                                    <span className={`text-sm truncate ${currentSessionId === s.id ? 'text-white font-medium' : 'text-finance-muted'}`}>{s.title}</span>
+                                    <MessageSquare size={16} className={currentSessionId === s.id ? 'text-[#00D4FF]' : 'text-gray-500'} />
+                                    <span className={`text-sm truncate ${currentSessionId === s.id ? 'text-white font-medium' : 'text-gray-400'}`}>{s.title}</span>
                                 </div>
-                                <button onClick={(e) => deleteSession(s.id, e)} className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-red-500/20 text-red-400 rounded-lg transition-all">
+                                <button onClick={(e) => deleteSession(s.id, e)} className="opacity-0 group-hover:opacity-100 p-1.5 text-red-400 hover:bg-red-400/20 rounded-lg transition-all">
                                     <Trash2 size={14} />
                                 </button>
                             </div>
                         ))}
                     </div>
 
-                    <button
-                        onClick={clearAll}
-                        className="mt-2 flex items-center justify-center gap-2 w-full py-2 text-[10px] font-bold text-red-400/50 hover:text-red-400 transition-colors uppercase tracking-widest"
-                    >
-                        <Trash2 size={12} /> Limpiar Todo
+                    <button onClick={clearAll} className="mt-2 flex items-center justify-center gap-2 w-full py-2 text-[10px] font-bold text-red-400/50 hover:text-red-400 transition-colors uppercase tracking-widest">
+                        <Trash2 size={12} /> Limpiar Historial
                     </button>
-
-                    <div className="pt-4 border-t border-white/5 mt-auto flex-shrink-0">
-                        <div className="flex items-center gap-3 p-2 bg-black/20 rounded-xl">
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-purple-500 to-blue-500 flex-shrink-0" />
-                            <div className="overflow-hidden">
-                                <p className="text-xs font-bold text-white truncate">Usuario Pro</p>
-                                <p className="text-[10px] text-finance-muted">Plan Elite</p>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </aside>
 
             {/* CHAT AREA */}
             <main className="flex-1 flex flex-col relative min-w-0 h-full">
-                <header className="px-6 py-4 bg-white/5 backdrop-blur-md border-b border-white/5 flex items-center justify-between z-20 shrink-0">
+                <header className="px-6 py-4 bg-transparent border-b border-white/5 flex items-center justify-between z-20 shrink-0">
                     <div className="flex items-center gap-4">
                         <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="p-2 hover:bg-white/5 rounded-lg text-finance-muted">
                             <Menu size={20} />
                         </button>
-                        <div className="flex flex-col">
-                            <h2 className="text-sm font-bold truncate max-w-[200px]">
-                                {sessions.find(s => s.id === currentSessionId)?.title || 'Asistente IA'}
-                            </h2>
-                            <span className="text-[10px] text-emerald-400 flex items-center gap-1">
-                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" /> Conectado
-                            </span>
+                        <div className="flex items-center gap-3">
+                            <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-[#8C30F5] to-[#00D4FF] flex items-center justify-center p-[1px] shadow-[0_0_15px_rgba(0,212,255,0.4)]">
+                                <img src={iaLogo} alt="IA" className="w-full h-full object-cover rounded-full" />
+                            </div>
+                            <div>
+                                <h2 className="text-sm font-bold text-white leading-tight">MenteBillete AI</h2>
+                                <span className="text-[10px] text-[#00D4FF] flex items-center gap-1">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-[#00D4FF] animate-pulse" /> {t('connected_data')}
+                                </span>
+                            </div>
                         </div>
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <div className="hidden md:flex items-center gap-2 mr-2">
-                            {hasGemini ? (
-                                <span className="flex items-center gap-1 text-[10px] bg-[#4F46E5]/20 text-[#8C8FFF] px-2 py-0.5 rounded-full font-bold border border-[#4F46E5]/30">
-                                    <Sparkles size={9} /> Gemini
-                                </span>
-                            ) : (
-                                <span className="flex items-center gap-1 text-[10px] bg-white/10 text-finance-muted px-2 py-0.5 rounded-full font-bold border border-white/10">
-                                    Modo Básico
-                                </span>
-                            )}
-                        </div>
+                        <span className="hidden sm:flex items-center gap-1 text-[10px] bg-[#4F46E5]/20 text-[#00D4FF] px-2 py-0.5 rounded-full font-bold border border-[#00D4FF]/40">
+                            <Sparkles size={9} /> Gemini
+                        </span>
                         <select value={filterIntent} onChange={e => setFilterIntent(e.target.value)} className="bg-black/40 border border-white/10 rounded-lg px-2 py-1 text-[10px] text-finance-muted outline-none">
-                            <option value="all">Todos los tipos</option>
+                            <option value="all">Filtros</option>
                             <option value="registrar_movimiento">Registros</option>
                             <option value="asesoramiento_inversion">Inversiones</option>
-                            <option value="analizar_impacto">Análisis What-If</option>
                         </select>
                     </div>
                 </header>
 
-                <div className="flex-1 overflow-y-auto p-4 md:p-8 space-y-6 scrollbar-thin">
-                    {filteredMessages.length === 0 && searchQuery && (
-                        <div className="text-center py-20 text-finance-muted">No se encontraron mensajes con "{searchQuery}"</div>
-                    )}
+                <div className="flex-1 overflow-y-auto p-4 md:px-20 space-y-6 scrollbar-hide">
                     {filteredMessages.map((msg, idx) => (
                         <div key={idx} className={`flex w-full ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                            <div className={`flex max-w-[90%] md:max-w-[75%] gap-4 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
-                                <div className={`w-8 h-8 flex-shrink-0 rounded-full flex items-center justify-center mt-auto ${msg.role === 'assistant' ? 'bg-finance-800 border border-finance-primary/30 p-0.5' : 'bg-finance-700'}`}>
-                                    {msg.role === 'assistant' ? <img src={isLight ? iaLogoLight : iaLogo} className="w-full h-full object-cover rounded-full" /> : <User size={16} />}
+                            <div className={`flex max-w-[90%] md:max-w-[80%] gap-4 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
+                                <div className={`w-10 h-10 flex-shrink-0 rounded-full flex items-center justify-center mt-auto border ${msg.role === 'assistant' ? 'bg-[#11111d] border-[#00D4FF]/50 shadow-[0_0_10px_rgba(0,212,255,0.3)]' : 'bg-[#0d0f1a] border-[#E600E6]/50 shadow-[0_0_10px_rgba(230,0,230,0.3)]'}`}>
+                                    {msg.role === 'assistant' ? <img src={iaLogo} className="w-full h-full object-cover rounded-full" /> : <User size={18} className="text-[#E600E6]" />}
                                 </div>
-                                <div className={`flex flex-col gap-1 ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
-                                    <div className={`p-4 rounded-2xl text-sm shadow-xl ${msg.role === 'user' ? 'bg-gradient-to-br from-[#8C30F5] to-[#4F46E5] text-white rounded-br-sm' : 'bg-[#1e1e2d] border border-white/5 text-finance-text rounded-bl-sm'}`}>
-                                        {renderContent(msg.content)}
-
-                                        {/* ETIQUETA INTELIGENTE: Posible Deducible */}
-                                        {(msg.intent === 'identificador_deducible' || (msg.intent === 'registrar_movimiento' && msg.content?.toLowerCase().includes('deducible'))) && (
-                                            <div className="mt-3 flex items-center gap-1.5 bg-emerald-500/20 text-emerald-400 px-3 py-1 rounded-lg border border-emerald-500/30 w-fit">
-                                                <Sparkles size={12} className="animate-pulse" />
-                                                <span className="font-bold text-[10px] uppercase tracking-wider">Posible Deducible</span>
+                                <div className={`p-[1.5px] rounded-3xl ${msg.role === 'user' ? 'bg-gradient-to-l from-[#8C30F5]/80 to-[#E600E6]/80' : 'bg-gradient-to-r from-[#00D4FF]/80 to-[#8C30F5]/80'}`}>
+                                    <div className={`p-5 rounded-[22px] ${msg.role === 'user' ? 'bg-[#150a26]/95 text-white' : 'bg-[#05011a]/95 text-gray-200 shadow-inner'}`}>
+                                        {msg.imageUrl && (
+                                            <img src={msg.imageUrl} alt="Documento" className="w-full max-w-[240px] rounded-xl mb-3 border border-white/20" />
+                                        )}
+                                        <div className="text-[14px] leading-relaxed">
+                                            {renderContent(msg.content)}
+                                        </div>
+                                        
+                                        {msg.data?.new_balance_neto && (
+                                            <div className="mt-4 grid grid-cols-2 gap-2">
+                                                <div className="bg-black/30 p-3 rounded-xl border border-white/5">
+                                                    <p className="text-[9px] text-finance-muted uppercase font-bold">Proyectado</p>
+                                                    <p className="font-bold text-white text-base">${Number(msg.data.new_balance_neto).toLocaleString()}</p>
+                                                </div>
+                                                <div className="bg-black/30 p-3 rounded-xl border border-white/5">
+                                                    <p className="text-[9px] text-finance-muted uppercase font-bold">Colchón</p>
+                                                    <p className="font-bold text-white text-base">{msg.data.new_dias_colchon_financiero} días</p>
+                                                </div>
                                             </div>
                                         )}
 
-                                        {/* Pronóstico y Impacto What-If */}
-                                        {msg.data && (
-                                            <div className="mt-4 space-y-3">
-                                                {msg.data.new_balance_neto !== undefined && (
-                                                    <div className="grid grid-cols-2 gap-2">
-                                                        <div className="bg-black/20 p-3 rounded-xl">
-                                                            <p className="text-[10px] text-finance-muted uppercase font-bold tracking-tight">Balance Proyectado</p>
-                                                            <p className="font-bold text-finance-text text-lg">${Number(msg.data.new_balance_neto).toLocaleString()}</p>
-                                                        </div>
-                                                        <div className={`p-3 rounded-xl ${msg.data.new_dias_colchon_financiero < 10 ? 'bg-red-500/20' : 'bg-black/20'}`}>
-                                                            <p className="text-[10px] text-finance-muted uppercase font-bold tracking-tight">Días de Colchón</p>
-                                                            <p className={`font-bold text-lg ${msg.data.new_dias_colchon_financiero < 10 ? 'text-red-400' : 'text-finance-text'}`}>{msg.data.new_dias_colchon_financiero} días</p>
-                                                        </div>
-                                                    </div>
-                                                )}
-
-                                                {msg.data.investment_options?.map((opt, i) => (
-                                                    <div key={i} className="bg-gradient-to-r from-finance-primary/10 to-transparent p-3 rounded-xl border border-white/5">
-                                                        <div className="flex justify-between items-center mb-2">
-                                                            <span className="text-xs font-bold text-white">{opt.tool}</span>
-                                                            <span className="text-xs text-emerald-400">{opt.yield}</span>
-                                                        </div>
-                                                        <p className="text-[10px] text-finance-muted mb-2">Inversión sugerida: ${opt.amount}</p>
-                                                        {opt.chart_data && <GrowthChart data={opt.chart_data} />}
-                                                    </div>
-                                                ))}
+                                        {msg.data?.investment_options?.map((opt, i) => (
+                                            <div key={i} className="mt-3 bg-white/5 p-3 rounded-xl border border-white/5">
+                                                <div className="flex justify-between text-xs font-bold mb-1">
+                                                    <span>{opt.tool}</span>
+                                                    <span className="text-emerald-400">{opt.yield}</span>
+                                                </div>
+                                                {opt.chart_data && <GrowthChart data={opt.chart_data} />}
                                             </div>
-                                        )}
+                                        ))}
                                     </div>
-                                    <span className="text-[9px] text-finance-muted px-2">{new Date(msg.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                                 </div>
                             </div>
                         </div>
                     ))}
-                    {isTyping && <div className="flex gap-4"><div className="w-8 h-8 flex-shrink-0 rounded-full bg-finance-800 p-0.5"><img src={isLight ? iaLogoLight : iaLogo} className="w-full h-full rounded-full" /></div><div className="bg-white/5 p-4 rounded-2xl animate-pulse text-xs text-finance-muted">Escribiendo...</div></div>}
+                    {isTyping && <TypingBubble />}
                     <div ref={messagesEndRef} />
                 </div>
 
-                <form onSubmit={e => { e.preventDefault(); sendMessage(input); }} className="p-4 bg-[#161625] border-t border-white/5">
-                    <div className="max-w-4xl mx-auto flex gap-3">
-                        <input
-                            ref={inputRef}
-                            value={input}
-                            onChange={e => setInput(e.target.value)}
-                            type="text"
-                            placeholder="Hazme una pregunta sobre tus finanzas..."
-                            className="flex-1 bg-black/40 border border-white/10 rounded-full px-6 py-3 text-sm focus:border-finance-primary outline-none transition-all"
-                        />
-                        <button type="submit" disabled={!input.trim() || isTyping} className="w-12 h-12 rounded-full bg-finance-primary flex items-center justify-center text-white shadow-lg hover:brightness-110 active:scale-95 transition-all">
-                            <Send size={18} />
-                        </button>
+                <div className="shrink-0 px-4 md:px-20 pb-4 pt-4 bg-[#05011a]">
+                    {attachedFile && (
+                        <div className="mx-auto max-w-4xl mb-3 flex items-center gap-3 p-2 bg-[#8C30F5]/20 border border-[#8C30F5]/50 rounded-xl w-max animate-fade-in shadow-lg">
+                            {attachedFile.preview ? (
+                                <img src={attachedFile.preview} className="w-10 h-10 rounded border border-white/20 object-cover" alt="preview" />
+                            ) : <FileText size={20} className="text-[#00D4FF]" />}
+                            <span className="text-xs text-white truncate max-w-[150px]">{attachedFile.name}</span>
+                            <button onClick={() => setAttachedFile(null)} className="text-red-400 ml-2"><X size={16} /></button>
+                        </div>
+                    )}
+
+                    <div className="mx-auto max-w-4xl relative rounded-3xl p-[1.5px] bg-gradient-to-r from-[#00D4FF] via-[#8C30F5] to-[#E600E6] shadow-[0_0_30px_rgba(140,48,245,0.4)] transition-all">
+                        <form onSubmit={e => { e.preventDefault(); sendMessage(input); }} className="bg-[#0b061c]/95 rounded-[22px] p-2 flex flex-col">
+                            <input type="file" accept="image/*,application/pdf" ref={fileInputRef} className="hidden" onChange={handleFileChange} />
+                            <textarea
+                                value={input}
+                                onChange={e => { setInput(e.target.value); e.target.style.height = '56px'; e.target.style.height = e.target.scrollHeight + 'px'; }}
+                                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(input); } }}
+                                className="w-full bg-transparent border-none px-4 py-3 text-white text-[16px] outline-none resize-none min-h-[56px] max-h-[120px]"
+                                placeholder={isListening ? 'Escuchando...' : 'Escribe o sube un ticket...'}
+                            />
+                            <div className="flex justify-between items-center px-2 pb-1">
+                                <div className="flex gap-2">
+                                    <button type="button" onClick={() => fileInputRef.current?.click()} className="p-2.5 rounded-full bg-[#8C30F5]/10 text-[#8C30F5] border border-[#8C30F5]/30">
+                                        <Paperclip size={18} />
+                                    </button>
+                                    <button type="button" onClick={handleVoiceInput} className={`p-2.5 rounded-full ${isListening ? 'bg-red-500/20 text-red-500 animate-pulse' : 'bg-[#00D4FF]/10 text-[#00D4FF] border border-[#00D4FF]/30'}`}>
+                                        <Mic size={18} />
+                                    </button>
+                                </div>
+                                <button type="submit" disabled={(!input.trim() && !attachedFile) || isTyping} className="w-10 h-10 rounded-full bg-gradient-to-r from-[#8C30F5] to-[#E600E6] flex items-center justify-center text-white shadow-lg">
+                                    <Send size={16} className="ml-0.5" />
+                                </button>
+                            </div>
+                        </form>
                     </div>
-                </form>
+                </div>
             </main>
-            <ConfirmModal />
+
+            {/* MODAL ELIMINAR */}
+            {modal.show && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setModal({ ...modal, show: false })}>
+                    <div className="bg-[#0a0520] border border-red-500/30 p-8 rounded-3xl shadow-[0_0_40px_rgba(239,68,68,0.2)] max-w-sm w-full animate-scale-in" onClick={e => e.stopPropagation()}>
+                        <div className="bg-red-500/20 p-4 rounded-full w-fit mx-auto mb-4 border border-red-500/40">
+                            <Trash2 size={32} className="text-red-500" />
+                        </div>
+                        <h3 className="text-xl font-bold text-white text-center mb-2">{modal.title}</h3>
+                        <p className="text-sm text-gray-400 text-center mb-8">{modal.message}</p>
+                        <div className="flex gap-4">
+                            <button onClick={() => setModal({ ...modal, show: false })} className="flex-1 py-3 px-4 rounded-xl border border-white/10 text-white font-bold hover:bg-white/5 transition-all">Cancelar</button>
+                            <button onClick={modal.onConfirm} className="flex-1 py-3 px-4 rounded-xl bg-red-600 text-white font-bold shadow-[0_0_20px_rgba(230,0,0,0.4)] hover:bg-red-500 transition-all">Eliminar</button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
