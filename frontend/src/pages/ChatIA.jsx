@@ -33,11 +33,11 @@ function TypingBubble() {
     return (
         <div className="flex justify-start">
             <div className="flex max-w-[70%] gap-4 flex-row">
-                <div className="w-12 h-12 flex-shrink-0 rounded-full bg-[#11111d] border border-[#8C30F5]/50 flex items-center justify-center overflow-hidden p-0.5 shadow-[0_0_20px_rgba(140,48,245,0.6)]">
+                <div className={`w-12 h-12 flex-shrink-0 rounded-full ${isLight ? 'bg-white border-blue-200' : 'bg-[#11111d] border-[#8C30F5]/50'} border flex items-center justify-center overflow-hidden p-0.5 shadow-[0_0_20px_rgba(140,48,245,0.6)]`}>
                     <img src={iaLogo} alt="IA" className="w-full h-full object-cover rounded-full" />
                 </div>
                 <div className="p-[1.5px] rounded-2xl rounded-bl-sm bg-gradient-to-r from-[#00D4FF]/80 to-[#8C30F5]/80 shadow-[0_0_20px_rgba(0,212,255,0.4)]">
-                    <div className="p-4 rounded-[15px] rounded-bl-sm bg-[#05011a]/95 flex items-center gap-1.5 backdrop-blur-md">
+                    <div className={`p-4 rounded-[15px] rounded-bl-sm ${isLight ? 'bg-white' : 'bg-[#05011a]/95'} flex items-center gap-1.5 backdrop-blur-md`}>
                         <span className="w-2 h-2 bg-[#00D4FF] rounded-full animate-bounce [animation-delay:0ms] shadow-[0_0_10px_rgba(0,212,255,0.8)]"></span>
                         <span className="w-2 h-2 bg-[#00D4FF] rounded-full animate-bounce [animation-delay:150ms] shadow-[0_0_10px_rgba(0,212,255,0.8)]"></span>
                         <span className="w-2 h-2 bg-[#00D4FF] rounded-full animate-bounce [animation-delay:300ms] shadow-[0_0_10px_rgba(0,212,255,0.8)]"></span>
@@ -51,6 +51,8 @@ function TypingBubble() {
 export default function ChatIA() {
     const { t } = useLanguage();
     const { theme } = useTheme();
+    const isLight = theme === 'light';
+
     
     // Sesiones y Mensajes
     const [sessions, setSessions] = useState([]);
@@ -285,27 +287,27 @@ export default function ChatIA() {
     });
 
     return (
-        <div className="flex h-[calc(100vh-8rem)] -m-4 md:-m-6 bg-[#05011a] overflow-hidden rounded-3xl border border-white/5 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+        <div className={`flex h-[calc(100vh-8rem)] -m-4 md:-m-6 ${isLight ? 'bg-slate-50' : 'bg-[#05011a]'} overflow-hidden rounded-3xl border ${isLight ? 'border-slate-200 shadow-xl' : 'border-white/5 shadow-[0_0_50px_rgba(0,0,0,0.5)]'}`}>
             {/* SIDEBAR */}
-            <aside className={`${isSidebarOpen ? 'w-80' : 'w-0'} md:relative fixed inset-y-0 left-0 z-50 h-full bg-[#0a0520] border-r border-white/5 transition-all duration-300 flex flex-col overflow-hidden shadow-2xl md:shadow-none`}>
+            <aside className={`${isSidebarOpen ? 'w-80' : 'w-0'} md:relative fixed inset-y-0 left-0 z-50 h-full ${isLight ? 'bg-white border-r border-slate-200' : 'bg-[#0a0520] border-r border-white/5'} transition-all duration-300 flex flex-col overflow-hidden shadow-2xl md:shadow-none`}>
                 <div className="p-4 flex flex-col h-full flex-shrink-0 w-80">
-                    <div className="relative rounded-xl p-[1.5px] bg-gradient-to-r from-[#8C30F5] to-[#00D4FF] shadow-[0_0_20px_rgba(0,212,255,0.3)] hover:shadow-[0_0_30px_rgba(0,212,255,0.6)] transition-all mb-4 cursor-pointer">
-                        <button onClick={handleNewChat} className="flex items-center gap-2 w-full bg-[#0a0520] text-white p-3 rounded-[10px] font-bold transition-all text-sm">
+                    <div className={`relative rounded-xl p-[1.5px] bg-gradient-to-r from-[#8C30F5] to-[#00D4FF] ${isLight ? 'shadow-lg' : 'shadow-[0_0_20px_rgba(0,212,255,0.3)]'} hover:shadow-[0_0_30px_rgba(0,212,255,0.6)] transition-all mb-4 cursor-pointer`}>
+                        <button onClick={handleNewChat} className={`flex items-center gap-2 w-full ${isLight ? 'bg-white text-slate-800' : 'bg-[#0a0520] text-white'} p-3 rounded-[10px] font-bold transition-all text-sm`}>
                             <Plus size={18} /> Nuevo Chat
                         </button>
                     </div>
 
                     <div className="relative mb-4 flex-shrink-0">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-finance-muted" size={14} />
-                        <input type="text" placeholder="Buscar mensajes..." className="w-full bg-black/40 border border-white/10 rounded-lg pl-9 pr-4 py-2 text-xs text-white focus:border-finance-primary outline-none" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+                        <input type="text" placeholder="Buscar mensajes..." className={`w-full ${isLight ? 'bg-slate-100 border-slate-200 text-slate-800' : 'bg-black/40 border-white/10 text-white'} border rounded-lg pl-9 pr-4 py-2 text-xs focus:border-finance-primary outline-none`} value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
                     </div>
 
                     <div className="flex-1 overflow-y-auto space-y-1 scrollbar-hide">
                         {sessions.map(s => (
-                            <div key={s.id} onClick={() => { setCurrentSessionId(s.id); if (window.innerWidth < 768) setIsSidebarOpen(false); }} className={`group flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all border ${currentSessionId === s.id ? 'bg-white/10 border-white/20' : 'hover:bg-white/5 border-transparent'}`}>
+                            <div key={s.id} onClick={() => { setCurrentSessionId(s.id); if (window.innerWidth < 768) setIsSidebarOpen(false); }} className={`group flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all border ${currentSessionId === s.id ? (isLight ? 'bg-slate-100 border-slate-200' : 'bg-white/10 border-white/20') : 'hover:bg-white/5 border-transparent'}`}>
                                 <div className="flex items-center gap-3 overflow-hidden">
-                                    <MessageSquare size={16} className={currentSessionId === s.id ? 'text-[#00D4FF]' : 'text-gray-500'} />
-                                    <span className={`text-sm truncate ${currentSessionId === s.id ? 'text-white font-medium' : 'text-gray-400'}`}>{s.title}</span>
+                                    <MessageSquare size={16} className={currentSessionId === s.id ? 'text-[#00D4FF]' : (isLight ? 'text-slate-400' : 'text-gray-500')} />
+                                    <span className={`text-sm truncate ${currentSessionId === s.id ? (isLight ? 'text-slate-900 font-bold' : 'text-white font-medium') : (isLight ? 'text-slate-500' : 'text-gray-400')}`}>{s.title}</span>
                                 </div>
                                 <button onClick={(e) => deleteSession(s.id, e)} className="opacity-0 group-hover:opacity-100 p-1.5 text-red-400 hover:bg-red-400/20 rounded-lg transition-all">
                                     <Trash2 size={14} />
@@ -332,7 +334,7 @@ export default function ChatIA() {
                                 <img src={iaLogo} alt="IA" className="w-full h-full object-cover rounded-full" />
                             </div>
                             <div>
-                                <h2 className="text-sm font-bold text-white leading-tight">MenteBillete AI</h2>
+                                <h2 className={`text-sm font-bold ${isLight ? 'text-slate-900' : 'text-white'} leading-tight`}>MenteBillete AI</h2>
                                 <span className="text-[10px] text-[#00D4FF] flex items-center gap-1">
                                     <span className="w-1.5 h-1.5 rounded-full bg-[#00D4FF] animate-pulse" /> {t('connected_data')}
                                 </span>
@@ -341,10 +343,10 @@ export default function ChatIA() {
                     </div>
 
                     <div className="flex items-center gap-2">
-                        <span className="hidden sm:flex items-center gap-1 text-[10px] bg-[#4F46E5]/20 text-[#00D4FF] px-2 py-0.5 rounded-full font-bold border border-[#00D4FF]/40">
+                        <span className={`hidden sm:flex items-center gap-1 text-[10px] ${isLight ? 'bg-blue-50 text-blue-600' : 'bg-[#4F46E5]/20 text-[#00D4FF]'} px-2 py-0.5 rounded-full font-bold border ${isLight ? 'border-blue-200' : 'border-[#00D4FF]/40'}`}>
                             <Sparkles size={9} /> Gemini
                         </span>
-                        <select value={filterIntent} onChange={e => setFilterIntent(e.target.value)} className="bg-black/40 border border-white/10 rounded-lg px-2 py-1 text-[10px] text-finance-muted outline-none">
+                        <select value={filterIntent} onChange={e => setFilterIntent(e.target.value)} className={`${isLight ? 'bg-slate-100 border-slate-200 text-slate-600' : 'bg-black/40 border-white/10 text-finance-muted'} rounded-lg px-2 py-1 text-[10px] outline-none`}>
                             <option value="all">Filtros</option>
                             <option value="registrar_movimiento">Registros</option>
                             <option value="asesoramiento_inversion">Inversiones</option>
@@ -356,11 +358,11 @@ export default function ChatIA() {
                     {filteredMessages.map((msg, idx) => (
                         <div key={idx} className={`flex w-full ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                             <div className={`flex max-w-[90%] md:max-w-[80%] gap-4 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
-                                <div className={`w-10 h-10 flex-shrink-0 rounded-full flex items-center justify-center mt-auto border ${msg.role === 'assistant' ? 'bg-[#11111d] border-[#00D4FF]/50 shadow-[0_0_10px_rgba(0,212,255,0.3)]' : 'bg-[#0d0f1a] border-[#E600E6]/50 shadow-[0_0_10px_rgba(230,0,230,0.3)]'}`}>
+                                <div className={`w-10 h-10 flex-shrink-0 rounded-full flex items-center justify-center mt-auto border ${msg.role === 'assistant' ? (isLight ? 'bg-white border-blue-200 shadow-sm' : 'bg-[#11111d] border-[#00D4FF]/50 shadow-[0_0_10px_rgba(0,212,255,0.3)]') : (isLight ? 'bg-white border-pink-200 shadow-sm' : 'bg-[#0d0f1a] border-[#E600E6]/50 shadow-[0_0_10px_rgba(230,0,230,0.3)]')}`}>
                                     {msg.role === 'assistant' ? <img src={iaLogo} className="w-full h-full object-cover rounded-full" /> : <User size={18} className="text-[#E600E6]" />}
                                 </div>
                                 <div className={`p-[1.5px] rounded-3xl ${msg.role === 'user' ? 'bg-gradient-to-l from-[#8C30F5]/80 to-[#E600E6]/80' : 'bg-gradient-to-r from-[#00D4FF]/80 to-[#8C30F5]/80'}`}>
-                                    <div className={`p-5 rounded-[22px] ${msg.role === 'user' ? 'bg-[#150a26]/95 text-white' : 'bg-[#05011a]/95 text-gray-200 shadow-inner'}`}>
+                                    <div className={`p-5 rounded-[22px] ${msg.role === 'user' ? (isLight ? 'bg-white text-slate-800 border border-slate-100' : 'bg-[#150a26]/95 text-white') : (isLight ? 'bg-white text-slate-800 border border-slate-100 shadow-sm' : 'bg-[#05011a]/95 text-gray-200 shadow-inner')}`}>
                                         {msg.imageUrl && (
                                             <img src={msg.imageUrl} alt="Documento" className="w-full max-w-[240px] rounded-xl mb-3 border border-white/20" />
                                         )}
@@ -399,7 +401,7 @@ export default function ChatIA() {
                     <div ref={messagesEndRef} />
                 </div>
 
-                <div className="shrink-0 px-4 md:px-20 pb-4 pt-4 bg-[#05011a]">
+                <div className={`shrink-0 px-4 md:px-20 pb-4 pt-4 ${isLight ? 'bg-slate-50 border-t border-slate-200' : 'bg-[#05011a]'}`}>
                     {attachedFile && (
                         <div className="mx-auto max-w-4xl mb-3 flex items-center gap-3 p-2 bg-[#8C30F5]/20 border border-[#8C30F5]/50 rounded-xl w-max animate-fade-in shadow-lg">
                             {attachedFile.preview ? (
@@ -410,16 +412,16 @@ export default function ChatIA() {
                         </div>
                     )}
 
-                    <div className="mx-auto max-w-4xl relative rounded-3xl p-[1.5px] bg-gradient-to-r from-[#00D4FF] via-[#8C30F5] to-[#E600E6] shadow-[0_0_30px_rgba(140,48,245,0.4)] transition-all">
-                        <form onSubmit={e => { e.preventDefault(); sendMessage(input); }} className="bg-[#0b061c]/95 rounded-[22px] p-2 flex flex-col">
+                    <div className={`mx-auto max-w-4xl relative rounded-3xl p-[1.5px] bg-gradient-to-r from-[#00D4FF] via-[#8C30F5] to-[#E600E6] ${isLight ? 'shadow-xl' : 'shadow-[0_0_30px_rgba(140,48,245,0.4)]'} transition-all`}>
+                        <form onSubmit={e => { e.preventDefault(); sendMessage(input); }} className={`${isLight ? 'bg-white' : 'bg-[#0b061c]/95'} rounded-[22px] p-2 flex flex-col`}>
                             <input type="file" accept="image/*,application/pdf" ref={fileInputRef} className="hidden" onChange={handleFileChange} />
-                            <textarea
-                                value={input}
-                                onChange={e => { setInput(e.target.value); e.target.style.height = '56px'; e.target.style.height = e.target.scrollHeight + 'px'; }}
-                                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(input); } }}
-                                className="w-full bg-transparent border-none px-4 py-3 text-white text-[16px] outline-none resize-none min-h-[56px] max-h-[120px]"
-                                placeholder={isListening ? 'Escuchando...' : 'Escribe o sube un ticket...'}
-                            />
+                                <textarea
+                                    value={input}
+                                    onChange={e => { setInput(e.target.value); e.target.style.height = '56px'; e.target.style.height = e.target.scrollHeight + 'px'; }}
+                                    onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(input); } }}
+                                    className={`w-full bg-transparent border-none px-4 py-3 ${isLight ? 'text-slate-800' : 'text-white'} text-[16px] outline-none resize-none min-h-[56px] max-h-[120px]`}
+                                    placeholder={isListening ? 'Escuchando...' : 'Escribe o sube un ticket...'}
+                                />
                             <div className="flex justify-between items-center px-2 pb-1">
                                 <div className="flex gap-2">
                                     <button type="button" onClick={() => fileInputRef.current?.click()} className="p-2.5 rounded-full bg-[#8C30F5]/10 text-[#8C30F5] border border-[#8C30F5]/30">
@@ -441,12 +443,12 @@ export default function ChatIA() {
             {/* MODAL ELIMINAR */}
             {modal.show && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setModal({ ...modal, show: false })}>
-                    <div className="bg-[#0a0520] border border-red-500/30 p-8 rounded-3xl shadow-[0_0_40px_rgba(239,68,68,0.2)] max-w-sm w-full animate-scale-in" onClick={e => e.stopPropagation()}>
+                    <div className={`${isLight ? 'bg-white border-slate-200' : 'bg-[#0a0520] border-red-500/30'} border p-8 rounded-3xl shadow-2xl max-w-sm w-full animate-scale-in`} onClick={e => e.stopPropagation()}>
                         <div className="bg-red-500/20 p-4 rounded-full w-fit mx-auto mb-4 border border-red-500/40">
                             <Trash2 size={32} className="text-red-500" />
                         </div>
-                        <h3 className="text-xl font-bold text-white text-center mb-2">{modal.title}</h3>
-                        <p className="text-sm text-gray-400 text-center mb-8">{modal.message}</p>
+                        <h3 className={`text-xl font-bold ${isLight ? 'text-slate-900' : 'text-white'} text-center mb-2`}>{modal.title}</h3>
+                        <p className={`text-sm ${isLight ? 'text-slate-500' : 'text-gray-400'} text-center mb-8`}>{modal.message}</p>
                         <div className="flex gap-4">
                             <button onClick={() => setModal({ ...modal, show: false })} className="flex-1 py-3 px-4 rounded-xl border border-white/10 text-white font-bold hover:bg-white/5 transition-all">Cancelar</button>
                             <button onClick={modal.onConfirm} className="flex-1 py-3 px-4 rounded-xl bg-red-600 text-white font-bold shadow-[0_0_20px_rgba(230,0,0,0.4)] hover:bg-red-500 transition-all">Eliminar</button>

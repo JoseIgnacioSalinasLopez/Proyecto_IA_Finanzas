@@ -8,7 +8,7 @@ import AnimatedCounter from '../components/ui/AnimatedCounter';
 
 export default function Perfil() {
     const { user } = useAuth();
-    const { t, language } = useLanguage();
+    const { t, language, setLanguage } = useLanguage();
     const [formData, setFormData] = useState({
         name: user?.name || '',
         email: user?.email || '',
@@ -43,6 +43,8 @@ export default function Perfil() {
         }
     };
 
+
+
     const initials = (user?.name || 'U').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
     const balance = stats?.summary?.balance || 0;
     const income = stats?.summary?.totalIncome || 0;
@@ -58,13 +60,8 @@ export default function Perfil() {
                 </div>
 
                 <div className="flex flex-col md:flex-row items-center gap-8 relative z-10">
-                    <div className="relative">
-                        <div className="w-32 h-32 rounded-3xl bg-gradient-to-tr from-[#4F46E5] to-[#00D4FF] flex items-center justify-center text-white font-bold text-4xl shadow-[0_0_30px_rgba(0,212,255,0.3)] border-2 border-white/20">
-                            {initials}
-                        </div>
-                        <div className="absolute -bottom-2 -right-2 w-10 h-10 bg-finance-900 rounded-full border-2 border-white/10 flex items-center justify-center text-finance-primary shadow-lg">
-                            <ShieldCheck size={20} />
-                        </div>
+                    <div className="w-32 h-32 rounded-3xl bg-gradient-to-tr from-[#4F46E5] to-[#00D4FF] flex items-center justify-center text-white font-bold text-4xl shadow-[0_0_30px_rgba(0,212,255,0.3)] border-2 border-white/20">
+                        {initials}
                     </div>
 
                     <div className="text-center md:text-left">
@@ -128,7 +125,7 @@ export default function Perfil() {
                                 </div>
                                 <div>
                                     <label className="block text-xs font-black text-finance-muted uppercase tracking-widest mb-2">{t('language')}</label>
-                                    <div className="input-field flex items-center gap-2 opacity-50 cursor-not-allowed">
+                                    <div className="input-field flex items-center gap-3">
                                         {language === 'es' ? '🇪🇸 Español' : '🇺🇸 English'}
                                     </div>
                                 </div>
@@ -181,44 +178,14 @@ export default function Perfil() {
                             />
                         </div>
                     </div>
+
+
+
                 </div>
 
                 {/* Right Column: Cards */}
                 <div className="space-y-8">
-                    {/* Security Status Card */}
-                    <div className="card bg-white/5 border-white/5 p-6">
-                        <h4 className="text-sm font-black text-finance-text uppercase tracking-widest mb-6 flex items-center gap-2">
-                            <ShieldCheck size={16} className="text-finance-primary" />
-                            {t('security_status')}
-                        </h4>
 
-                        <div className="space-y-4">
-                            <div className="flex items-center justify-between">
-                                <span className="text-sm text-finance-muted">{t('levels') || 'Nivel de Protección'}</span>
-                                <span className="px-3 py-1 bg-finance-primary/20 text-finance-primary text-[10px] font-black rounded-full uppercase">
-                                    {t('high')}
-                                </span>
-                            </div>
-                            <div className="h-2 bg-white/5 rounded-full overflow-hidden">
-                                <div className="h-full bg-finance-primary w-[85%] shadow-[0_0_10px_rgba(0,212,255,0.5)]" />
-                            </div>
-
-                            <div className="space-y-3 pt-4">
-                                <div className="flex items-center gap-3 text-xs text-finance-text">
-                                    <CheckCircle2 size={14} className="text-emerald-400" />
-                                    <span>{t('2fa_active') || 'Autenticación activa'}</span>
-                                </div>
-                                <div className="flex items-center gap-3 text-xs text-finance-text">
-                                    <CheckCircle2 size={14} className="text-emerald-400" />
-                                    <span>{t('encryption_ok') || 'Cifrado de grado bancario'}</span>
-                                </div>
-                                <div className="flex items-center gap-3 text-xs text-finance-muted/50">
-                                    <AlertCircle size={14} />
-                                    <span>{t('backup_pending') || 'Copia de seguridad semanal'}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
                     {/* Quick Stats Card */}
                     <div className="card bg-white/5 border-white/5 p-6 relative overflow-hidden">
@@ -249,6 +216,9 @@ export default function Perfil() {
                     </div>
                 </div>
             </div>
+
+
+
         </div>
     );
 }

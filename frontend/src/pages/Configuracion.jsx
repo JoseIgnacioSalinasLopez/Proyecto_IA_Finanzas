@@ -281,31 +281,6 @@ export default function Configuracion() {
                             </div>
                         )}
 
-
-                        {/* Apariencia - Modo Claro/Oscuro */}
-                        <div className="card border-white/5 bg-white/5 animate-slide-in">
-                            <div className="flex justify-between items-center transition-all">
-                                <div className="flex items-center gap-3">
-                                    <div className={`p-3 rounded-2xl transition-colors ${theme === 'dark' ? 'bg-indigo-500/10' : 'bg-amber-500/10'}`}>
-                                        {theme === 'dark' ? (
-                                            <Moon size={24} className="text-indigo-400" />
-                                        ) : (
-                                            <Sun size={24} className="text-amber-500" />
-                                        )}
-                                    </div>
-                                    <div className="flex flex-col">
-                                        <span className="font-bold text-sm tracking-tight">{t('appearance')}</span>
-                                        <span className="text-[10px] text-finance-muted uppercase font-bold tracking-widest">{theme === 'dark' ? t('dark_mode') : t('light_mode')}</span>
-                                    </div>
-                                </div>
-                                <button
-                                    onClick={toggleTheme}
-                                    className={`w-14 h-7 rounded-full transition-all duration-300 flex items-center px-1.5 ${theme === 'dark' ? 'bg-finance-primary shadow-[0_0_15px_rgba(0,212,255,0.4)]' : 'bg-black/10'}`}
-                                >
-                                    <div className={`w-4 h-4 bg-white rounded-full shadow-lg transform transition-transform duration-300 ${theme === 'dark' ? 'translate-x-7' : 'translate-x-0'}`} />
-                                </button>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
