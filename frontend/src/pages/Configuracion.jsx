@@ -150,6 +150,39 @@ export default function Configuracion() {
                                 </div>
 
                                 <div className="mt-8 pt-6 border-t border-white/5">
+                                    <div className="flex items-center gap-3 mb-6">
+                                        <div className="p-3 bg-finance-primary/10 rounded-2xl">
+                                            {theme === 'dark' ? <Moon size={24} className="text-finance-primary" /> : <Sun size={24} className="text-finance-primary" />}
+                                        </div>
+                                        <h2 className="text-xl font-bold text-finance-text">{t('appearance')}</h2>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <button
+                                            onClick={() => theme !== 'light' && toggleTheme()}
+                                            className={`p-4 rounded-xl border-2 transition-all flex items-center justify-between ${theme === 'light' ? 'border-finance-primary bg-finance-primary/5 shadow-[0_0_15px_rgba(0,212,255,0.1)]' : 'border-white/5 bg-white/5 hover:border-white/20'}`}
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <Sun size={20} className={theme === 'light' ? 'text-finance-primary' : 'text-finance-muted'} />
+                                                <span className="font-bold text-finance-text">{t('light_mode')}</span>
+                                            </div>
+                                            {theme === 'light' && <div className="w-2 h-2 rounded-full bg-finance-primary shadow-[0_0_8px_rgba(0,212,255,0.6)]" />}
+                                        </button>
+
+                                        <button
+                                            onClick={() => theme !== 'dark' && toggleTheme()}
+                                            className={`p-4 rounded-xl border-2 transition-all flex items-center justify-between ${theme === 'dark' ? 'border-finance-primary bg-finance-primary/5 shadow-[0_0_15px_rgba(0,212,255,0.1)]' : 'border-white/5 bg-white/5 hover:border-white/20'}`}
+                                        >
+                                            <div className="flex items-center gap-3">
+                                                <Moon size={20} className={theme === 'dark' ? 'text-finance-primary' : 'text-finance-muted'} />
+                                                <span className="font-bold text-finance-text">{t('dark_mode')}</span>
+                                            </div>
+                                            {theme === 'dark' && <div className="w-2 h-2 rounded-full bg-finance-primary shadow-[0_0_8px_rgba(0,212,255,0.6)]" />}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="mt-8 pt-6 border-t border-white/5">
                                     <p className="text-xs text-finance-muted mb-4 italic">{t('lang_help')}</p>
                                     <div className="flex justify-end">
                                         <button className="btn-primary flex items-center gap-2">{t('save')}</button>
