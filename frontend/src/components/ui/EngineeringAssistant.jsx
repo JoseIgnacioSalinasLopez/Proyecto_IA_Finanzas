@@ -1,22 +1,23 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-    AlertCircle,
-    CheckCircle2,
-    Clock,
     Calendar,
-    TrendingUp,
-    Laptop,
     Zap,
-    Target,
-    Plus,
+    PieChart,
+    Bell,
+    AlertCircle,
     Trash2,
-    Pencil,
+    Clock,
+    CheckCircle2,
+    TrendingUp,
     ChevronLeft,
     ChevronRight,
-    Bell,
+    Pencil,
     Check,
-    PieChart
+    RotateCcw,
+    Plus,
+    Target,
+    X
 } from 'lucide-react';
 import api from '../../services/api';
 import { useLanguage } from '../../context/LanguageContext';
@@ -28,8 +29,8 @@ import AnimatedCounter from './AnimatedCounter';
 const PriorityBadge = ({ level }) => {
     const { t } = useLanguage();
     const styles = {
-        critical: "bg-red-500/20 text-red-500 border-red-500/50",
-        important: "bg-orange-500/20 text-orange-500 border-orange-500/50",
+        critical: "bg-[#FF4DA6]/20 text-[#FF4DA6] border-[#FF4DA6]/50",
+        important: "bg-[#FFD166]/20 text-[#FFD166] border-[#FFD166]/50",
         optional: "bg-blue-500/20 text-blue-500 border-blue-500/50"
     };
     const labels = {
@@ -60,6 +61,7 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
     });
     const [editEventId, setEditEventId] = useState(null);
     const [prefs, setPrefs] = useState({ hide_challenges: false, hide_forecasts: false });
+    const [simResult, setSimResult] = useState(null);
 
     // Fetch preferences
     React.useEffect(() => {
@@ -135,6 +137,27 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
         } catch (error) {
             console.error(error);
         }
+    };
+
+    // Función para simular el impacto de cancelar un gasto en el Buffer Time
+    const handleSimulate = (item) => {
+        if (!stats || !stats.summary) return;
+        const { balance, bufferTime, dailyBurnRate } = stats.summary;
+        
+        const currentMonthly = dailyBurnRate * 30;
+        const newMonthly = Math.max(0, currentMonthly - item.amount);
+        const newDaily = newMonthly / 30;
+        
+        const newBuffer = newDaily > 0 ? (balance / newDaily) : 999;
+        const impact = newBuffer - bufferTime;
+
+        setSimResult({
+            title: item.title,
+            amount: item.amount,
+            oldBuffer: Math.round(bufferTime),
+            newBuffer: Math.round(newBuffer),
+            impact: Math.round(impact)
+        });
     };
 
     const handleEdit = (id) => {
@@ -273,7 +296,7 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                 priority: "critical",
                 time: t('alert'),
                 description: t('overspend_desc'),
-                icon: <AlertCircle size={14} className="text-red-500" />
+                icon: <AlertCircle size={14} className="text-[#FF4DA6]" />
             });
         }
 
@@ -286,12 +309,16 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                 priority: "critical",
                 time: t('alert'),
                 description: `${t('low_buffer_desc')} (${summary.bufferTime} ${t('remaining_days_label')}).`,
-                icon: <AlertCircle size={14} className="text-red-500" />
+                icon: <AlertCircle size={14} className="text-[#FF4DA6]" />
             });
         }
-
         // Eventos Manuales y Recurrentes Personalizados
         manualEvents?.forEach(ev => {
+            const lastPaidDate = ev.last_paid_at ? new Date(ev.last_paid_at) : null;
+            const isPaidThisMonth = ev.status === 'paid' && lastPaidDate &&
+                                   (lastPaidDate.getMonth() === currentMonth) &&
+                                   (lastPaidDate.getFullYear() === currentYear);
+
             if (ev.is_recurring && ev.payment_day) {
                 const pDay = Number(ev.payment_day);
                 const dDay = Number(ev.deadline_day);
@@ -299,10 +326,13 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                 let priority = ev.priority || "important";
                 let timeDesc = `${t('next_payment')}: ${pDay}/${currentMonth + 1}`;
 
-                if (currentDay >= pDay && currentDay <= dDay) {
+                if (isPaidThisMonth) {
+                    status = "paid";
+                    timeDesc = t('paid_label');
+                } else if (currentDay >= pDay && currentDay <= dDay) {
                     status = "today";
                     timeDesc = t('deadline_approaching');
-                } else if (currentDay > dDay) {
+                } else if (currentDay > dDay && !isPaidThisMonth) { // Only mark as expired if not paid this month
                     const daysOver = currentDay - dDay;
                     status = "expired";
                     timeDesc = `${t('not_paid_yet')} (+${daysOver} ${t('days')})`;
@@ -318,13 +348,16 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                     description: `${t('payment_day')}: ${pDay} | ${t('deadline_day')}: ${dDay}`,
                     isManual: true,
                     isRecurring: true,
-                    icon: <Bell size={14} className="text-finance-primary" />
+                    lastPaidAt: ev.last_paid_at,
+                    transactionId: ev.transaction_id,
+                    icon: status === 'paid' ? <CheckCircle2 size={14} className="text-[#00FFFF]" /> : <Bell size={14} className="text-finance-primary" />
                 });
             } else {
                 const evDate = new Date(ev.date);
                 let status = "upcoming";
-                if (evDate.toDateString() === now.toDateString()) status = "today";
-                else if (evDate < now) status = "expired";
+                if (ev.status === 'paid') status = "paid";
+                else if (evDate.toDateString() === now.toDateString()) status = "today";
+                else if (evDate < now && ev.status !== 'paid') status = "expired"; // Only mark as expired if not paid
 
                 events.push({
                     id: ev.id,
@@ -332,17 +365,19 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                     amount: Number(ev.amount || 0),
                     status,
                     priority: ev.priority,
-                    time: status === "expired" ? t('past_label') : (status === "today" ? t('today_label') : `${t('event_label')}${evDate.toLocaleDateString(language === 'en' ? 'en-US' : 'es-MX')}`),
+                    time: status === 'paid' ? t('paid_label') : (status === "expired" ? t('past_label') : (status === "today" ? t('today_label') : `${t('event_label')}${evDate.toLocaleDateString(language === 'en' ? 'en-US' : 'es-MX')}`)),
                     description: t('manual_event_desc'),
                     isManual: true,
-                    icon: <Calendar size={14} className="text-finance-primary" />
+                    lastPaidAt: ev.last_paid_at,
+                    transactionId: ev.transaction_id,
+                    icon: status === 'paid' ? <CheckCircle2 size={14} className="text-[#00FFFF]" /> : <Calendar size={14} className="text-finance-primary" />
                 });
             }
         });
 
-        // Sort events: critical/today first, then upcoming
+        // Sort events: critical/today first, then upcoming, then paid
         return events.sort((a, b) => {
-            const statusMap = { expired: 0, today: 1, upcoming: 2 };
+            const statusMap = { expired: 0, today: 1, upcoming: 2, paid: 3 };
             const priorityMap = { critical: 0, important: 1, optional: 2 };
 
             if (statusMap[a.status] !== statusMap[b.status]) {
@@ -385,7 +420,7 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                                 </div>
                                 <div className="text-right">
                                     <p className="text-[10px] text-finance-muted uppercase">{t('financial_health')}</p>
-                                    <p className={`text-sm font-bold uppercase ${summary?.riskLevel === 'CRÍTICO' ? 'text-red-500' : summary?.riskLevel === 'MEDIO' ? 'text-orange-500' : 'text-finance-primary'}`}>
+                                    <p className={`text-sm font-bold uppercase ${summary?.riskLevel === 'CRÍTICO' ? 'text-[#FF4DA6]' : summary?.riskLevel === 'MEDIO' ? 'text-[#FFD166]' : 'text-finance-primary'}`}>
                                         {summary?.riskLevel === 'BAJO' ? t('risk_low') :
                                             summary?.riskLevel === 'MEDIO' ? t('risk_medium') :
                                                 summary?.riskLevel === 'CRÍTICO' ? t('risk_critical') :
@@ -417,8 +452,8 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                                     </div>
                                     <div className="h-1.5 bg-white soft-ui-bg dark:bg-black/40 rounded-full overflow-hidden border border-black/5 soft-ui-border dark:border-white/5">
                                         <div
-                                            className={`h-full transition-all duration-1000 ${b.percentage > 90 ? 'bg-red-500 dark:shadow-[0_0_10px_rgba(239,68,68,0.4)]' :
-                                                b.percentage > 70 ? 'bg-orange-500 dark:shadow-[0_0_10px_rgba(249,115,22,0.4)]' :
+                                            className={`h-full transition-all duration-1000 ${b.percentage > 90 ? 'bg-[#FF4DA6] dark:shadow-[0_0_10px_rgba(255,77,166,0.4)]' :
+                                                b.percentage > 70 ? 'bg-[#FFD166] dark:shadow-[0_0_10px_rgba(255,209,102,0.4)]' :
                                                     'bg-finance-primary dark:shadow-[0_0_10px_rgba(0,212,255,0.4)]'
                                                 }`}
                                             style={{ width: `${b.percentage}%` }}
@@ -529,25 +564,27 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                             <div key={item.id} className="relative group/item px-1 flex gap-4">
                                 <div className="flex flex-col items-center">
                                     <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center bg-white soft-ui-bg dark:bg-black/40 z-10 transition-all duration-500
-                                        ${item.status === 'expired' ? 'border-red-500 text-red-500 shadow-[0_0_10px_rgba(239,68,68,0.3)]' :
-                                            item.status === 'today' ? 'border-orange-500 text-orange-500 shadow-[0_0_10px_rgba(249,115,22,0.3)]' :
-                                                'border-finance-primary text-finance-primary shadow-[0_0_10px_rgba(0,212,255,0.2)]'}`}>
-                                        {item.icon || (item.status === 'expired' ? <AlertCircle size={14} /> : <Calendar size={14} />)}
+                                        ${item.status === 'expired' ? 'border-[#FF4DA6] text-[#FF4DA6] shadow-[0_0_10px_rgba(255,77,166,0.3)]' :
+                                            item.status === 'today' ? 'border-[#FFD166] text-[#FFD166] shadow-[0_0_10px_rgba(255,209,102,0.3)]' :
+                                                item.status === 'paid' ? 'border-[#00FFFF] text-[#00FFFF] shadow-[0_0_10px_rgba(0,255,255,0.3)]' :
+                                                    'border-finance-primary text-finance-primary shadow-[0_0_10px_rgba(0,212,255,0.2)]'}`}>
+                                        {item.icon || (item.status === 'expired' ? <AlertCircle size={14} /> : (item.status === 'paid' ? <Check size={14} /> : <Calendar size={14} />))}
                                     </div>
                                     <div className="w-[1px] flex-1 bg-white/10 my-1" />
                                 </div>
 
                                 <div className={`flex-1 p-3 sm:p-4 rounded-2xl border transition-all duration-300 relative overflow-hidden
-                                    ${item.status === 'expired' ? 'bg-red-500/5 border-red-500/20' :
-                                        item.status === 'today' ? 'bg-orange-500/10 border-orange-500/30' :
-                                            'bg-white soft-ui-bg border-black/5 soft-ui-border dark:bg-white/5 dark:border-white/5 hover:border-black/10 dark:hover:border-white/10'}`}>
+                                    ${item.status === 'expired' ? 'bg-[#FF4DA6]/5 border-[#FF4DA6]/20' :
+                                        item.status === 'today' ? 'bg-[#FFD166]/10 border-[#FFD166]/30' :
+                                            item.status === 'paid' ? 'bg-[#00FFFF]/10 border-[#00FFFF]/30 shadow-[inset_0_0_20px_rgba(0,255,255,0.05)]' :
+                                                'bg-white soft-ui-bg border-black/5 soft-ui-border dark:bg-white/5 dark:border-white/5 hover:border-black/10 dark:hover:border-white/10'}`}>
 
                                     {deleteConfirmId === item.id ? (
                                         <div className="absolute inset-0 bg-slate-100 dark:bg-finance-900 z-20 flex items-center justify-between px-3 sm:px-6 animate-fade-in">
-                                            <span className="text-[10px] sm:text-xs font-bold text-red-400">{t('delete_event_confirm')}</span>
+                                            <span className="text-[10px] sm:text-xs font-bold text-[#FF4DA6]">{t('delete_event_confirm')}</span>
                                             <div className="flex gap-2 sm:gap-3">
                                                 <button onClick={() => setDeleteConfirmId(null)} className="text-[9px] sm:text-[10px] uppercase font-black text-finance-muted hover:text-white">{t('keep_action')}</button>
-                                                <button onClick={() => confirmDelete(item.id)} className="px-3 py-1 sm:px-4 sm:py-1.5 bg-red-500/20 text-red-500 rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-wider hover:bg-red-500 hover:text-white transition-all">{t('delete_action')}</button>
+                                                <button onClick={() => confirmDelete(item.id)} className="px-3 py-1 sm:px-4 sm:py-1.5 bg-[#FF4DA6]/20 text-[#FF4DA6] rounded-lg text-[9px] sm:text-[10px] font-black uppercase tracking-wider hover:bg-[#FF4DA6] hover:text-white transition-all">{t('delete_action')}</button>
                                             </div>
                                         </div>
                                     ) : (
@@ -555,19 +592,76 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                                             <div className="flex justify-between items-start mb-1.5 sm:mb-2">
                                                 <div className="min-w-0 pr-2">
                                                     <p className={`text-[8px] sm:text-[10px] font-black uppercase tracking-tighter mb-0.5
-                                                        ${item.status === 'expired' ? 'text-red-500' :
-                                                            item.status === 'today' ? 'text-orange-500' : 'text-finance-primary'}`}>
+                                                        ${item.status === 'expired' ? 'text-[#FF4DA6]' :
+                                                            item.status === 'today' ? 'text-[#FFD166]' :
+                                                                item.status === 'paid' ? 'text-[#00FFFF]' : 'text-finance-primary'}`}>
                                                         {item.time}
                                                     </p>
-                                                    <h4 className="text-xs sm:text-sm font-bold truncate leading-tight uppercase tracking-tight text-finance-text">{item.title}</h4>
+                                                    <h4 className={`text-xs sm:text-sm font-bold truncate leading-tight uppercase tracking-tight text-finance-text ${item.status === 'paid' ? 'opacity-70 line-through' : ''}`}>{item.title}</h4>
                                                 </div>
                                                 <div className="flex items-center gap-1.5 shrink-0">
                                                     {item.isManual && (
-                                                        <div className="hidden sm:flex items-center gap-1">
+                                                        <div className="flex items-center gap-1">
+                                                            {item.status === 'paid' && (
+                                                                <button
+                                                                    onClick={async () => {
+                                                                        if (item.transactionId) {
+                                                                            try {
+                                                                                await api.delete(`/transactions/${item.transactionId}`);
+                                                                            } catch (err) {
+                                                                                console.error('Error deleting associated transaction:', err);
+                                                                            }
+                                                                        }
+                                                                        
+                                                                        await api.put(`/events/${item.id}`, {
+                                                                            status: 'pending',
+                                                                            last_paid_at: null,
+                                                                            transaction_id: null
+                                                                        });
+                                                                        if (onRefresh) await onRefresh();
+                                                                    }}
+                                                                    className="bg-finance-muted/20 text-finance-muted hover:bg-finance-primary hover:text-white p-1.5 rounded-lg transition-all"
+                                                                    title={t('undo_payment')}
+                                                                >
+                                                                    <RotateCcw size={12} strokeWidth={3} />
+                                                                </button>
+                                                            )}
+                                                            {item.status !== 'paid' && (
+                                                                <button
+                                                                    onClick={() => {
+                                                                        window.dispatchEvent(new CustomEvent('open-quick-add', {
+                                                                            detail: {
+                                                                                description: item.title,
+                                                                                amount: item.amount,
+                                                                                type: 'expense',
+                                                                                onSuccess: async (txData) => {
+                                                                                    await api.put(`/events/${item.id}`, {
+                                                                                        status: 'paid',
+                                                                                        last_paid_at: new Date().toISOString(),
+                                                                                        transaction_id: txData?.id
+                                                                                    });
+                                                                                    if (onRefresh) await onRefresh();
+                                                                                }
+                                                                            }
+                                                                        }));
+                                                                    }}
+                                                                    className="bg-[#00FFFF]/20 text-[#00FFFF] hover:bg-[#00FFFF] hover:text-black p-1.5 rounded-lg transition-all"
+                                                                    title={t('mark_as_paid')}
+                                                                >
+                                                                    <Check size={12} strokeWidth={3} />
+                                                                </button>
+                                                            )}
+                                                            <button 
+                                                                onClick={(e) => { e.stopPropagation(); handleSimulate(item); }}
+                                                                className="text-[#00FFFF] hover:bg-[#00FFFF]/20 p-1.5 rounded-lg transition-all"
+                                                                title={t('simulate_impact') || "Simular Impacto"}
+                                                            >
+                                                                <Zap size={12} className={item.amount > 100 ? "animate-pulse" : ""} />
+                                                            </button>
                                                             <button onClick={() => handleEdit(item.id)} className="text-finance-muted hover:text-finance-primary p-1 opacity-50 hover:opacity-100" title={t('edit_label')}>
                                                                 <Pencil size={12} />
                                                             </button>
-                                                            <button onClick={() => setDeleteConfirmId(item.id)} className="text-finance-muted hover:text-red-500 p-1 opacity-50 hover:opacity-100" title={t('delete_action')}>
+                                                            <button onClick={() => setDeleteConfirmId(item.id)} className="text-finance-muted hover:text-[#FF4DA6] p-1 opacity-50 hover:opacity-100" title={t('delete_action')}>
                                                                 <Trash2 size={12} />
                                                             </button>
                                                         </div>
@@ -579,8 +673,8 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                                                 <p className="text-[9px] sm:text-[11px] text-finance-muted max-w-[65%] leading-relaxed font-medium line-clamp-2">
                                                     {item.description}
                                                 </p>
-                                                <span className={`text-sm sm:text-base font-mono font-black shrink-0 ${item.status === 'expired' ? 'text-red-500' : 'text-finance-text'}`}>
-                                                    {item.amount > 0 ? <AnimatedCounter amount={item.amount} className={item.status === 'expired' ? 'text-red-500' : 'text-finance-text'} /> : ''}
+                                                <span className={`text-sm sm:text-base font-mono font-black shrink-0 ${item.status === 'expired' ? 'text-[#FF4DA6]' : 'text-finance-text'}`}>
+                                                    {item.amount > 0 ? <AnimatedCounter amount={item.amount} className={item.status === 'expired' ? 'text-[#FF4DA6]' : 'text-finance-text'} /> : ''}
                                                 </span>
                                             </div>
                                         </>
@@ -715,7 +809,7 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                                                 onClick={() => setEventFormData({ ...eventFormData, priority: p })}
                                                 className={`flex-1 py-3 px-2 rounded-xl border text-[10px] font-black uppercase tracking-widest transition-all
                                                     ${eventFormData.priority === p ?
-                                                        (p === 'critical' ? 'bg-red-500 border-red-500 text-white dark:shadow-[0_0_15px_rgba(239,68,68,0.4)]' : p === 'important' ? 'bg-orange-500 border-orange-500 text-white dark:shadow-[0_0_15px_rgba(249,115,22,0.4)]' : 'bg-finance-primary border-finance-primary text-black dark:shadow-[0_0_15px_rgba(0,212,255,0.4)]') :
+                                                        (p === 'critical' ? 'bg-[#FF4DA6] border-[#FF4DA6] text-white dark:shadow-[0_0_15px_rgba(255,77,166,0.4)]' : p === 'important' ? 'bg-[#FFD166] border-[#FFD166] text-white dark:shadow-[0_0_15px_rgba(255,209,102,0.4)]' : 'bg-finance-primary border-finance-primary text-black dark:shadow-[0_0_15px_rgba(0,212,255,0.4)]') :
                                                         'bg-slate-200/50 dark:bg-white/5 border-black/5 dark:border-white/10 text-finance-muted hover:border-black/20 dark:hover:border-white/20'}`}
                                             >
                                                 {t(`priority_${p}`)}
@@ -745,6 +839,65 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                                 </div>
                             </form>
                         </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+            {/* Panel de Resultados de Simulación Flotante */}
+            <AnimatePresence>
+                {simResult && (
+                    <motion.div 
+                        initial={{ opacity: 0, y: 50, scale: 0.9 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        className="fixed bottom-6 right-6 z-[100] w-80 overflow-hidden"
+                    >
+                        <div className="card p-5 border-finance-primary/40 bg-black/80 backdrop-blur-xl shadow-[0_0_30px_rgba(0,212,255,0.2)]">
+                            <div className="flex justify-between items-start mb-4">
+                                <div className="flex items-center gap-2">
+                                    <div className="p-2 rounded-lg bg-finance-primary/20 text-finance-primary">
+                                        <Zap size={18} />
+                                    </div>
+                                    <h4 className="text-sm font-black uppercase tracking-tighter text-white">
+                                        Modo Simulación
+                                    </h4>
+                                </div>
+                                <button onClick={() => setSimResult(null)} className="text-finance-muted hover:text-white transition-colors">
+                                    <X size={16} />
+                                </button>
+                            </div>
+                            
+                            <p className="text-[11px] text-finance-muted mb-4 leading-relaxed">
+                                Si cancelaras <span className="text-white font-bold">{simResult.title}</span> (${simResult.amount}):
+                            </p>
+                            
+                            <div className="grid grid-cols-2 gap-3 mb-4">
+                                <div className="p-3 rounded-xl bg-white/5 border border-white/5 text-center">
+                                    <p className="text-[10px] text-finance-muted uppercase mb-1">Buffer Actual</p>
+                                    <p className="text-lg font-mono font-black text-white">{simResult.oldBuffer}d</p>
+                                </div>
+                                <div className="p-3 rounded-xl bg-finance-primary/10 border border-finance-primary/20 text-center">
+                                    <p className="text-[10px] text-finance-primary uppercase mb-1">Nuevo Buffer</p>
+                                    <p className="text-lg font-mono font-black text-finance-primary glow-cyan">{simResult.newBuffer}d</p>
+                                </div>
+                            </div>
+                            
+                            <div className="p-3 rounded-xl bg-[#00FFFF]/10 border border-[#00FFFF]/20 flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                    <TrendingUp size={14} className="text-[#00FFFF]" />
+                                    <span className="text-xs font-bold text-white">Impacto Positivo:</span>
+                                </div>
+                                <span className="text-sm font-mono font-black text-[#00FFFF]">
+                                    +{simResult.impact} días
+                                </span>
+                            </div>
+                            
+                            <button 
+                                onClick={() => setSimResult(null)}
+                                className="w-full mt-4 py-2.5 rounded-xl bg-finance-primary/20 hover:bg-finance-primary/30 text-finance-primary text-[11px] font-black uppercase tracking-widest transition-all border border-finance-primary/30"
+                            >
+                                Entendido
+                            </button>
+                        </div>
                     </motion.div>
                 )}
             </AnimatePresence>

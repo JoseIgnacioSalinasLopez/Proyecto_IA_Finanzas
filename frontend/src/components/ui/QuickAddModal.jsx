@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, Plus, Calendar } from 'lucide-react';
+import { X, Calendar, ArrowRight, ArrowLeft, Search, Plus } from 'lucide-react';
 import api from '../../services/api';
 import { useLanguage } from '../../context/LanguageContext';
 import Toast from './Toast';
@@ -20,12 +20,32 @@ export default function QuickAddModal() {
     const [form, setForm] = useState(EMPTY_FORM);
     const [loading, setLoading] = useState(false);
     const [toast, setToast] = useState(null);
+    const [onSuccessCallback, setOnSuccessCallback] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
     const firstInputRef = useRef(null);
 
     useEffect(() => {
-        const handleOpen = () => {
+        const handleOpen = (e) => {
+            if (e.detail) {
+                setForm({
+                    ...EMPTY_FORM,
+                    description: e.detail.description || '',
+                    amount: e.detail.amount || '',
+                    type: e.detail.type || 'expense',
+                    date: e.detail.date || new Date().toISOString().split('T')[0]
+                });
+                if (e.detail.onSuccess) {
+                    setOnSuccessCallback(() => e.detail.onSuccess);
+                } else {
+                    setOnSuccessCallback(null);
+                }
+            } else {
+                setForm(EMPTY_FORM);
+                setOnSuccessCallback(null);
+            }
             setShow(true);
-            fetchCategories();
+            setSearchTerm('');
+            fetchCategories(e.detail?.type || 'expense');
         };
         window.addEventListener('open-quick-add', handleOpen);
         return () => window.removeEventListener('open-quick-add', handleOpen);
@@ -37,12 +57,21 @@ export default function QuickAddModal() {
         }
     }, [show]);
 
-    const fetchCategories = async () => {
+    const fetchCategories = async (typeToUse) => {
         try {
             const res = await api.get('/categories');
-            setCategories(res.data.data);
-            if (res.data.data.length > 0 && !form.category_id) {
-                setForm(prev => ({ ...prev, category_id: res.data.data[0].id }));
+            const catData = res.data?.data || [];
+            setCategories(catData);
+            
+            // BUSCAR LA PRIMERA CATEGORÍA QUE COINCIDA CON EL TIPO ACTUAL (expense/income)
+            const targetType = typeToUse || form.type;
+            if (catData.length > 0 && !form.category_id) {
+                const firstOfType = catData.find(c => (c.type || 'expense') === targetType);
+                if (firstOfType) {
+                    setForm(prev => ({ ...prev, category_id: firstOfType.id }));
+                } else {
+                    setForm(prev => ({ ...prev, category_id: catData[0].id }));
+                }
             }
         } catch (error) {
             console.error('Error fetching categories for quick add', error);
@@ -66,7 +95,7 @@ export default function QuickAddModal() {
             const [y, m, d] = form.date.split('-');
             const dateWithTime = new Date(y, m - 1, d, now.getHours(), now.getMinutes(), now.getSeconds());
 
-            await api.post('/transactions', {
+            const res = await api.post('/transactions', {
                 ...form,
                 amount: parseFloat(form.amount),
                 date: dateWithTime.toISOString()
@@ -75,11 +104,17 @@ export default function QuickAddModal() {
             // DISPARAR EVENTO GLOBAL DE RECARGA
             window.dispatchEvent(new CustomEvent('refresh-data'));
 
+            // EJECUTAR CALLBACK DE ÉXITO SI EXISTE
+            if (onSuccessCallback) {
+                await onSuccessCallback(res.data.data);
+            }
+
             setToast({ message: t('movement_registered'), type: 'success' });
             setTimeout(() => {
                 setShow(false);
                 setForm(EMPTY_FORM);
-            }, 1500);
+                setOnSuccessCallback(null);
+            }, 1000);
         } catch (error) {
             setToast({ message: t('registration_error'), type: 'error' });
         } finally {
@@ -124,8 +159,8 @@ export default function QuickAddModal() {
                                     onClick={() => setForm({ ...form, type: type.key, category_id: '' })}
                                     className={`flex-1 py-2.5 rounded-xl font-bold text-sm border-2 transition-all ${form.type === type.key
                                         ? type.color === 'red'
-                                            ? 'bg-red-500/20 border-red-500 text-red-400 shadow-[0_0_10px_rgba(239,68,68,0.2)]'
-                                            : 'bg-emerald-500/20 border-emerald-500 text-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.2)]'
+                                                ? 'bg-[#FF4DA6]/20 border-[#FF4DA6] text-[#FF4DA6] shadow-[0_0_10px_rgba(255,77,166,0.2)]'
+                                                : 'bg-[#00FFFF]/20 border-[#00FFFF] text-[#00FFFF] shadow-[0_0_10px_rgba(0,255,255,0.2)]'
                                         : 'bg-black/10 dark:bg-black/20 border-white/10 text-finance-muted hover:border-white/30'
                                         }`}
                                 >
@@ -175,21 +210,54 @@ export default function QuickAddModal() {
                     />
 
                     {/* Categoría */}
-                    <div>
-                        <label htmlFor="quick-category" className="block text-xs font-semibold text-finance-muted mb-1.5 uppercase tracking-wide">
+                    <div className="space-y-2">
+                        <label className="block text-xs font-semibold text-finance-muted uppercase tracking-wide">
                             {t('category_label')}
                         </label>
-                        <select
-                            id="quick-category"
-                            required className="input-field"
-                            value={form.category_id}
-                            onChange={e => setForm({ ...form, category_id: e.target.value })}
-                        >
-                            <option value="" disabled>{t('select_category')}</option>
-                            {categories
-                                .filter(c => (c.type || 'expense') === form.type)
-                                .map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-                        </select>
+                        
+                        {/* Buscador de Categoría */}
+                        <div className="relative">
+                            <input 
+                                type="text"
+                                placeholder={t('search_category')}
+                                className="w-full bg-black/5 dark:bg-black/20 border border-black/10 dark:border-white/5 rounded-xl px-4 py-2.5 text-xs text-finance-text focus:outline-none focus:border-finance-primary/50 transition-all placeholder:text-finance-muted/40"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
+                            <Search size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-finance-muted/40" />
+                        </div>
+
+                        {/* Grid de Categorías */}
+                        <div className="grid grid-cols-2 gap-2 max-h-[160px] overflow-y-auto pr-1 custom-scrollbar">
+                            {(categories || [])
+                                .filter(c => c && (c.type || 'expense') === form.type)
+                                .filter(c => c && c.name && c.name.toLowerCase().includes(searchTerm.toLowerCase()))
+                                .map(c => (
+                                    <button
+                                        key={c.id}
+                                        type="button"
+                                        onClick={() => setForm({ ...form, category_id: c.id })}
+                                        className={`flex items-center gap-2.5 p-2 rounded-xl text-[11px] font-bold border transition-all truncate
+                                            ${form.category_id === c.id 
+                                                ? 'bg-finance-primary/10 border-finance-primary/50 text-finance-primary shadow-[0_0_15px_rgba(0,212,255,0.1)]' 
+                                                : 'bg-black/5 dark:bg-white/5 border-black/5 dark:border-white/5 text-finance-muted hover:border-finance-primary/30 hover:bg-finance-primary/5'}`}
+                                    >
+                                        <div 
+                                            className="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm" 
+                                            style={{ backgroundColor: c.color || '#00D4FF' }} 
+                                        />
+                                        <span className="truncate">{c.name}</span>
+                                    </button>
+                                ))
+                            }
+                            {(categories || [])
+                                .filter(c => c && (c.type || 'expense') === form.type && c.name && c.name.toLowerCase().includes(searchTerm.toLowerCase()))
+                                .length === 0 && (
+                                <p className="col-span-2 py-4 text-center text-[10px] text-finance-muted uppercase tracking-widest opacity-50">
+                                    {t('no_categories_found')}
+                                </p>
+                            )}
+                        </div>
                     </div>
 
 
@@ -205,7 +273,7 @@ export default function QuickAddModal() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className={`btn-primary flex-1 flex justify-center items-center gap-2 ${form.type === 'expense' ? 'bg-red-500 shadow-red-500/20 hover:bg-red-400 border-red-500/50' : ''
+                            className={`btn-primary flex-1 flex justify-center items-center gap-2 ${form.type === 'expense' ? 'bg-gradient-to-r from-[#FF4DA6] to-[#8C30F5] shadow-[#FF4DA6]/20 hover:from-[#FF4DA6] hover:to-[#FF4DA6] border-[#FF4DA6]/50' : ''
                                 }`}
                         >
                             {loading ? (

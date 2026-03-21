@@ -18,7 +18,7 @@ const glowPlugin = {
         const ctx = chart.ctx;
         ctx.save();
         const isDark = chart.config.options.scales.y.ticks.color?.includes('255'); // Simple dark check
-        ctx.shadowColor = isDark ? 'rgba(0, 212, 255, 0.3)' : 'rgba(0, 212, 255, 0.15)';
+        ctx.shadowColor = isDark ? 'rgba(0, 255, 255, 0.4)' : 'rgba(0, 255, 255, 0.2)';
         ctx.shadowBlur = 10;
         ctx.shadowOffsetX = 0;
         ctx.shadowOffsetY = 4;
@@ -49,7 +49,7 @@ export default function BarChart({ data, title = 'Comparativa' }) {
         return {
             ...data,
             datasets: data.datasets.map((ds) => {
-                const color = ds.backgroundColor || '#00D4FF';
+                const color = ds.backgroundColor || '#00FFFF';
 
                 return {
                     ...ds,
@@ -59,7 +59,7 @@ export default function BarChart({ data, title = 'Comparativa' }) {
                         if (!chartArea) return color;
                         const gradient = ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
 
-                        const baseColor = typeof color === 'string' ? color : '#00D4FF';
+                        const baseColor = typeof color === 'string' ? color : '#00FFFF';
                         const isHex = baseColor.startsWith('#');
                         gradient.addColorStop(0, isHex ? hexToRgba(baseColor, 0.95) : baseColor);
                         gradient.addColorStop(0.5, isHex ? hexToRgba(baseColor, 0.7) : baseColor.replace(')', ', 0.7)').replace('rgb', 'rgba'));

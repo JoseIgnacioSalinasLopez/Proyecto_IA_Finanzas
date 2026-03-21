@@ -73,7 +73,7 @@ export default function PieChart({ data, title = 'Distribución' }) {
         return {
             ...data,
             datasets: data.datasets.map(ds => {
-                const palette = ['#E600E6', '#8C30F5', '#4F46E5', '#00D4FF', '#00FFFF'];
+                const palette = ['#FF4DA6', '#8C30F5', '#00FFFF', '#4F46E5', '#FFD166', '#2F5BFF', '#00D4FF', '#6A3DF0'];
                 return {
                     ...ds,
                     backgroundColor: ds.data ? ds.data.map((_, i) => palette[i % palette.length]) : ds.backgroundColor,

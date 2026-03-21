@@ -3,16 +3,19 @@ import { Link } from 'react-router-dom';
 import { Send, User, Sparkles, Mic, Trash2, Plus, MessageSquare, Paperclip, X, FileText, Volume2, VolumeX } from 'lucide-react';
 import api from '../services/api';
 import iaLogo from '../assets/IAboy.gif';
+import iaLogoLight from '../assets/IAboy claro.gif';
 import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
+import GlobalLoader from '../components/ui/GlobalLoader';
 
 function TypingBubble() {
     const { theme } = useTheme();
+    const currentIALogo = theme === 'light' ? iaLogoLight : iaLogo;
     return (
         <div className="flex justify-start">
             <div className="flex max-w-[70%] gap-4 flex-row">
                 <div className={`w-20 h-20 flex-shrink-0 rounded-full flex items-center justify-center overflow-hidden ${theme === 'light' ? 'bg-black shadow-[0_0_15px_rgba(0,212,255,0.3)]' : 'bg-[#11111d]'}`}>
-                    <img src={iaLogo} alt="IA" className="w-full h-full object-cover rounded-full" />
+                    <img src={currentIALogo} alt="IA" className="w-full h-full object-cover rounded-full" />
                 </div>
                 {/* Burbuja brillante para el "escribiendo" */}
                 <div className="rounded-2xl rounded-bl-sm bg-transparent">
@@ -30,11 +33,13 @@ function TypingBubble() {
 export default function ChatIA() {
     const { t, language } = useLanguage();
     const { theme } = useTheme();
+    const currentIALogo = theme === 'light' ? iaLogoLight : iaLogo;
 
     const [allHistory, setAllHistory] = useState([]);
     const [sessionList, setSessionList] = useState([]);
     const [currentSessionId, setCurrentSessionId] = useState(() => `chat_${Date.now()}`);
     const [messages, setMessages] = useState([{ role: 'assistant', content: t('ai_welcome') }]);
+    const [loading, setLoading] = useState(true);
 
     const [chatServiceError, setChatServiceError] = useState(null);
     const [input, setInput] = useState('');
@@ -118,6 +123,8 @@ export default function ChatIA() {
             }
         } catch (error) {
             console.error("Error loading chat history:", error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -370,6 +377,8 @@ export default function ChatIA() {
         return 'Nueva Conversación';
     };
 
+    if (loading) return <GlobalLoader fullScreen={true} />;
+
     return (
         <div className={`flex h-[calc(100vh-5rem)] -m-4 md:-m-6 relative rounded-t-3xl overflow-hidden shadow-2xl z-10 ${theme === 'light' ? 'bg-slate-50' : 'bg-[#05011a]'}`}>
             {/* SIDEBAR DINÁMICO */}
@@ -422,7 +431,7 @@ export default function ChatIA() {
                     <div className="flex items-center gap-3">
                         {/* Avatar IA brillante */}
                         <div className="w-24 h-24 rounded-full bg-gradient-to-tr from-[#8C30F5] to-[#00D4FF] flex items-center justify-center shadow-[0_0_20px_rgba(0,212,255,0.6)] overflow-hidden p-[3px]">
-                            <img src={iaLogo} alt="IA" className={`w-full h-full object-cover rounded-full border-[3px] ${theme === 'light' ? 'border-black' : 'border-[#0a0520]'}`} />
+                            <img src={currentIALogo} alt="IA" className={`w-full h-full object-cover rounded-full border-[3px] ${theme === 'light' ? 'border-black' : 'border-[#0a0520]'}`} />
                         </div>
                         <div>
                             <div className="flex items-center gap-2">
@@ -447,21 +456,21 @@ export default function ChatIA() {
                                 {/* AVATARES */}
                                 {msg.role === 'assistant' ? (
                                     <div className={`w-20 h-20 flex-shrink-0 rounded-full border border-white/10 flex items-center justify-center mt-auto overflow-hidden ${theme === 'light' ? 'bg-black shadow-[0_0_15px_rgba(0,212,255,0.3)]' : 'bg-[#11111d]'}`}>
-                                        <img src={iaLogo} alt="IA" className="w-full h-full object-cover rounded-full" />
+                                        <img src={currentIALogo} alt="IA" className="w-full h-full object-cover rounded-full" />
                                     </div>
                                 ) : (
-                                    <div className={`w-10 h-10 flex-shrink-0 rounded-full border border-[#E600E6]/50 flex items-center justify-center mt-auto ${theme === 'light' ? 'bg-white shadow-sm' : 'bg-[#0d0f1a] shadow-[0_0_15px_rgba(230,0,230,0.5)]'}`}>
-                                        <User size={20} className="text-[#E600E6] drop-shadow-[0_0_5px_rgba(230,0,230,0.8)]" />
+                                    <div className={`w-10 h-10 flex-shrink-0 rounded-full border border-[#FF4DA6]/50 flex items-center justify-center mt-auto ${theme === 'light' ? 'bg-white shadow-sm' : 'bg-[#0d0f1a] shadow-[0_0_15px_rgba(255,77,166,0.5)]'}`}>
+                                        <User size={20} className="text-[#FF4DA6] drop-shadow-[0_0_5px_rgba(255,77,166,0.8)]" />
                                     </div>
                                 )}
 
                                 {/* BURBUJAS DE MENSAJE CON BORDES DEGRADADOS Y AURA */}
                                 <div className={`p-[1.5px] rounded-3xl ${theme === 'light' ? 'shadow-sm' : 'shadow-[0_0_25px_rgba(0,0,0,0.5)]'} ${msg.role === 'user'
-                                    ? 'bg-gradient-to-l from-[#8C30F5]/80 to-[#E600E6]/80 shadow-[0_0_20px_rgba(140,48,245,0.3)]' // Glow púrpura para usuario
+                                    ? 'bg-gradient-to-l from-[#8C30F5]/80 to-[#FF4DA6]/80 shadow-[0_0_20px_rgba(140,48,245,0.3)]' // Glow púrpura para usuario
                                     : 'bg-transparent'  // Sin Glow cian para IA
                                     }`}>
                                     <div className={`rounded-3xl ${theme === 'light' ? 'shadow-sm' : 'shadow-[0_0_25px_rgba(0,0,0,0.5)]'} ${msg.role === 'user'
-                                        ? 'bg-gradient-to-l from-[#8C30F5]/80 to-[#E600E6]/80 p-[1.5px]' // Glow user
+                                        ? 'bg-gradient-to-l from-[#8C30F5]/80 to-[#FF4DA6]/80 p-[1.5px]' // Glow user
                                         : 'bg-transparent'  // Borde simple asistente
                                         }`}>
                                         <div className={`p-5 rounded-[22px] ${msg.role === 'user'
@@ -542,7 +551,7 @@ export default function ChatIA() {
                     )}
 
                     {/* CONTENEDOR DE LA CAJA DE TEXTO CON EFECTO DE LUZ */}
-                    <div className="mx-auto max-w-4xl relative rounded-3xl p-[1.5px] bg-gradient-to-r from-[#00D4FF] via-[#8C30F5] to-[#E600E6] shadow-[0_0_30px_rgba(140,48,245,0.4)] focus-within:shadow-[0_0_50px_rgba(0,212,255,0.6)] transition-all duration-500">
+                    <div className="mx-auto max-w-4xl relative rounded-3xl p-[1.5px] bg-gradient-to-r from-[#00D4FF] via-[#8C30F5] to-[#FF4DA6] shadow-[0_0_30px_rgba(140,48,245,0.4)] focus-within:shadow-[0_0_50px_rgba(0,212,255,0.6)] transition-all duration-500">
 
                         <form
                             onSubmit={handleSubmit}
@@ -597,7 +606,7 @@ export default function ChatIA() {
                                         type="button"
                                         onClick={handleVoiceInput}
                                         className={`p-2.5 rounded-full transition-all duration-300 ${isListening
-                                            ? 'bg-red-500/20 text-red-400 shadow-[0_0_20px_rgba(239,68,68,0.8)] animate-pulse border border-red-500/50'
+                                            ? 'bg-[#FF4DA6]/20 text-[#FF4DA6] shadow-[0_0_20px_rgba(255,77,166,0.8)] animate-pulse border border-[#FF4DA6]/50'
                                             : 'bg-[#00D4FF]/10 text-[#00D4FF] hover:bg-[#00D4FF]/20 shadow-[0_0_15px_rgba(0,212,255,0.3)] hover:shadow-[0_0_25px_rgba(0,212,255,0.6)] border border-[#00D4FF]/30'
                                             }`}
                                         title="Dictar por voz"
@@ -610,7 +619,7 @@ export default function ChatIA() {
                                 <button
                                     type="submit"
                                     disabled={(!input.trim() && !attachedFile) || isTyping}
-                                    className="w-11 h-11 rounded-full bg-gradient-to-r from-[#8C30F5] to-[#E600E6] flex items-center justify-center transition-all disabled:opacity-30 disabled:cursor-not-allowed text-white shadow-[0_0_20px_rgba(230,0,230,0.6)] hover:shadow-[0_0_30px_rgba(230,0,230,0.9)] hover:scale-105 border border-white/20"
+                                    className="w-11 h-11 rounded-full bg-gradient-to-r from-[#8C30F5] to-[#FF4DA6] flex items-center justify-center transition-all disabled:opacity-30 disabled:cursor-not-allowed text-white shadow-[0_0_20px_rgba(255,77,166,0.6)] hover:shadow-[0_0_30px_rgba(255,77,166,0.9)] hover:scale-105 border border-white/20"
                                 >
                                     <Send size={18} className="ml-1 drop-shadow-[0_0_5px_rgba(255,255,255,0.8)]" />
                                 </button>
@@ -629,12 +638,12 @@ export default function ChatIA() {
                 <div className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4 backdrop-blur-md" onClick={handleCancelDelete}>
                     {/* Modal con aura roja */}
                     <div
-                        className="relative rounded-3xl p-[1.5px] w-full max-w-md bg-gradient-to-tr from-red-500/80 to-[#8C30F5]/50 shadow-[0_0_40px_rgba(239,68,68,0.4)] transform transition-all"
+                        className="relative rounded-3xl p-[1.5px] w-full max-w-md bg-gradient-to-tr from-[#FF4DA6]/80 to-[#8C30F5]/50 shadow-[0_0_40px_rgba(255,77,166,0.4)] transform transition-all"
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className={`rounded-[22px] p-6 w-full h-full ${theme === 'light' ? 'bg-white' : 'bg-[#0b061c]'}`}>
                             <div className="flex items-center gap-4 mb-6">
-                                <div className="bg-red-500/20 p-4 rounded-full text-red-500 shadow-[0_0_15px_rgba(239,68,68,0.5)] border border-red-500/30">
+                                <div className="bg-[#FF4DA6]/20 p-4 rounded-full text-[#FF4DA6] shadow-[0_0_15px_rgba(255,77,166,0.5)] border border-[#FF4DA6]/30">
                                     <Trash2 size={24} className="drop-shadow-[0_0_5px_currentColor]" />
                                 </div>
                                 <h3 className={`text-xl font-bold ${theme === 'light' ? 'text-gray-900' : 'text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]'}`}>
@@ -651,7 +660,7 @@ export default function ChatIA() {
                                 </button>
                                 <button
                                     onClick={handleConfirmDelete}
-                                    className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400 text-white px-6 py-2.5 rounded-xl font-bold transition-all shadow-[0_0_15px_rgba(239,68,68,0.6)] hover:shadow-[0_0_25px_rgba(239,68,68,0.9)]"
+                                    className="bg-gradient-to-r from-[#FF4DA6] to-[#8C30F5] hover:opacity-90 text-white px-6 py-2.5 rounded-xl font-bold transition-all shadow-[0_0_15px_rgba(255,77,166,0.6)] hover:shadow-[0_0_25px_rgba(255,77,166,0.9)]"
                                 >
                                     Eliminar
                                 </button>

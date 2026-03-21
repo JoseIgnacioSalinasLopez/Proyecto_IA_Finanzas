@@ -104,18 +104,18 @@ export default function Presupuestos() {
                         <p className="text-xs text-finance-muted mb-1 font-medium">{t('available')}</p>
                         <AnimatedCounter
                             amount={remains}
-                            className={`text-xl font-bold ${remains > 0 ? 'text-emerald-400' : 'text-red-400'}`}
+                            className={`text-xl font-bold ${remains > 0 ? 'text-[#00FFFF]' : 'text-[#FF4DA6]'}`}
                         />
                     </div>
                 </div>
                 <div className="h-4 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
                     <div
-                        className={`h-full transition-all duration-1000 ease-out ${progressPerc > 100 ? 'bg-red-500' : progressPerc > 80 ? 'bg-orange-500' : 'bg-finance-primary'}`}
+                        className={`h-full transition-all duration-1000 ease-out ${progressPerc > 100 ? 'bg-[#FF4DA6]' : progressPerc > 80 ? 'bg-[#FFD166]' : 'bg-finance-primary'}`}
                         style={{ width: `${Math.min(100, progressPerc)}%` }}
                     />
                 </div>
                 {progressPerc > 90 && (
-                    <div className="mt-4 flex items-center gap-2 text-red-400 text-xs font-bold animate-pulse">
+                    <div className="mt-4 flex items-center gap-2 text-[#FF4DA6] text-xs font-bold animate-pulse">
                         <AlertCircle size={14} /> {t('budget_alert')}
                     </div>
                 )}
@@ -206,7 +206,7 @@ export default function Presupuestos() {
                                             </button>
                                             <button
                                                 onClick={() => setShowDeleteConfirm(b)}
-                                                className="p-2 text-finance-muted hover:text-red-400 hover:bg-red-400/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                                                className="p-2 text-finance-muted hover:text-[#FF4DA6] hover:bg-[#FF4DA6]/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
                                             >
                                                 <Trash2 size={16} />
                                             </button>
@@ -218,13 +218,13 @@ export default function Presupuestos() {
                                                 <span className="text-finance-muted">{t('spent_prefix')}</span>
                                                 <AnimatedCounter amount={spentInCat} className="text-finance-muted" />
                                             </div>
-                                            <span className={perc > 100 ? 'text-red-400' : perc > 80 ? 'text-orange-400' : 'text-finance-primary'}>
+                                            <span className={perc > 100 ? 'text-[#FF4DA6]' : perc > 80 ? 'text-[#FFD166]' : 'text-finance-primary'}>
                                                 {perc.toFixed(1)}%
                                             </span>
                                         </div>
                                         <div className="h-2 w-full bg-black/40 rounded-full overflow-hidden border border-white/5">
                                             <div
-                                                className={`h-full transition-all duration-700 ${perc > 100 ? 'bg-red-500' : perc > 80 ? 'bg-orange-500' : 'bg-finance-primary'}`}
+                                                className={`h-full transition-all duration-700 ${perc > 100 ? 'bg-[#FF4DA6]' : perc > 80 ? 'bg-[#FFD166]' : 'bg-finance-primary'}`}
                                                 style={{ width: `${Math.min(100, perc)}%` }}
                                             />
                                         </div>
@@ -239,10 +239,10 @@ export default function Presupuestos() {
             {showDeleteConfirm && (
                 <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex justify-center items-center z-50 p-4"
                     role="dialog" aria-modal="true">
-                    <div className="card p-6 w-full max-w-sm border-red-500/20 animate-scale-in bg-[#11111d]">
+                    <div className="card p-6 w-full max-w-sm border-[#FF4DA6]/20 animate-scale-in bg-[#11111d]">
                         <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2.5 bg-red-500/15 rounded-xl">
-                                <Trash2 size={20} className="text-red-400" />
+                            <div className="p-2.5 bg-[#FF4DA6]/15 rounded-xl">
+                                <Trash2 size={20} className="text-[#FF4DA6]" />
                             </div>
                             <h2 className="text-lg font-bold">{t('delete_confirm')}</h2>
                         </div>
@@ -257,7 +257,7 @@ export default function Presupuestos() {
                                 {t('cancel')}
                             </button>
                             <button onClick={() => handleDelete(showDeleteConfirm)}
-                                className="flex-1 px-4 py-2.5 bg-red-500 hover:bg-red-400 text-white rounded-xl font-bold text-sm transition-all active:scale-95">
+                                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[#FF4DA6] to-[#8C30F5] hover:opacity-90 text-white rounded-xl font-bold text-sm transition-all active:scale-95 shadow-lg shadow-pink-500/20">
                                 {t('delete_label')}
                             </button>
                         </div>

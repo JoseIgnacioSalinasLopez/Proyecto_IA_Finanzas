@@ -16,7 +16,7 @@ export default function BottomNav() {
     ];
 
     return (
-        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-finance-900/90 backdrop-blur-2xl border-t border-white/5 pb-safe shadow-[0_-8px_32px_rgba(0,0,0,0.4)] backdrop-saturate-150">
+        <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-finance-900/95 backdrop-blur-2xl border-t border-white/5 pb-safe shadow-[0_-8px_32px_rgba(0,0,0,0.6)] backdrop-saturate-150">
             <div className="flex justify-around items-center h-14 sm:h-16 px-1 sm:px-2 relative">
                 {/* Left Links */}
                 {navLinks.map((link) => (
@@ -30,7 +30,7 @@ export default function BottomNav() {
                     >
                         {({ isActive }) => (
                             <>
-                                <div className={`transition-transform duration-300 ${isActive ? '-translate-y-1 scale-110 drop-shadow-[0_0_8px_rgba(0,212,255,0.5)]' : ''}`}>
+                                <div className={`transition-transform duration-300 ${isActive ? '-translate-y-1 scale-110 drop-shadow-[0_0_10px_var(--epic-cyan)]' : ''}`}>
                                     {link.icon}
                                 </div>
                                 <span className={`text-[9px] font-bold tracking-wider uppercase transition-all duration-300 ${isActive ? 'opacity-100 font-black' : 'opacity-70'}`}>
@@ -45,7 +45,7 @@ export default function BottomNav() {
                 <div className="relative -top-4 sm:-top-5 flex justify-center w-full">
                     <button
                         onClick={() => window.dispatchEvent(new CustomEvent('open-quick-add'))}
-                        className="btn-epic w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center shadow-[0_8px_30px_rgba(0,212,255,0.4)] transform active:scale-95 transition-all duration-300"
+                        className="btn-epic w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center shadow-[0_8px_30px_rgba(0,255,255,0.4)] transform active:scale-95 transition-all duration-300"
                         aria-label="Añadir Rápido"
                     >
                         <Plus size={20} sm:size={24} strokeWidth={3} className="text-black" />
@@ -64,7 +64,7 @@ export default function BottomNav() {
                     >
                         {({ isActive }) => (
                             <>
-                                <div className={`transition-transform duration-300 ${isActive ? '-translate-y-1 scale-110 drop-shadow-[0_0_8px_rgba(0,212,255,0.5)]' : ''}`}>
+                                <div className={`transition-transform duration-300 ${isActive ? '-translate-y-1 scale-110 drop-shadow-[0_0_10px_var(--epic-cyan)]' : ''}`}>
                                     {link.icon}
                                 </div>
                                 <span className={`text-[9px] font-bold tracking-wider uppercase transition-all duration-300 ${isActive ? 'opacity-100 font-black' : 'opacity-70'}`}>

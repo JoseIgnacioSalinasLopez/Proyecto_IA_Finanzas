@@ -5,6 +5,7 @@ import { useAuth } from '../hooks/useAuth';
 import { Save, User, Phone, MapPin, Briefcase, ShieldCheck, TrendingUp, Wallet, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import AnimatedCounter from '../components/ui/AnimatedCounter';
+import GlobalLoader from '../components/ui/GlobalLoader';
 
 export default function Perfil() {
     const { user } = useAuth();
@@ -15,7 +16,8 @@ export default function Perfil() {
         phone: user?.phone || '',
         bio: user?.bio || '',
     });
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
     const [stats, setStats] = useState(null);
 
     useEffect(() => {
@@ -25,6 +27,8 @@ export default function Perfil() {
                 setStats(res.data.data);
             } catch (error) {
                 console.error('Error fetching stats for profile:', error);
+            } finally {
+                setLoading(false);
             }
         };
         fetchStats();
@@ -32,14 +36,14 @@ export default function Perfil() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true);
+        setSaving(true);
         try {
             await api.put('/profile', formData);
             toast.success(t('profile_updated'));
         } catch (error) {
             toast.error(error.response?.data?.message || t('profile_error'));
         } finally {
-            setLoading(false);
+            setSaving(false);
         }
     };
 
@@ -49,6 +53,8 @@ export default function Perfil() {
     const balance = stats?.summary?.balance || 0;
     const income = stats?.summary?.totalIncome || 0;
     const expense = stats?.summary?.totalExpense || 0;
+
+    if (loading) return <GlobalLoader fullScreen={true} />;
 
     return (
         <div className="max-w-6xl mx-auto space-y-8 pb-12 animate-fade-in">
@@ -145,10 +151,10 @@ export default function Perfil() {
                                 <button
                                     type="submit"
                                     className="btn-epic !px-10 flex items-center gap-2"
-                                    disabled={loading}
+                                    disabled={saving}
                                 >
                                     <Save size={18} />
-                                    <span>{loading ? t('saving').toUpperCase() : t('save').toUpperCase()}</span>
+                                    <span>{saving ? t('saving').toUpperCase() : t('save').toUpperCase()}</span>
                                 </button>
                             </div>
                         </form>
@@ -160,21 +166,21 @@ export default function Perfil() {
                             <div className="text-xs font-black text-finance-muted uppercase tracking-tighter mb-1">{t('total_balance')}</div>
                             <AnimatedCounter
                                 amount={balance}
-                                className={`text-2xl font-black ${balance >= 0 ? 'text-white' : 'text-red-400'}`}
+                                className={`text-2xl font-black ${balance >= 0 ? 'text-white' : 'text-[#FF4DA6]'}`}
                             />
                         </div>
-                        <div className="card bg-emerald-500/5 border-emerald-500/10 p-6">
+                        <div className="card bg-[#00FFFF]/5 border-[#00FFFF]/10 p-6">
                             <div className="text-xs font-black text-finance-muted uppercase tracking-tighter mb-1">{t('total_income')}</div>
                             <AnimatedCounter
                                 amount={income}
-                                className="text-2xl font-black text-emerald-400"
+                                className="text-2xl font-black text-[#00FFFF]"
                             />
                         </div>
-                        <div className="card bg-red-500/5 border-red-500/10 p-6">
+                        <div className="card bg-[#FF4DA6]/5 border-[#FF4DA6]/10 p-6">
                             <div className="text-xs font-black text-finance-muted uppercase tracking-tighter mb-1">{t('total_expense')}</div>
                             <AnimatedCounter
                                 amount={expense}
-                                className="text-2xl font-black text-red-400"
+                                className="text-2xl font-black text-[#FF4DA6]"
                             />
                         </div>
                     </div>

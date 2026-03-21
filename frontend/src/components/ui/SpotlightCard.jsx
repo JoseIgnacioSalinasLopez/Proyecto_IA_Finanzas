@@ -44,16 +44,23 @@ export default function SpotlightCard({ children, className = '', spotlightColor
             onBlur={handleBlur}
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
-            className={`relative overflow-hidden ${className}`}
+            className={`relative ${className}`}
         >
-            <div
-                className="pointer-events-none absolute -inset-px opacity-0 transition duration-300"
-                style={{
-                    opacity,
-                    background: `radial-gradient(600px circle at ${position.x}px ${position.y}px, ${spotlightColor}, transparent 40%)`,
-                }}
-            />
-            {children}
+            {/* Contenedor de efecto Spotlight (con overflow hidden propio) */}
+            <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
+                <div
+                    className="absolute -inset-px opacity-0 transition duration-300"
+                    style={{
+                        opacity,
+                        background: `radial-gradient(600px circle at ${position.x}px ${position.y}px, ${spotlightColor}, transparent 40%)`,
+                    }}
+                />
+            </div>
+            
+            {/* Contenido real (puede desbordar afuera del card si es necesario, p.ej. tooltips) */}
+            <div className="relative z-10 h-full w-full">
+                {children}
+            </div>
         </div>
     );
 }

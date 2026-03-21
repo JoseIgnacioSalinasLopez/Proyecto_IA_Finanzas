@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import { CheckCircle2, XCircle, AlertTriangle, X } from 'lucide-react';
 import { useLanguage } from '../../context/LanguageContext';
 
-export default function Toast({ message, type = 'success', onClose, duration = 4000 }) {
+export default function Toast({ message, type = 'success', onClose, onUndo, duration = 4000 }) {
     const { t } = useLanguage();
     const timerRef = useRef(null);
 
@@ -50,6 +50,19 @@ export default function Toast({ message, type = 'success', onClose, duration = 4
         >
             <Icon size={18} className={`flex-shrink-0 ${iconClass} opacity-80`} />
             <span className="text-sm font-bold flex-1">{message}</span>
+            
+            {onUndo && (
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        onUndo();
+                        onClose();
+                    }}
+                    className="mx-2 px-3 py-1.5 bg-white/10 hover:bg-white/20 rounded-lg text-[10px] font-black uppercase tracking-widest border border-white/10 transition-all active:scale-95 hover:border-white/30"
+                >
+                    {t('undo')}
+                </button>
+            )}
             <button
                 onClick={onClose}
                 className="ml-2 opacity-40 hover:opacity-100 transition-opacity flex-shrink-0 p-0.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/5"

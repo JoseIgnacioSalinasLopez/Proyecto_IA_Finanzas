@@ -49,7 +49,7 @@ export default function Sidebar({ isOpen, onClose }) {
                             <img
                                 src={isLight ? bolsaIconLight : bolsaIcon}
                                 alt="Bolsa"
-                                className={`h-11 w-auto object-contain transition-all duration-300 drop-shadow-[0_0_10px_rgba(0,212,255,0.4)] ${isOpen ? 'opacity-0 scale-50' : 'opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-50'}`}
+                                className={`h-11 w-auto object-contain transition-all duration-300 drop-shadow-[0_0_12px_var(--epic-cyan)] ${isOpen ? 'opacity-0 scale-50' : 'opacity-100 scale-100 group-hover:opacity-0 group-hover:scale-50'}`}
                             />
                         </div>
 
@@ -57,7 +57,7 @@ export default function Sidebar({ isOpen, onClose }) {
                             <img
                                 src={isLight ? appLogoLight : appLogo}
                                 alt="Logo"
-                                className="h-14 w-auto object-contain drop-shadow-[0_0_15px_rgba(0,212,255,0.5)]"
+                                className="h-14 w-auto object-contain drop-shadow-[0_0_18px_var(--epic-cyan)]"
                             />
                         </div>
                     </Link>
@@ -95,11 +95,11 @@ export default function Sidebar({ isOpen, onClose }) {
                                 onClick={handleLinkClick}
                                 className={`
                                     flex items-center min-h-[50px] transition-all duration-300 mx-2 rounded-xl relative
-                                    ${isActive ? 'bg-finance-primary/10 text-finance-primary font-black border border-finance-primary/20 shadow-[0_0_15px_rgba(0,212,255,0.1)]' : 'text-finance-muted hover:bg-white/5 hover:text-finance-text'}
+                                    ${isActive ? 'bg-gradient-to-r from-[#00FFFF]/30 to-[#8C30F5]/10 text-[#00FFFF] font-black border border-[#00FFFF]/30 shadow-[0_0_20px_rgba(0,255,255,0.2)] transition-all' : 'text-finance-muted hover:bg-white/10 hover:text-finance-text'}
                                 `}
                             >
                                 <div className="w-[64px] flex-shrink-0 flex items-center justify-center h-full">
-                                    <div className={isActive ? 'drop-shadow-[0_0_8px_rgba(0,212,255,0.5)] scale-110' : 'group-hover:scale-110'}>
+                                    <div className={isActive ? 'drop-shadow-[0_0_10px_var(--epic-cyan)] scale-110' : 'group-hover:scale-110'}>
                                         {link.icon}
                                     </div>
                                 </div>
@@ -107,7 +107,7 @@ export default function Sidebar({ isOpen, onClose }) {
                                     {link.name}
                                 </span>
                                 {isActive && (
-                                    <div className={`ml-auto mr-4 w-1.5 h-1.5 rounded-full bg-finance-primary shadow-[0_0_10px_#00D4FF] transition-opacity ${isOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} />
+                                    <div className={`ml-auto mr-4 w-1.5 h-1.5 rounded-full bg-finance-primary shadow-[0_0_12px_var(--epic-cyan)] transition-opacity ${isOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`} />
                                 )}
                             </Link>
                         );
@@ -119,7 +119,7 @@ export default function Sidebar({ isOpen, onClose }) {
                     <button
                         onClick={logout}
                         className={`
-                            flex items-center w-full min-h-[50px] text-finance-muted hover:bg-red-500/10 hover:text-red-400 rounded-xl transition-all duration-200 overflow-hidden group/logout
+                            flex items-center w-full min-h-[50px] text-finance-muted hover:bg-[#FF4DA6]/10 hover:text-[#FF4DA6] rounded-xl transition-all duration-200 overflow-hidden group/logout
                             ${isOpen ? 'px-0' : 'px-0 justify-start'}
                         `}
                     >

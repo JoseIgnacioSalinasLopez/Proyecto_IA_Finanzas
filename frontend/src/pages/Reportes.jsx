@@ -310,7 +310,7 @@ export default function Reportes() {
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Main Timeline Chart */}
-                <div className="lg:col-span-2 card p-5 flex flex-col min-h-[500px] bg-white soft-ui-bg">
+                <div className="lg:col-span-2 card p-5 flex flex-col min-h-[500px]">
                     <h2 className="text-sm font-bold text-finance-muted uppercase tracking-wider mb-6">{t('wealth_evolution')}</h2>
                     <div className="flex-1 min-h-[300px]">
                         <Line data={lineData} options={chartOptions} />
@@ -320,14 +320,14 @@ export default function Reportes() {
                             <p className="text-[10px] text-finance-muted uppercase tracking-widest mb-1">{t('max_income')}</p>
                             <AnimatedCounter
                                 amount={Math.max(...stats.timeline.map(d => d.income), 0)}
-                                className="text-emerald-400 font-bold text-lg"
+                                className="text-[#00FFFF] font-bold text-lg"
                             />
                         </div>
                         <div className="text-center">
                             <p className="text-[10px] text-finance-muted uppercase tracking-widest mb-1">{t('max_expense')}</p>
                             <AnimatedCounter
                                 amount={Math.max(...stats.timeline.map(d => d.expense), 0)}
-                                className="text-red-400 font-bold text-lg"
+                                className="text-[#FF4DA6] font-bold text-lg"
                             />
                         </div>
                         <div className="text-center">
@@ -339,7 +339,7 @@ export default function Reportes() {
                         </div>
                         <div className="text-center">
                             <p className="text-[10px] text-finance-muted uppercase tracking-widest mb-1">{t('risk_level_label')}</p>
-                            <p className={`font-bold text-lg ${stats.summary.riskLevel === 'CRÍTICO' ? 'text-red-500' : 'text-emerald-400'}`}>
+                            <p className={`font-bold text-lg ${stats.summary.riskLevel === 'CRÍTICO' ? 'text-[#FF4DA6]' : 'text-[#00FFFF]'}`}>
                                 {stats.summary.riskLevel === 'BAJO' ? t('risk_low') :
                                     stats.summary.riskLevel === 'MEDIO' ? t('risk_medium') :
                                         stats.summary.riskLevel === 'CRÍTICO' ? t('risk_critical') :
@@ -351,15 +351,15 @@ export default function Reportes() {
 
                 {/* Stats Summary Panel */}
                 <div className="lg:col-span-1 space-y-6">
-                    <div className="card p-5 space-y-4 bg-white soft-ui-bg">
+                    <div className="card p-5 space-y-4">
                         <h2 className="text-sm font-bold text-finance-muted uppercase tracking-wider">{t('key_metrics')}</h2>
                         <div className="space-y-4">
                             {[
                                 { label: t('net_balance_report'), value: stats.summary.balance, color: 'text-finance-primary' },
-                                { label: t('projected_savings'), value: stats.summary.balance * 0.2, color: 'text-emerald-400' },
-                                { label: t('reserve_days'), value: stats.summary.bufferTime, suffix: ` ${t('days').toLowerCase()}`, color: 'text-orange-400' }
+                                { label: t('projected_savings'), value: stats.summary.balance * 0.2, color: 'text-[#00FFFF]' },
+                                { label: t('reserve_days'), value: stats.summary.bufferTime, suffix: ` ${t('days').toLowerCase()}`, color: 'text-[#FFD166]' }
                             ].map((item, i) => (
-                                <div key={i} className="flex justify-between items-center p-3 bg-white soft-ui-bg rounded-xl border border-black/5 soft-ui-border">
+                                <div key={i} className="flex justify-between items-center p-3 rounded-xl border border-black/5 dark:border-white/5 soft-ui-bg dark:bg-white/5 shadow-sm">
                                     <span className="text-xs text-finance-muted font-medium">{item.label}</span>
                                     <AnimatedCounter
                                         amount={item.value}

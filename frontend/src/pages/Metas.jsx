@@ -163,16 +163,16 @@ export default function Metas() {
                     return (
                         <div key={goal.id}
                             className={`card p-5 flex flex-col transition-all duration-300 card-glow hover:-translate-y-1 active:scale-[0.98] cursor-pointer animate-fade-in-up bg-white soft-ui-bg ${isComplete
-                                ? 'border-emerald-500/40 shadow-[0_0_20px_rgba(52,211,153,0.1)]'
+                                ? 'border-[#00FFFF]/40 shadow-[0_0_20px_rgba(0,255,255,0.15)]'
                                 : isExpired
-                                    ? 'border-red-500/30 shadow-[0_0_20px_rgba(239,68,68,0.05)]'
+                                    ? 'border-[#FF4DA6]/30 shadow-[0_0_20px_rgba(255,77,166,0.1)]'
                                     : 'border-white/5 soft-ui-border'
                                 }`}
                             style={{ animationDelay: `${idx * 60}ms` }}
                         >
                             <div className="flex justify-between items-start mb-4">
                                 <div className={`p-2.5 rounded-xl border ${isComplete
-                                    ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20 shadow-[0_0_15px_rgba(52,211,153,0.2)]'
+                                    ? 'bg-[#00FFFF]/15 text-[#00FFFF] border-[#00FFFF]/20 shadow-[0_0_15px_rgba(0,255,255,0.25)]'
                                     : 'bg-finance-primary/15 text-finance-primary border-finance-primary/20 shadow-[0_0_15px_rgba(0,212,255,0.2)]'}`}>
                                     {isComplete ? <TrendingUp size={20} /> : <Target size={20} />}
                                 </div>
@@ -186,21 +186,21 @@ export default function Metas() {
                                         <Pencil size={15} />
                                     </button>
                                     <button onClick={() => setDeleteConfirm(goal)}
-                                        className="text-finance-muted hover:text-red-500 hover:bg-red-500/10 p-1.5 rounded-lg transition-all">
+                                        className="text-finance-muted hover:text-[#FF4DA6] hover:bg-[#FF4DA6]/10 p-1.5 rounded-lg transition-all">
                                         <Trash2 size={15} />
                                     </button>
                                 </div>
                             </div>
 
                             <h3 className="text-lg font-bold mb-1 leading-tight text-finance-text">{goal.name}</h3>
-                            <p className={`text-xs mb-3 flex items-center gap-1 ${isExpired ? 'text-red-400' : 'text-finance-muted'}`}>
+                            <p className={`text-xs mb-3 flex items-center gap-1 ${isExpired ? 'text-[#FF4DA6]' : 'text-finance-muted'}`}>
                                 <Calendar size={11} />
                                 {isExpired ? (t('expired_label_sm') + ': ') : `${t('deadline_label')}: `}
                                 {deadline.toLocaleDateString(language === 'en' ? 'en-US' : 'es-MX')}
                             </p>
 
                             {isComplete && (
-                                <div className="mb-3 py-1.5 bg-emerald-500/10 border border-emerald-500/30 rounded-lg text-emerald-400 text-xs font-bold text-center">
+                                <div className="mb-3 py-1.5 bg-[#00FFFF]/10 border border-[#00FFFF]/30 rounded-lg text-[#00FFFF] text-xs font-bold text-center glow-cyan">
                                     ✅ {t('goal_completed_title')}
                                 </div>
                             )}
@@ -208,13 +208,13 @@ export default function Metas() {
                             <div className="mb-3">
                                 <div className="flex justify-between text-xs mb-1.5">
                                     <span className="text-finance-muted">{t('progress')}</span>
-                                    <span className={`font-bold ${isComplete ? 'text-emerald-400' : 'text-finance-primary'}`}>
+                                    <span className={`font-bold ${isComplete ? 'text-[#00FFFF] glow-cyan' : 'text-finance-primary'}`}>
                                         {progress.toFixed(0)}%
                                     </span>
                                 </div>
                                 <div className="h-2.5 bg-slate-100 dark:bg-black/40 border border-black/5 dark:border-white/5 rounded-full overflow-hidden">
                                     <div
-                                        className={`h-full rounded-full transition-all duration-700 ${isComplete ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.4)]' : isExpired ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.4)]' : 'bg-finance-primary shadow-[0_0_8px_rgba(0,212,255,0.4)]'}`}
+                                        className={`h-full rounded-full transition-all duration-700 ${isComplete ? 'bg-[#00FFFF] shadow-[0_0_8px_rgba(0,255,255,0.5)]' : isExpired ? 'bg-[#FF4DA6] shadow-[0_0_8px_rgba(255,77,166,0.5)]' : 'bg-finance-primary shadow-[0_0_8px_rgba(0,212,255,0.4)]'}`}
                                         style={{ width: `${progress}%` }}
                                     />
                                 </div>
@@ -315,7 +315,7 @@ export default function Metas() {
             {/* Modal Eliminar */}
             {deleteConfirm && (
                 <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex justify-center items-center z-50 p-4" onClick={(e) => e.target === e.currentTarget && setDeleteConfirm(null)}>
-                    <div className="card p-6 w-full max-w-sm border-red-500/20 animate-scale-in">
+                    <div className="card p-6 w-full max-w-sm border-[#FF4DA6]/20 animate-scale-in">
                         <h2 className="text-lg font-bold mb-4 text-finance-text">{t('delete_confirm')}</h2>
                         <p className="text-sm text-finance-muted mb-5">"{deleteConfirm.name}"</p>
                         <div className="flex gap-3">

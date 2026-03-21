@@ -55,19 +55,19 @@ export default function ForgotPassword() {
 
                 {/* Mensaje de estado */}
                 {status === 'success' && (
-                    <div className="flex items-start gap-3 p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl mb-6 animate-slide-up">
-                        <CheckCircle2 size={20} className="text-emerald-400 flex-shrink-0 mt-0.5" />
+                    <div className="flex items-start gap-3 p-4 bg-[#00FFFF]/10 border border-[#00FFFF]/30 rounded-xl mb-6 animate-slide-up">
+                        <CheckCircle2 size={20} className="text-[#00FFFF] flex-shrink-0 mt-0.5" />
                         <div>
-                            <p className="text-emerald-300 text-sm font-medium">{t('recovery_email_sent')}</p>
-                            <p className="text-emerald-300/70 text-xs mt-1">{message}</p>
+                            <p className="text-[#00FFFF] text-sm font-medium">{t('recovery_email_sent')}</p>
+                            <p className="text-[#00FFFF]/70 text-xs mt-1">{message}</p>
                         </div>
                     </div>
                 )}
 
                 {status === 'error' && (
-                    <div className="flex items-start gap-3 p-4 bg-red-500/10 border border-red-500/30 rounded-xl mb-6 animate-slide-up">
-                        <AlertCircle size={20} className="text-red-400 flex-shrink-0 mt-0.5" />
-                        <p className="text-red-300 text-sm">{message}</p>
+                    <div className="flex items-start gap-3 p-4 bg-[#FF4DA6]/10 border border-[#FF4DA6]/30 rounded-xl mb-6 animate-slide-up">
+                        <AlertCircle size={20} className="text-[#FF4DA6] flex-shrink-0 mt-0.5" />
+                        <p className="text-[#FF4DA6] text-sm">{message}</p>
                     </div>
                 )}
 

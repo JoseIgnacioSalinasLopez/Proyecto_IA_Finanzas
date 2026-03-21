@@ -56,15 +56,15 @@ const DashboardLayout = ({ children }) => {
         {[...Array(15)].map((_, i) => (
           <div
             key={i}
-            className={`particle ${i % 5 === 0 ? 'particle-yellow' : 'particle-cyan'}`}
+            className={`particle ${i % 3 === 0 ? 'particle-yellow' : i % 3 === 1 ? 'particle-cyan' : 'particle-purple'}`}
             style={{
-              width: '2px',
-              height: '2px',
+              width: i % 2 === 0 ? '2px' : '3px',
+              height: i % 2 === 0 ? '2px' : '3px',
               left: `${Math.random() * 100}%`,
               top: `${Math.random() * 100}%`,
-              animationDuration: `${Math.random() * 20 + 30}s`,
+              animationDuration: `${Math.random() * 15 + 20}s`,
               animationDelay: `${-Math.random() * 20}s`,
-              opacity: 0.3
+              opacity: 0.4
             }}
           />
         ))}
@@ -114,21 +114,31 @@ function App() {
         position="top-right"
         toastOptions={{
           style: {
-            background: '#1a1f2e',
-            color: '#e2e8f0',
-            border: '1px solid #2d3748',
+            background: 'rgba(15, 10, 50, 0.95)',
+            color: '#FFFFFF',
+            border: '1px solid rgba(140, 48, 245, 0.3)',
+            backdropFilter: 'blur(10px)',
+            borderRadius: '16px',
+            padding: '12px 20px',
+            boxShadow: '0 10px 30px rgba(0, 0, 0, 0.5)',
           },
           success: {
             iconTheme: {
-              primary: '#10b981',
-              secondary: '#1a1f2e',
+              primary: '#00FFFF',
+              secondary: '#0a0523',
             },
+            style: {
+              border: '1px solid rgba(0, 255, 255, 0.4)',
+            }
           },
           error: {
             iconTheme: {
-              primary: '#ef4444',
-              secondary: '#1a1f2e',
+              primary: '#FF4DA6',
+              secondary: '#0a0523',
             },
+            style: {
+              border: '1px solid rgba(255, 77, 166, 0.4)',
+            }
           },
         }}
       />

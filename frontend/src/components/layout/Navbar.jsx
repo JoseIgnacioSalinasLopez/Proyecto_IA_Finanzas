@@ -90,8 +90,8 @@ export default function Navbar({ onMenuClick }) {
                 >
                     <Menu size={22} />
                 </button>
-                <span className="text-[10px] font-black px-3 py-1.5 rounded-full bg-finance-primary/10 text-finance-primary border border-finance-primary/20 hidden sm:inline-flex items-center gap-1.5 uppercase tracking-[0.2em] shadow-[0_0_15px_rgba(0,212,255,0.1)]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-finance-primary shadow-[0_0_8px_rgba(0,212,255,0.6)] animate-pulse" />
+                <span className="text-[10px] font-black px-3 py-1.5 rounded-full bg-finance-primary/20 text-finance-primary border border-finance-primary/30 hidden sm:inline-flex items-center gap-1.5 uppercase tracking-[0.2em] shadow-[0_0_20px_rgba(0,255,255,0.15)]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-finance-primary shadow-[0_0_10px_var(--epic-cyan)] animate-pulse" />
                     {user?.account_type || t('account_type')}
                 </span>
             </div>
@@ -102,11 +102,11 @@ export default function Navbar({ onMenuClick }) {
                     <button
                         aria-label={t('notifications')}
                         onClick={() => setShowNotifs(!showNotifs)}
-                        className={`flex items-center justify-center w-9 h-9 rounded-full transition-all relative group cursor-pointer ${showNotifs ? 'bg-finance-primary/10 text-finance-primary' : 'text-finance-muted hover:text-finance-text hover:bg-white/5'}`}
+                        className={`flex items-center justify-center w-9 h-9 rounded-full transition-all relative group cursor-pointer ${showNotifs ? 'bg-finance-primary/20 text-finance-primary' : 'text-finance-muted hover:text-finance-text hover:bg-white/10'}`}
                     >
-                        <Bell size={18} className="group-hover:drop-shadow-[0_0_8px_rgba(0,212,255,0.5)]" />
+                        <Bell size={18} className="group-hover:drop-shadow-[0_0_10px_var(--epic-cyan)]" />
                         {hasUnseenNotifications && notifications.length > 0 && (
-                            <span className="absolute top-1 right-1 w-2 h-2 bg-finance-primary rounded-full shadow-[0_0_8px_#00D4FF] cursor-pointer" />
+                            <span className="absolute top-1 right-1 w-2 h-2 bg-finance-primary rounded-full shadow-[0_0_10px_var(--epic-cyan)] cursor-pointer" />
                         )}
                     </button>
 
@@ -135,7 +135,7 @@ export default function Navbar({ onMenuClick }) {
 
                     {/* Avatar con inicial Elite */}
                     <div
-                        className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#8C30F5] to-[#00D4FF] flex items-center justify-center text-white font-black text-sm shadow-[0_0_15px_rgba(0,212,255,0.4)] flex-shrink-0 cursor-pointer select-none ring-2 ring-white/10"
+                        className="w-10 h-10 rounded-full bg-gradient-to-tr from-[var(--epic-purple)] via-[var(--epic-blue)] to-[var(--epic-cyan)] flex items-center justify-center text-white font-black text-sm shadow-[0_0_20px_rgba(0,255,255,0.3)] flex-shrink-0 cursor-pointer select-none ring-2 ring-white/10"
                     >
                         {user?.name?.charAt(0).toUpperCase()}
                     </div>

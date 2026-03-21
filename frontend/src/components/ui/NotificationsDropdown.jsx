@@ -46,8 +46,8 @@ export default function NotificationsDropdown({ notifications, onClose, onClear 
                             <div key={n.id} className="p-4 hover:bg-white/5 transition-colors group cursor-pointer">
 
                                 <div className="flex gap-3">
-                                    <div className={`mt-0.5 rounded-lg p-1.5 ${n.type === 'alert' ? 'bg-red-500/20 text-red-500' :
-                                        n.type === 'success' ? 'bg-emerald-500/20 text-emerald-500' :
+                                    <div className={`mt-0.5 rounded-lg p-1.5 ${n.type === 'alert' ? 'bg-[#FF4DA6]/20 text-[#FF4DA6]' :
+                                        n.type === 'success' ? 'bg-[#00FFFF]/20 text-[#00FFFF]' :
                                             'bg-finance-primary/20 text-finance-primary'
                                         }`}>
                                         {n.type === 'alert' ? <AlertTriangle size={14} /> :

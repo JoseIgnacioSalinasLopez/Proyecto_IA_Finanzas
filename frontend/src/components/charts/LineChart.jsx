@@ -19,7 +19,7 @@ const glowPlugin = {
         ctx.save();
         ctx.shadowColor = typeof chart.data.datasets[0]?.borderColor === 'string'
             ? chart.data.datasets[0].borderColor
-            : 'rgba(0, 212, 255, 0.5)';
+            : 'rgba(0, 255, 255, 0.5)';
         ctx.shadowBlur = 12;
         ctx.shadowOffsetX = 0;
         ctx.shadowOffsetY = 4;
@@ -50,7 +50,7 @@ export default function LineChart({ data, title = 'Evolución' }) {
         return {
             ...data,
             datasets: data.datasets.map((ds) => {
-                const color = ds.borderColor || '#00D4FF';
+                const color = ds.borderColor || '#00FFFF';
                 return {
                     ...ds,
                     borderColor: color,
@@ -59,7 +59,7 @@ export default function LineChart({ data, title = 'Evolución' }) {
                         const { ctx, chartArea } = chart;
                         if (!chartArea) return 'rgba(0,0,0,0)';
                         const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-                        const baseColor = typeof color === 'string' ? color : '#00D4FF';
+                        const baseColor = typeof color === 'string' ? color : '#00FFFF';
                         const isHex = baseColor.startsWith('#');
                         gradient.addColorStop(0, isHex ? hexToRgba(baseColor, 0.4) : baseColor.replace(')', ', 0.4)').replace('rgb', 'rgba'));
                         gradient.addColorStop(1, 'rgba(0,0,0,0)');

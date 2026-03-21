@@ -78,10 +78,7 @@ export default function Dashboard() {
 
             if (txStartOfDay === startOfToday) {
                 if (groups.today.length < 5) groups.today.push(tx);
-            } else if (txStartOfDay === startOfYesterday || txStartOfDay < startOfYesterday) {
-                // If it's yesterday or older, put it in yesterday (acting as a "Recents" bin if today is empty)
-                // but usually "yesterday" just holds the past. 
-                // We'll rename it later if needed, but for now we group anything older than today into "YESTERDAY"
+            } else if (txStartOfDay === startOfYesterday) {
                 if (groups.yesterday.length < 5) groups.yesterday.push(tx);
             }
         });
@@ -132,7 +129,7 @@ export default function Dashboard() {
 
                 <button
                     onClick={toggleBalances}
-                    className="p-2 mb-1 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-[#00fbff]/30 text-finance-muted hover:text-[#00fbff] transition-all shadow-sm flex items-center gap-2 group"
+                    className="p-2 mb-1 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-[#00FFFF]/30 text-finance-muted hover:text-[#00FFFF] transition-all shadow-sm flex items-center gap-2 group"
                     title={showBalances ? 'Ocultar saldos' : 'Mostrar saldos'}
                 >
                     {showBalances ? <EyeOff size={20} className="group-hover:scale-110 transition-transform" /> : <Eye size={20} className="group-hover:scale-110 transition-transform" />}
@@ -141,10 +138,10 @@ export default function Dashboard() {
 
             {/* Tarjetas de resumen */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <SummaryCard title={t('total_balance')} amount={summary.balance} icon={<Wallet size={22} />} type="balance" delay={0} />
-                <SummaryCard title={t('monthly_income')} amount={summary.totalIncome} icon={<ArrowUpRight size={22} />} type="income" delay={80} />
-                <SummaryCard title={t('monthly_expenses')} amount={summary.totalExpense} icon={<ArrowDownRight size={22} />} type="expense" delay={160} />
-                <SummaryCard title={t('liquid_balance')} amount={summary.liquidBalance} icon={<Zap size={22} className="text-[#00fbff]" />} type="income" delay={240} />
+                <SummaryCard title={t('total_balance')} amount={summary.balance} icon={<Wallet size={22} />} type="balance" delay={0} description={t('total_balance_desc')} />
+                <SummaryCard title={t('monthly_income')} amount={summary.totalIncome} icon={<ArrowUpRight size={22} />} type="income" delay={80} description={t('monthly_income_desc')} />
+                <SummaryCard title={t('monthly_expenses')} amount={summary.totalExpense} icon={<ArrowDownRight size={22} />} type="expense" delay={160} description={t('monthly_expenses_desc')} />
+                <SummaryCard title={t('liquid_balance')} amount={summary.liquidBalance} icon={<Zap size={22} className="text-[#00FFFF]" />} type="income" delay={240} description={t('liquid_balance_desc')} />
             </div>
 
             {/* Resumen de Presupuesto Mensual */}
@@ -160,7 +157,7 @@ export default function Dashboard() {
                     </div>
                     <div className="h-2.5 w-full bg-black/20 dark:bg-black/40 rounded-full overflow-hidden border border-white/5">
                         <div
-                            className={`h-full transition-all duration-1000 ease-out ${(summary.totalSpentThisMonth / summary.totalBudget) > 0.9 ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.3)]' : 'bg-finance-primary'
+                            className={`h-full transition-all duration-1000 ease-out ${(summary.totalSpentThisMonth / summary.totalBudget) > 0.9 ? 'bg-[#FF4DA6] shadow-[0_0_10px_rgba(255,77,166,0.3)]' : 'bg-gradient-to-r from-[#00FFFF] to-[#2F5BFF]'
                                 }`}
                             style={{ width: `${Math.min(100, (summary.totalSpentThisMonth / summary.totalBudget) * 100)}%` }}
                         />
@@ -244,7 +241,7 @@ export default function Dashboard() {
                                                             <div className="absolute -left-6 top-1/2 w-6 h-[1px] bg-finance-primary/40" />
 
                                                             <div className="flex items-center gap-4 min-w-0">
-                                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 ${tx.type === 'income' ? 'bg-emerald-500/10 text-emerald-400 shadow-[inset_0_0_12px_rgba(52,211,153,0.05)]' : 'bg-red-500/10 text-red-400 shadow-[inset_0_0_12px_rgba(248,113,113,0.05)]'}`}>
+                                                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 ${tx.type === 'income' ? 'bg-[#00FFFF]/10 text-[#00FFFF] shadow-[inset_0_0_12px_rgba(0,255,255,0.05)]' : 'bg-[#FF4DA6]/10 text-[#FF4DA6] shadow-[inset_0_0_12px_rgba(255,77,166,0.05)]'}`}>
                                                                     {tx.type === 'income' ? <ArrowUpRight size={18} /> : <ArrowDownRight size={18} />}
                                                                 </div>
                                                                 <div className="min-w-0">
@@ -275,7 +272,7 @@ export default function Dashboard() {
                                                                 </div>
                                                             </div>
                                                             <div className="text-right ml-4">
-                                                                <p className={`font-black text-sm tracking-tight ${tx.type === 'income' ? 'text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.3)]' : 'text-red-400 drop-shadow-[0_0_8px_rgba(248,113,113,0.3)]'}`}>
+                                                                <p className={`font-black text-sm tracking-tight ${tx.type === 'income' ? 'text-[#00FFFF] drop-shadow-[0_0_8px_rgba(0,255,255,0.3)]' : 'text-[#FF4DA6] drop-shadow-[0_0_8px_rgba(255,77,166,0.3)]'}`}>
                                                                     {tx.type === 'income' ? '+' : '-'}${Number(tx.amount).toLocaleString(language === 'en' ? 'en-US' : 'es-MX', { minimumFractionDigits: 2 })}
                                                                 </p>
                                                             </div>

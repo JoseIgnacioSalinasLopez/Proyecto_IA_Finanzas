@@ -70,20 +70,20 @@ export default function DatePickerElite({ value, onChange, label, id }) {
                 onClick={() => setOpen(o => !o)}
                 className="input-field w-full flex items-center justify-between gap-2 cursor-pointer text-left"
             >
-                <span className={value ? 'text-white' : 'text-slate-500'}>
+                <span className={value ? 'text-finance-text dark:text-white' : 'text-slate-500'}>
                     {displayValue}
                 </span>
                 <Calendar size={15} className="text-slate-400 flex-shrink-0" />
             </button>
 
             {open && (
-                <div className="absolute z-[200] mt-2 w-72 bg-[#0d0d1a] border border-white/10 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.8)] overflow-hidden animate-scale-in origin-top-left">
+                <div className="absolute z-[200] mt-2 w-72 bg-white dark:bg-[#0d0d1a] border border-black/10 dark:border-white/10 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.8)] overflow-hidden animate-scale-in origin-top-left transition-colors">
                     {/* Header mes/año */}
-                    <div className="flex items-center justify-between px-4 py-3 border-b border-white/5 bg-white/5">
+                    <div className="flex items-center justify-between px-4 py-3 border-b border-black/5 dark:border-white/5 bg-black/5 dark:bg-white/5">
                         <button type="button" onClick={prevMonth} className="p-1 hover:text-white text-slate-400 transition-colors rounded-lg hover:bg-white/5">
                             <ChevronLeft size={16} />
                         </button>
-                        <span className="text-sm font-black uppercase tracking-widest text-white">
+                        <span className="text-sm font-black uppercase tracking-widest text-finance-text dark:text-white">
                             {MONTHS[viewMonth]} {viewYear}
                         </span>
                         <button type="button" onClick={nextMonth} className="p-1 hover:text-white text-slate-400 transition-colors rounded-lg hover:bg-white/5">
@@ -120,7 +120,7 @@ export default function DatePickerElite({ value, onChange, label, id }) {
                                             ? 'bg-[#00D4FF] text-black shadow-[0_0_12px_rgba(0,212,255,0.4)]'
                                             : isToday
                                                 ? 'text-[#00D4FF] ring-1 ring-[#00D4FF]/40'
-                                                : 'text-slate-300 hover:bg-white/5 hover:text-white'
+                                                : 'text-slate-600 dark:text-slate-300 hover:bg-black/5 dark:hover:bg-white/5 hover:text-finance-text dark:hover:text-white'
                                         }
                                     `}
                                 >

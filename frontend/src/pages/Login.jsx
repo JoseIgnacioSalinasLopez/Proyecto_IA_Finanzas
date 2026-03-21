@@ -172,7 +172,7 @@ export default function Login() {
                                 <div className="flex justify-center mb-6 cursor-pointer">
                                     <img src={isLight ? appLogoLight : appLogo} alt="Logo" className="h-16 w-auto drop-shadow-[0_0_20px_rgba(0,212,255,0.6)]" />
                                 </div>
-                                <h1 className="text-5xl font-black tracking-tighter leading-tight mb-3 bg-clip-text text-transparent bg-gradient-to-r from-[#8C30F5] via-[#4F46E5] to-[#2E6FF2] drop-shadow-sm">
+                                <h1 className="text-5xl font-black tracking-tighter leading-tight mb-3 bg-clip-text text-transparent bg-gradient-to-r from-[var(--epic-purple)] via-[var(--epic-indigo)] to-[var(--epic-blue)] drop-shadow-sm">
                                     {currentView === 'login' ? t('welcome_elite') : currentView === 'register' ? t('create_account_elite') : t('recover_elite')}
                                 </h1>
                                 <p className="text-slate-400 font-bold text-lg">
@@ -187,8 +187,8 @@ export default function Login() {
                         <div className={`overflow-hidden ${isExpanded ? 'pt-4' : 'pt-0'} ${error ? 'animate-shake' : ''}`}>
 
                             {error && (
-                                <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-xl mb-6 text-xs flex items-center gap-3">
-                                    <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></div>
+                                <div className="bg-[#FF4DA6]/10 border border-[#FF4DA6]/30 text-[#FF4DA6] px-4 py-3 rounded-xl mb-6 text-xs flex items-center gap-3">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-[#FF4DA6] animate-pulse"></div>
                                     {error}
                                 </div>
                             )}
@@ -203,7 +203,7 @@ export default function Login() {
                                                 <input
                                                     type="email"
                                                     placeholder=" "
-                                                    className={`input-field placeholder-transparent ${error ? 'border-red-500/50' : 'focus:border-[#00D4FF]'}`}
+                                                    className={`input-field placeholder-transparent ${error ? 'border-[#FF4DA6]/50' : 'focus:border-[#00D4FF]'}`}
                                                     value={email}
                                                     onChange={(e) => setEmail(e.target.value)}
                                                     required
@@ -215,7 +215,7 @@ export default function Login() {
                                                 <input
                                                     type={showPassword ? "text" : "password"}
                                                     placeholder=" "
-                                                    className={`input-field placeholder-transparent ${error ? 'border-red-500/50' : 'focus:border-[#00D4FF]'}`}
+                                                    className={`input-field placeholder-transparent ${error ? 'border-[#FF4DA6]/50' : 'focus:border-[#00D4FF]'}`}
                                                     value={password}
                                                     onChange={(e) => setPassword(e.target.value)}
                                                     required
@@ -243,7 +243,7 @@ export default function Login() {
                                                 <button
                                                     type="button"
                                                     onClick={(e) => { e.stopPropagation(); toggleView('register'); }}
-                                                    className="text-[10px] font-bold text-red-500 hover:text-red-400 transition-colors tracking-widest uppercase"
+                                                    className="text-[10px] font-bold text-[#FF4DA6] hover:text-[#00FFFF] transition-colors tracking-widest uppercase"
                                                 >
                                                     {t('register_action')}
                                                 </button>
@@ -296,10 +296,10 @@ export default function Login() {
 
                                         {registerSuccess ? (
                                             <div className="text-center py-6 animate-fade-in">
-                                                <div className="w-14 h-14 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-4">
-                                                    <svg className="text-emerald-400" width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                                                <div className="w-14 h-14 rounded-full bg-[#00FFFF]/20 flex items-center justify-center mx-auto mb-4">
+                                                    <svg className="text-[#00FFFF]" width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                                                 </div>
-                                                <p className="text-emerald-400 font-black text-sm uppercase tracking-widest">{language === 'en' ? 'Account created!' : '¡Cuenta creada!'}</p>
+                                                <p className="text-[#00FFFF] font-black text-sm uppercase tracking-widest">{language === 'en' ? 'Account created!' : '¡Cuenta creada!'}</p>
                                                 <p className="text-slate-500 text-xs mt-1">{language === 'en' ? 'Entering your dashboard...' : 'Ingresando a tu panel...'}</p>
                                             </div>
                                         ) : registerStep === 1 ? (
@@ -359,9 +359,9 @@ export default function Login() {
                                                         type={showConfirmPassword ? 'text' : 'password'}
                                                         placeholder=" "
                                                         className={`input-field pr-12 placeholder-transparent ${confirmPassword && confirmPassword !== password
-                                                            ? 'border-red-500/50'
+                                                            ? 'border-[#FF4DA6]/50'
                                                             : confirmPassword && confirmPassword === password
-                                                                ? 'border-emerald-500/50'
+                                                                ? 'border-[#00FFFF]/50'
                                                                 : ''
                                                             }`}
                                                         value={confirmPassword}

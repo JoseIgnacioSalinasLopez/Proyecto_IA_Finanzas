@@ -1,88 +1,173 @@
-.stroke-loader {
-    stroke: var(--epic-cyan, #00d4ff);
+/* Variables de Color Neon */
+:root {
+  --neon-cyan: #00f2ff;
+  --neon-purple: #8c30f5;
+  --neon-pink: #ff00de;
+  --neon-white: #ffffff;
+}
+
+.loader-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  z-index: 1000;
+  background: radial-gradient(circle at center, #130a24 0%, #050608 100%);
+  transition: background 0.5s ease;
+}
+
+.light-mode .loader-container {
+  background: radial-gradient(circle at center, #ffffff 0%, #f1f5f9 100%);
 }
 
 .loader-path {
-    stroke-dasharray: 400;
-    stroke-dashoffset: 400;
-    animation: draw 3.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* 
- * Animaciones progresivas con delays variados
- * Utilizamos un sistema de pseudoaleatoriedad mediante nth-child o nth-of-type
- * Al envolverlo en una configuración de animación infinita, cambiarán las prioridades perceptualmente si las duraciones o delays difieren ligeramente.
- * Para simular "empezar por el contorno" vs "empezar por el dólar" 
- * se han definido animaciones con duraciones ligeramente desfasadas.
- */
-
-.path-bag { animation-delay: 0s; }
-.path-neck { animation-delay: 0.5s; }
-.path-tie { animation-delay: 0.8s; }
-.path-dollar { 
-    animation-delay: 1.2s; 
-    stroke-width: 4; 
-    stroke: var(--finance-neon, #fff); /* Hacer brillar más el $ */
+.bag-body {
+  stroke: var(--neon-purple);
+  stroke-width: 4;
+  filter: drop-shadow(0 0 8px var(--neon-purple)) drop-shadow(0 0 20px var(--neon-purple));
 }
 
-/* 
- * Variación 1: La bolsa se dibuja primero, luego el dólar. 
- * Variación 2: El dólar se dibuja primero, luego la bolsa.
- * Variación 3: Todo a la vez de forma esporádica.
- * Usamos una animación secundaria que modifique los offsets o que desplace la duración.
- */
-
-@keyframes draw {
-    0% {
-        stroke-dashoffset: 400;
-        opacity: 0;
-    }
-    10% {
-        opacity: 1;
-    }
-    40% {
-        stroke-dashoffset: 0;
-        opacity: 1;
-    }
-    60% {
-        stroke-dashoffset: 0;
-        opacity: 1;
-        filter: drop-shadow(0 0 10px rgba(0,212,255,1));
-    }
-    90% {
-        stroke-dashoffset: -400;
-        opacity: 1;
-    }
-    100% {
-        stroke-dashoffset: -400;
-        opacity: 0;
-    }
+.bag-flare {
+  stroke: var(--neon-purple);
+  stroke-width: 3.5;
+  filter: drop-shadow(0 0 5px var(--neon-purple));
 }
 
-.animate-spin-slow {
-    animation: spin 4s linear infinite;
+.bag-rope {
+  stroke: var(--neon-pink);
+  stroke-width: 5;
+  stroke-dasharray: 6 10; /* Braided texture simulation */
+  filter: drop-shadow(0 0 10px var(--neon-pink)) drop-shadow(0 0 2px white);
 }
 
-@keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+.dollar-sign {
+  filter: drop-shadow(0 0 8px var(--neon-cyan)) drop-shadow(0 0 20px var(--neon-cyan));
 }
 
-.animate-pulse-slow {
-    animation: pulse-slow 3s ease-in-out infinite alternate;
+.orbital-ring {
+  stroke: var(--neon-cyan);
+  stroke-width: 2.5;
+  stroke-dasharray: 200 600;
+  filter: drop-shadow(0 0 12px var(--neon-cyan));
+  animation: orbit-spin 2.5s linear infinite;
+  opacity: 0.9;
 }
 
-@keyframes pulse-slow {
-    0% { transform: scale(0.9); opacity: 0.5; }
-    100% { transform: scale(1.1); opacity: 0.8; }
+@keyframes orbit-spin {
+  from { stroke-dashoffset: 800; }
+  to { stroke-dashoffset: 0; }
 }
 
-/* 
- * Pseudo-aleatoriedad: Añadimos una variación global 
- * que alterna el `animation-direction` entre normal y reverse cada N segundos 
- * para simular los cambios de prioridad que pide el usuario sin recurrir a JS complejo.
- */
-.path-bag { animation-duration: 4s; }
-.path-dollar { animation-duration: 3.5s; animation-direction: alternate-reverse; }
-.path-neck { animation-duration: 4.2s; }
-.path-tie { animation-duration: 3.8s; }
+.animate-draw {
+  stroke-dasharray: 1000;
+  stroke-dashoffset: 1000;
+  animation: draw-neon-ultra 4.5s ease-in-out infinite;
+}
+
+@keyframes draw-neon-ultra {
+  0% { stroke-dashoffset: 1000; opacity: 0; }
+  5% { opacity: 1; }
+  45% { stroke-dashoffset: 0; transform: scale(1); }
+  50% { filter: brightness(1.4); transform: scale(1.02); }
+  85% { stroke-dashoffset: 0; opacity: 1; transform: scale(1); }
+  100% { stroke-dashoffset: 0; opacity: 0; }
+}
+
+.delay-1 { animation-delay: 0s !important; }
+.delay-2 { animation-delay: 0.6s !important; }
+.delay-3 { animation-delay: 1.2s !important; }
+
+.spark {
+  position: absolute;
+  width: 5px;
+  height: 5px;
+  background: white;
+  border-radius: 50%;
+  filter: blur(1px) drop-shadow(0 0 6px var(--neon-cyan));
+  animation: spark-float 3s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.light-mode .spark {
+  background: var(--neon-purple);
+  filter: blur(1px) drop-shadow(0 0 6px var(--neon-purple));
+}
+
+@keyframes spark-float {
+  0%, 100% { transform: translate(0,0) scale(0); opacity: 0; }
+  50% { transform: translate(var(--tw-translate-x, -20px), -40px) scale(1.2); opacity: 1; }
+}
+
+.loading-text {
+  font-family: 'Outfit', 'Inter', sans-serif;
+  font-weight: 800;
+  font-size: 1.4rem;
+  letter-spacing: 0.15em;
+  text-transform: none; /* No more force caps */
+  background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple), var(--neon-pink));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 8px rgba(140, 48, 245, 0.4));
+  animation: text-glow-pulse 2.5s ease-in-out infinite;
+}
+
+@keyframes text-glow-pulse {
+  0%, 100% { opacity: 0.85; filter: brightness(1); }
+  50% { opacity: 1; filter: brightness(1.2) drop-shadow(0 0 12px var(--neon-purple)); }
+}
+
+.dot {
+  display: inline-block;
+  animation: dot-jump 1.6s infinite;
+}
+.dot:nth-child(2) { animation-delay: 0.2s; }
+.dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes dot-jump {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); color: var(--neon-cyan); }
+}
+
+.ambient-glow {
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, rgba(140, 48, 245, 0.2) 0%, transparent 70%);
+  filter: blur(50px);
+  animation: ambient-drift 5s ease-in-out infinite alternate;
+  z-index: -1;
+}
+
+.light-mode .ambient-glow {
+  background: radial-gradient(circle, rgba(0, 212, 255, 0.3) 0%, transparent 70%);
+}
+
+@keyframes ambient-drift {
+  from { transform: scale(1) translate(-10px, -10px); }
+  to { transform: scale(1.2) translate(10px, 10px); }
+}
+
+/* Ajustes para el Símbolo $ */
+.path-dollar path {
+    stroke-dasharray: 200;
+    stroke-dashoffset: 200;
+    animation: draw-dollar 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    animation-delay: inherit; /* Hereda el delay de su grupo de orden */
+}
+
+@keyframes draw-dollar {
+    0% { stroke-dashoffset: 200; opacity: 0; }
+    10% { opacity: 1; }
+    40% { stroke-dashoffset: 0; opacity: 1; }
+    60% { stroke-dashoffset: 0; opacity: 1; filter: brightness(2) drop-shadow(0 0 10px #fff); }
+    90% { stroke-dashoffset: -200; opacity: 1; }
+    100% { stroke-dashoffset: -200; opacity: 0; }
+}

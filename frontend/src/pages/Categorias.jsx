@@ -14,7 +14,7 @@ export default function Categorias() {
     const [activeTab, setActiveTab] = useState('expense'); // 'expense' or 'income'
     const [search, setSearch] = useState('');
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
-    const [formData, setFormData] = useState({ name: '', color: '#00D4FF', type: 'expense' });
+    const [formData, setFormData] = useState({ name: '', color: '#00FFFF', type: 'expense' });
 
     useEffect(() => { fetchCategories(); }, []);
 
@@ -31,7 +31,7 @@ export default function Categorias() {
 
     const openCreate = () => {
         setEditingCat(null);
-        setFormData({ name: '', color: '#00D4FF', type: activeTab });
+        setFormData({ name: '', color: '#00FFFF', type: activeTab });
         setShowModal(true);
     };
 
@@ -41,14 +41,14 @@ export default function Categorias() {
             return;
         }
         setEditingCat(cat);
-        setFormData({ name: cat.name, color: cat.color || '#00D4FF', type: cat.type || 'expense' });
+        setFormData({ name: cat.name, color: cat.color || '#00FFFF', type: cat.type || 'expense' });
         setShowModal(true);
     };
 
     const handleCloseModal = () => {
         setShowModal(false);
         setEditingCat(null);
-        setFormData({ name: '', color: '#00D4FF', type: activeTab });
+        setFormData({ name: '', color: '#00FFFF', type: activeTab });
     };
 
     const handleDelete = async (cat) => {
@@ -89,8 +89,8 @@ export default function Categorias() {
     };
 
     const PRESET_COLORS = [
-        '#00D4FF', '#4F46E5', '#10b981', '#ef4444', '#f59e0b',
-        '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16', '#f97316',
+        '#00FFFF', '#FF4DA6', '#8C30F5', '#00D4FF', '#FFD166',
+        '#4F46E5', '#2F5BFF', '#6A3DF0', '#FFFFFF', '#a5b4fc',
     ];
 
     const filteredCategories = categories.filter(cat => {
@@ -120,13 +120,13 @@ export default function Categorias() {
             <div className="flex gap-2 p-1 bg-black/20 soft-ui-bg soft-ui-border rounded-xl w-full max-w-sm">
                 <button
                     onClick={() => setActiveTab('expense')}
-                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all ${activeTab === 'expense' ? 'bg-finance-primary text-white shadow-lg' : 'text-finance-muted hover:text-finance-text dark:hover:text-white hover:bg-white/5'}`}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all ${activeTab === 'expense' ? 'bg-gradient-to-r from-[#FF4DA6] to-[#8C30F5] text-white shadow-lg' : 'text-finance-muted hover:text-finance-text dark:hover:text-white hover:bg-white/5'}`}
                 >
                     <ArrowDownCircle size={16} /> {t('expenses_section')}
                 </button>
                 <button
                     onClick={() => setActiveTab('income')}
-                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all ${activeTab === 'income' ? 'bg-finance-primary text-white shadow-lg' : 'text-finance-muted hover:text-finance-text dark:hover:text-white hover:bg-white/5'}`}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all ${activeTab === 'income' ? 'bg-gradient-to-r from-[#00FFFF] to-[#2F5BFF] text-white shadow-lg' : 'text-finance-muted hover:text-finance-text dark:hover:text-white hover:bg-white/5'}`}
                 >
                     <ArrowUpCircle size={16} /> {t('income_section')}
                 </button>
@@ -160,7 +160,7 @@ export default function Categorias() {
                         <div className="flex items-center gap-3 min-w-0">
                             <div
                                 className="w-9 h-9 rounded-xl flex-shrink-0 shadow-lg ring-2 ring-black/20"
-                                style={{ backgroundColor: cat.color || '#00D4FF' }}
+                                style={{ backgroundColor: cat.color || '#00FFFF' }}
                             />
                             <div className="flex flex-col min-w-0">
                                 <span className="font-medium text-finance-text truncate text-sm">{cat.name}</span>
@@ -182,7 +182,7 @@ export default function Categorias() {
                                     </button>
                                     <button
                                         onClick={() => setShowDeleteConfirm(cat)}
-                                        className="p-2 rounded-lg text-finance-muted hover:text-red-400 hover:bg-red-400/10 transition-all"
+                                        className="p-2 rounded-lg text-finance-muted hover:text-[#FF4DA6] hover:bg-[#FF4DA6]/10 transition-all"
                                         title={t('delete_label')}
                                     >
                                         <Trash2 size={15} />
@@ -234,14 +234,14 @@ export default function Categorias() {
                                         <button
                                             type="button"
                                             onClick={() => setFormData({ ...formData, type: 'expense' })}
-                                            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold border transition-all ${formData.type === 'expense' ? 'bg-red-500/10 border-red-500/50 text-red-400' : 'bg-black/20 border-white/5 text-finance-muted hover:text-white'}`}
+                                            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold border transition-all ${formData.type === 'expense' ? 'bg-[#FF4DA6]/10 border-[#FF4DA6]/50 text-[#FF4DA6]' : 'bg-black/20 border-white/5 text-finance-muted hover:text-white'}`}
                                         >
                                             <ArrowDownCircle size={14} /> {t('expenses_section')}
                                         </button>
                                         <button
                                             type="button"
                                             onClick={() => setFormData({ ...formData, type: 'income' })}
-                                            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold border transition-all ${formData.type === 'income' ? 'bg-green-500/10 border-green-500/50 text-green-400' : 'bg-black/20 border-white/5 text-finance-muted hover:text-white'}`}
+                                            className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-xs font-bold border transition-all ${formData.type === 'income' ? 'bg-[#00FFFF]/10 border-[#00FFFF]/50 text-[#00FFFF]' : 'bg-black/20 border-white/5 text-finance-muted hover:text-white'}`}
                                         >
                                             <ArrowUpCircle size={14} /> {t('income_section')}
                                         </button>
@@ -314,10 +314,10 @@ export default function Categorias() {
             {/* Modal de Confirmación de Eliminación */}
             {showDeleteConfirm && (
                 <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex justify-center items-center z-50 p-4 modal-overlay">
-                    <div className="card p-6 w-full max-w-sm border-red-500/20 shadow-2xl animate-scale-in">
+                    <div className="card p-6 w-full max-w-sm border-[#FF4DA6]/20 shadow-2xl animate-scale-in">
                         <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2.5 bg-red-500/15 rounded-xl">
-                                <Trash2 size={20} className="text-red-400" />
+                            <div className="p-2.5 bg-[#FF4DA6]/15 rounded-xl">
+                                <Trash2 size={20} className="text-[#FF4DA6]" />
                             </div>
                             <h2 className="text-lg font-bold">{t('delete_confirm')}</h2>
                         </div>

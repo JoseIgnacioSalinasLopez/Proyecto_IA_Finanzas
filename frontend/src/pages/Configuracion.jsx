@@ -4,6 +4,7 @@ import { useTheme } from '../context/ThemeContext';
 import { Globe, Shield, Bell, Moon, Clock, Sun } from 'lucide-react';
 import api from '../services/api';
 import { toast } from 'react-hot-toast';
+import GlobalLoader from '../components/ui/GlobalLoader';
 
 export default function Configuracion() {
     const { language, setLanguage, t } = useLanguage();
@@ -12,6 +13,7 @@ export default function Configuracion() {
     const [securityData, setSecurityData] = useState({ current: '', new: '', confirm: '' });
     const [notifSettings, setNotifSettings] = useState({ budget: true, login: true, weekly: false, ai: true });
     const [timelineSettings, setTimelineSettings] = useState({ hide_challenges: false, hide_forecasts: false });
+    const [loading, setLoading] = useState(true);
 
     React.useEffect(() => {
         const fetchPrefs = async () => {
@@ -30,8 +32,8 @@ export default function Configuracion() {
                         hide_forecasts: d.hide_forecasts ?? false
                     });
                 }
-            } catch (err) {
-                console.error('Error fetching preferences:', err);
+            } finally {
+                setLoading(false);
             }
         };
         fetchPrefs();
@@ -80,6 +82,8 @@ export default function Configuracion() {
         savePreferences(notifSettings, updated);
     };
 
+    if (loading) return <GlobalLoader fullScreen={true} />;
+
     return (
         <div className="flex-1 p-4 md:p-8 animate-fade-in overflow-y-auto">
             <div className="max-w-4xl mx-auto space-y-8 pb-10">
@@ -93,21 +97,21 @@ export default function Configuracion() {
                     <div className="space-y-2">
                         <button
                             onClick={() => setActiveTab('language')}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold border transition-all ${activeTab === 'language' ? 'bg-finance-primary/10 text-finance-primary border-finance-primary/20 shadow-sm' : 'text-finance-muted border-transparent hover:bg-white/5 hover:text-finance-text'}`}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold border transition-all ${activeTab === 'language' ? 'bg-gradient-to-r from-[#00FFFF]/20 to-[#4F46E5]/10 text-[#00FFFF] border-[#00FFFF]/20 shadow-[0_0_15px_rgba(0,255,255,0.1)]' : 'text-finance-muted border-transparent hover:bg-white/5 hover:text-finance-text'}`}
                         >
                             <Globe size={18} />
                             <span>{t('language')}</span>
                         </button>
                         <button
                             onClick={() => setActiveTab('security')}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold border transition-all ${activeTab === 'security' ? 'bg-finance-primary/10 text-finance-primary border-finance-primary/20 shadow-sm' : 'text-finance-muted border-transparent hover:bg-white/5 hover:text-finance-text'}`}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold border transition-all ${activeTab === 'security' ? 'bg-gradient-to-r from-[#00FFFF]/20 to-[#4F46E5]/10 text-[#00FFFF] border-[#00FFFF]/20 shadow-[0_0_15px_rgba(0,255,255,0.1)]' : 'text-finance-muted border-transparent hover:bg-white/5 hover:text-finance-text'}`}
                         >
                             <Shield size={18} />
                             <span>{t('security')}</span>
                         </button>
                         <button
                             onClick={() => setActiveTab('notifications')}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold border transition-all ${activeTab === 'notifications' ? 'bg-finance-primary/10 text-finance-primary border-finance-primary/20 shadow-sm' : 'text-finance-muted border-transparent hover:bg-white/5 hover:text-finance-text'}`}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold border transition-all ${activeTab === 'notifications' ? 'bg-gradient-to-r from-[#00FFFF]/20 to-[#4F46E5]/10 text-[#00FFFF] border-[#00FFFF]/20 shadow-[0_0_15px_rgba(0,255,255,0.1)]' : 'text-finance-muted border-transparent hover:bg-white/5 hover:text-finance-text'}`}
                         >
                             <Bell size={18} />
                             <span>{t('notifications')}</span>
@@ -194,8 +198,8 @@ export default function Configuracion() {
                         {activeTab === 'security' && (
                             <div className="card border-white/5 bg-white/5 animate-slide-in">
                                 <div className="flex items-center gap-3 mb-6">
-                                    <div className="p-3 bg-red-500/10 rounded-2xl">
-                                        <Shield size={24} className="text-red-500" />
+                                    <div className="p-3 bg-[#FF4DA6]/10 rounded-2xl">
+                                        <Shield size={24} className="text-[#FF4DA6]" />
                                     </div>
                                     <h2 className="text-xl font-bold text-finance-text">{t('account_security')}</h2>
                                 </div>
@@ -257,8 +261,8 @@ export default function Configuracion() {
                             <div className="card border-white/5 bg-white/5 animate-slide-in space-y-8">
                                 <div>
                                     <div className="flex items-center gap-3 mb-6">
-                                        <div className="p-3 bg-finance-neon/10 rounded-2xl">
-                                            <Bell size={24} className="text-finance-neon" />
+                                        <div className="p-3 bg-[#00FFFF]/10 rounded-2xl">
+                                            <Bell size={24} className="text-[#00FFFF]" />
                                         </div>
                                         <h2 className="text-xl font-bold text-finance-text">{t('notifications')}</h2>
                                     </div>
@@ -274,9 +278,9 @@ export default function Configuracion() {
                                                 <span className="font-bold text-sm text-finance-text">{n.label}</span>
                                                 <button
                                                     onClick={() => toggleNotif(n.id)}
-                                                    className={`w-12 h-6 rounded-full transition-all flex items-center px-1 ${notifSettings[n.id] ? 'bg-finance-primary shadow-[0_0_10px_#00D4FF]' : 'bg-white/10'}`}
+                                                    className={`w-12 h-6 rounded-full transition-all flex items-center px-1 ${notifSettings[n.id] ? 'bg-[#00FFFF] shadow-[0_0_10px_#00FFFF]' : 'bg-white/10'}`}
                                                 >
-                                                    <div className={`w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${notifSettings[n.id] ? 'translate-x-6' : ''}`} />
+                                                    <div className={`w-4 h-4 bg-[#0a0523] rounded-full shadow-sm transition-transform ${notifSettings[n.id] ? 'translate-x-6' : ''}`} />
                                                 </button>
                                             </div>
                                         ))}
@@ -303,9 +307,9 @@ export default function Configuracion() {
                                                 </div>
                                                 <button
                                                     onClick={() => toggleTimeline(s.id)}
-                                                    className={`w-12 h-6 rounded-full transition-all flex items-center px-1 ${timelineSettings[s.id] ? 'bg-finance-primary shadow-[0_0_10px_#00D4FF]' : 'bg-white/10'}`}
+                                                    className={`w-12 h-6 rounded-full transition-all flex items-center px-1 ${timelineSettings[s.id] ? 'bg-[#00FFFF] shadow-[0_0_10px_#00FFFF]' : 'bg-white/10'}`}
                                                 >
-                                                    <div className={`w-4 h-4 bg-white rounded-full shadow-sm transition-transform ${timelineSettings[s.id] ? 'translate-x-6' : ''}`} />
+                                                    <div className={`w-4 h-4 bg-[#0a0523] rounded-full shadow-sm transition-transform ${timelineSettings[s.id] ? 'translate-x-6' : ''}`} />
                                                 </button>
                                             </div>
                                         ))}

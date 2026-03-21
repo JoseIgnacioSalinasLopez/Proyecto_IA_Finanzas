@@ -25,7 +25,7 @@ function Modal({ title, onClose, children }) {
 
     return (
         <div
-            className="fixed inset-0 bg-black/60 backdrop-blur-md flex justify-center items-center z-50 p-4 modal-overlay"
+            className="fixed inset-0 bg-black/60 dark:bg-black/60 backdrop-blur-md flex justify-center items-center z-50 p-4 modal-overlay"
             onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
             role="dialog"
             aria-modal="true"
@@ -50,6 +50,7 @@ function Modal({ title, onClose, children }) {
 
 function TransactionForm({ formData, setFormData, categories, onSubmit, onClose, isEditing }) {
     const { t } = useLanguage();
+    const [searchTerm, setSearchTerm] = useState('');
     return (
         <form onSubmit={onSubmit} className="space-y-5" noValidate>
             {/* Tipo */}
@@ -64,8 +65,8 @@ function TransactionForm({ formData, setFormData, categories, onSubmit, onClose,
                             aria-pressed={formData.type === tKey}
                             className={`flex-1 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 ${formData.type === tKey
                                 ? tKey === 'expense'
-                                    ? 'bg-red-500/20 border border-red-500/60 text-red-400 shadow-[0_0_16px_rgba(239,68,68,0.25)]'
-                                    : 'bg-emerald-500/20 border border-emerald-500/60 text-emerald-400 shadow-[0_0_16px_rgba(52,211,153,0.25)]'
+                                    ? 'bg-[#FF4DA6]/20 border border-[#FF4DA6]/60 text-[#FF4DA6] shadow-[0_0_16px_rgba(255,77,166,0.25)]'
+                                    : 'bg-[#00FFFF]/20 border border-[#00FFFF]/60 text-[#00FFFF] shadow-[0_0_16px_rgba(0,255,255,0.25)]'
                                 : 'bg-transparent border border-transparent text-finance-muted hover:text-finance-text hover:bg-white/5'
                                 }`}
                         >
@@ -93,18 +94,50 @@ function TransactionForm({ formData, setFormData, categories, onSubmit, onClose,
                 />
             </div>
 
-            {/* Categoría */}
-            <div>
-                <label htmlFor="tx-category" className="block text-sm mb-2 text-finance-muted font-medium">{t('category_label')}</label>
-                <select id="tx-category" required
-                    className="w-full p-3 rounded-xl bg-black/20 dark:bg-black/40 border border-white/10 text-finance-text transition-colors"
-                    value={formData.category_id}
-                    onChange={e => setFormData({ ...formData, category_id: e.target.value })}>
-                    <option value="" disabled>{t('select_category')}</option>
-                    {categories
-                        .filter(cat => (cat.type || 'expense') === formData.type)
-                        .map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
-                </select>
+            {/* Categoría con Buscador */}
+            <div className="space-y-3">
+                <label className="block text-sm text-finance-muted font-medium uppercase tracking-wide">
+                    {t('category_label')}
+                </label>
+                
+                <div className="relative">
+                    <input 
+                        type="text"
+                        placeholder={t('search_category')}
+                        className="w-full bg-black/5 dark:bg-black/20 border border-black/10 dark:border-white/5 rounded-xl px-4 py-2.5 text-xs text-finance-text focus:outline-none focus:border-finance-primary/50 transition-all placeholder:text-finance-muted/40"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    <Search size={14} className="absolute right-4 top-1/2 -translate-y-1/2 text-finance-muted/40" />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 max-h-[160px] overflow-y-auto pr-1 custom-scrollbar">
+                    {(categories || [])
+                        .filter(c => c && (c.type || 'expense') === formData.type)
+                        .filter(c => c && c.name && c.name.toLowerCase().includes(searchTerm.toLowerCase()))
+                        .map(c => (
+                            <button
+                                key={c.id}
+                                type="button"
+                                onClick={() => setFormData({ ...formData, category_id: c.id })}
+                                className={`flex items-center gap-2.5 p-2 rounded-xl text-[11px] font-bold border transition-all truncate
+                                    ${formData.category_id === c.id 
+                                        ? 'bg-finance-primary/10 border-finance-primary/50 text-finance-primary shadow-[0_0_15px_rgba(0,212,255,0.1)]' 
+                                        : 'bg-black/5 dark:bg-white/5 border-black/5 dark:border-white/5 text-finance-muted hover:border-finance-primary/30 hover:bg-finance-primary/5'}`}
+                            >
+                                <div 
+                                    className="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm" 
+                                    style={{ backgroundColor: c.color || '#00D4FF' }} 
+                                />
+                                <span className="truncate">{c.name}</span>
+                            </button>
+                        ))}
+                    {(categories || []).filter(c => c && (c.type || 'expense') === formData.type && c.name && c.name.toLowerCase().includes(searchTerm.toLowerCase())).length === 0 && (
+                        <p className="col-span-2 py-4 text-center text-[10px] text-finance-muted uppercase tracking-widest opacity-50">
+                            {t('no_categories_found')}
+                        </p>
+                    )}
+                </div>
             </div>
 
 
@@ -212,8 +245,8 @@ function exportToPDF(transactions, stats, t, language) {
     const summary = stats?.summary || {};
     const summaryItems = [
         { label: t('pdf_net_balance'), value: summary.balance ?? 0, highlight: true },
-        { label: t('pdf_income'), value: summary.totalIncome ?? 0, color: [5, 150, 105] },
-        { label: t('pdf_expense'), value: summary.totalExpense ?? 0, color: [220, 38, 38] },
+        { label: t('pdf_income'), value: summary.totalIncome ?? 0, color: [0, 212, 255] },
+        { label: t('pdf_expense'), value: summary.totalExpense ?? 0, color: [255, 77, 166] },
     ];
 
     const colW = (pageW - 30) / 3;
@@ -302,8 +335,9 @@ export default function ResumenFinanciero() {
     const [editingTx, setEditingTx] = useState(null);
     const [formData, setFormData] = useState(EMPTY_FORM);
     const [toast, setToast] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [editingCell, setEditingCell] = useState(null); // { id, field, value }
     const [filter, setFilter] = useState('all');
-    const [search, setSearch] = useState('');
     // Filtro de fechas
     const [dateFilter, setDateFilter] = useState('all'); // 'all' | 'thisMonth' | 'lastMonth' | 'custom'
     const [customDateStart, setCustomDateStart] = useState('');
@@ -313,7 +347,7 @@ export default function ResumenFinanciero() {
     const [chartPeriod, setChartPeriod] = useState('30days'); // '7days' | '30days'
 
 
-    const showToast = (message, type = 'success') => setToast({ message, type });
+    const showToast = (message, type = 'success', onUndo = null) => setToast({ message, type, onUndo });
     const closeToast = () => setToast(null);
 
     useEffect(() => {
@@ -351,17 +385,70 @@ export default function ResumenFinanciero() {
     };
 
     // Modal de confirmación de eliminación (estilizado)
-    const handleDelete = async (id) => {
+    // Eliminación diferida con opción de Deshacer (Undo)
+    const handleDelete = async (tx) => {
+        const id = tx.id;
+        const previousTransactions = [...transactions];
+        const previousStats = { ...stats };
+        
+        // 1. Optimistic UI: Eliminar localmente de inmediato
+        setTransactions(prev => prev.filter(t => t.id !== id));
+        setShowDeleteConfirm(null);
+
+        // 2. Programar borrado real en 5 segundos
+        const timeoutId = setTimeout(async () => {
+            try {
+                await api.delete(`/transactions/${id}`);
+                // Notificar a otros para que actualicen balances globales si es necesario
+                window.dispatchEvent(new CustomEvent('refresh-data'));
+            } catch (error) {
+                console.error("Error eliminando:", error);
+                showToast(t('error_loading'), 'error');
+            }
+        }, 5000);
+
+        // 3. Mostrar Toast con botón de deshacer
+        showToast(t('movement_deleted'), 'success', () => {
+            clearTimeout(timeoutId);
+            setTransactions(previousTransactions);
+            setStats(previousStats);
+            showToast(t('action_undone'));
+        });
+    };
+
+    const handleInlineSave = async (id, field, value) => {
+        const originalTx = transactions.find(t => t.id === id);
+        if (!originalTx) return;
+        
+        // Si el valor no cambió, solo cerrar
+        if (String(originalTx[field]) === String(value)) {
+            setEditingCell(null);
+            return;
+        }
+
         try {
-            await api.delete(`/transactions/${id}`);
-            setShowDeleteConfirm(null);
+            const numericValue = field === 'amount' ? parseFloat(value) : value;
+            
+            // Optimistic Update
+            setTransactions(prev => prev.map(t => t.id === id ? { ...t, [field]: numericValue } : t));
+            setEditingCell(null);
 
-            // NOTIFICAR A OTROS COMPONENTES
+            const payload = { 
+                ...originalTx, 
+                [field]: numericValue,
+                amount: parseFloat(field === 'amount' ? value : originalTx.amount)
+            };
+            
+            // Limpiar campos que el backend no espera en el body plano
+            delete payload.categories; 
+            
+            await api.put(`/transactions/${id}`, payload);
+            showToast(t('movement_updated'));
             window.dispatchEvent(new CustomEvent('refresh-data'));
-
-            showToast(t('movement_deleted'));
-        } catch (error) {
-            showToast(t('error_loading'), 'error');
+        } catch (err) {
+            console.error('Error in inline save:', err);
+            setTransactions([...transactions]); // Revertir al estado actual (que es el original antes del setTransactions previo)
+            showToast(t('registration_error'), 'error');
         }
     };
 
@@ -435,8 +522,8 @@ export default function ResumenFinanciero() {
         .filter(tx => filter === 'all' || tx.type === filter)
         .filter(applyDateFilter)
         .filter(tx => {
-            if (!search) return true;
-            const s = search.toLowerCase();
+            if (!searchTerm) return true;
+            const s = searchTerm.toLowerCase();
             return (tx.description || '').toLowerCase().includes(s) || (tx.categories?.name || '').toLowerCase().includes(s);
         });
 
@@ -463,7 +550,7 @@ export default function ResumenFinanciero() {
     }, [stats?.timeline, chartPeriod]);
 
     if (loading) return <GlobalLoader fullScreen={true} />;
-    if (!stats) return <div className="p-6 text-red-500">{t('error_loading')}</div>;
+    if (!stats) return <div className="p-6 text-[#FF4DA6]">{t('error_loading')}</div>;
 
     const expensesData = {
         labels: stats.expensesByCategory.map(c => c.name),
@@ -484,7 +571,7 @@ export default function ResumenFinanciero() {
             {
                 label: t('income_label'),
                 data: filteredTimeline.map(tKey => tKey.income),
-                backgroundColor: '#00D4FF',
+                backgroundColor: '#00FFFF',
                 borderRadius: 4,
                 barPercentage: 0.6,
                 categoryPercentage: 0.8
@@ -492,7 +579,7 @@ export default function ResumenFinanciero() {
             {
                 label: t('expense_label'),
                 data: filteredTimeline.map(tKey => tKey.expense),
-                backgroundColor: '#E600E6',
+                backgroundColor: '#FF4DA6',
                 borderRadius: 4,
                 barPercentage: 0.6,
                 categoryPercentage: 0.8
@@ -502,7 +589,7 @@ export default function ResumenFinanciero() {
 
     return (
         <div className="min-h-full p-0 text-finance-text dark:text-white animate-fade-in relative z-10">
-            {toast && <Toast message={toast.message} type={toast.type} onClose={closeToast} />}
+            {toast && <Toast message={toast.message} type={toast.type} onUndo={toast.onUndo} onClose={closeToast} />}
 
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
@@ -550,21 +637,21 @@ export default function ResumenFinanciero() {
                     <p className="text-finance-muted text-xs uppercase font-semibold tracking-wide mb-2">{t('net_balance')}</p>
                     <AnimatedCounter
                         amount={stats.summary.balance}
-                        className={`text-2xl font-bold ${stats.summary.balance >= 0 ? 'text-finance-primary' : 'text-red-400'}`}
+                        className={`text-2xl font-bold ${stats.summary.balance >= 0 ? 'text-finance-primary' : 'text-[#FF4DA6]'}`}
                     />
                 </div>
-                <div className="col-span-12 md:col-span-3 card p-6 flex flex-col justify-center border-emerald-400/20">
+                <div className="col-span-12 md:col-span-3 card p-6 flex flex-col justify-center border-[#00FFFF]/20">
                     <p className="text-finance-muted text-xs uppercase font-semibold tracking-wide mb-2">{t('total_income')}</p>
                     <AnimatedCounter
                         amount={stats.summary.totalIncome}
-                        className="text-2xl font-bold text-emerald-400"
+                        className="text-2xl font-bold text-[#00FFFF]"
                     />
                 </div>
-                <div className="col-span-12 md:col-span-3 card p-6 flex flex-col justify-center border-red-400/20">
+                <div className="col-span-12 md:col-span-3 card p-6 flex flex-col justify-center border-[#FF4DA6]/20">
                     <p className="text-finance-muted text-xs uppercase font-semibold tracking-wide mb-2">{t('total_expense')}</p>
                     <AnimatedCounter
                         amount={stats.summary.totalExpense}
-                        className="text-2xl font-bold text-red-400"
+                        className="text-2xl font-bold text-[#FF4DA6]"
                     />
                 </div>
                 <div className="col-span-12 md:col-span-3 card p-6 flex flex-col justify-center border-finance-primary/20">
@@ -578,7 +665,7 @@ export default function ResumenFinanciero() {
                 {/* Gráficos */}
                 <div className="col-span-12 lg:col-span-8 card p-6 min-h-[360px] flex flex-col">
                     <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-base font-bold text-finance-text dark:text-finance-muted">{t('movement_history')}</h3>
+                        <h3 className="text-base font-bold text-finance-text dark:text-finance-muted">{t('movement_trend')}</h3>
                         <div className="flex bg-white soft-ui-bg dark:bg-black/30 rounded-xl p-1 border border-black/10 soft-ui-border dark:border-white/5 gap-1 shadow-sm dark:shadow-none">
                             <button
                                 onClick={() => setChartPeriod('7days')}
@@ -630,11 +717,11 @@ export default function ResumenFinanciero() {
                                         placeholder={t('search_placeholder')}
                                         aria-label={t('search_placeholder')}
                                         className="pl-8 pr-3 py-2 rounded-xl bg-white soft-ui-input dark:bg-black/40 border border-black/10 dark:border-white/10 text-sm text-finance-text dark:text-white focus:outline-none focus:border-finance-primary w-36 transition-colors shadow-sm dark:shadow-none"
-                                        value={search}
-                                        onChange={e => setSearch(e.target.value)}
+                                        value={searchTerm}
+                                        onChange={e => setSearchTerm(e.target.value)}
                                     />
-                                    {search && (
-                                        <button onClick={() => setSearch('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-finance-muted hover:text-white" aria-label={t('clear_search')}>
+                                    {searchTerm && (
+                                        <button onClick={() => setSearchTerm('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-finance-muted hover:text-white" aria-label={t('clear_search')}>
                                             <X size={12} />
                                         </button>
                                     )}
@@ -690,6 +777,28 @@ export default function ResumenFinanciero() {
                         )}
                     </div>
 
+                    {/* Barra de Búsqueda Global */}
+                    <div className="relative group">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <Search size={14} className="text-finance-muted group-focus-within:text-finance-primary transition-colors" />
+                        </div>
+                        <input
+                            type="text"
+                            placeholder={t('search_description')}
+                            className="w-full bg-white dark:bg-black/20 border border-black/10 dark:border-white/5 rounded-xl pl-10 pr-4 py-2.5 text-xs text-finance-text focus:outline-none focus:border-finance-primary/40 focus:ring-1 focus:ring-finance-primary/20 transition-all placeholder:text-finance-muted/40 shadow-sm"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                        {searchTerm && (
+                            <button 
+                                onClick={() => setSearchTerm('')}
+                                className="absolute inset-y-0 right-0 pr-4 flex items-center text-finance-muted hover:text-finance-text transition-colors"
+                            >
+                                <X size={14} />
+                            </button>
+                        )}
+                    </div>
+
                     <div className="overflow-x-auto flex-1 overflow-y-auto max-h-[380px]">
                         <table className="w-full text-left border-collapse min-w-[480px]">
                             <thead className="sticky top-0 bg-white soft-ui-header dark:bg-black/60 backdrop-blur-md dark:backdrop-blur-md z-10 border-b border-black/10 dark:border-white/10">
@@ -703,15 +812,38 @@ export default function ResumenFinanciero() {
                             </thead>
                             <tbody>
                                 {filteredTx.map(tx => (
-                                    <tr key={tx.id} className="border-b border-black/5 dark:border-white/5 hover:bg-black/5 dark:hover:bg-white/4 transition-colors text-finance-text dark:text-white">
+                                    <tr key={tx.id} className="border-b border-black/5 dark:border-white/5 hover:bg-black/5 dark:hover:bg-white/4 transition-colors text-finance-text dark:text-white group">
                                         <td className="p-3 text-sm text-slate-500 dark:text-finance-muted font-medium">
-                                            {/* Fix date offset: parse string directly instead of using constructor */}
                                             {(() => {
                                                 const [y, m, d] = tx.date.split('T')[0].split('-');
                                                 return language === 'en' ? `${m}/${d}/${y}` : `${d}/${m}/${y}`;
                                             })()}
                                         </td>
-                                        <td className="p-3 text-sm font-bold text-finance-text dark:text-white max-w-[160px] truncate">{tx.description || '—'}</td>
+                                        <td className="p-3">
+                                            {editingCell?.id === tx.id && editingCell?.field === 'description' ? (
+                                                <input
+                                                    autoFocus
+                                                    className="w-full bg-black/5 dark:bg-black/40 border border-finance-primary/40 rounded-lg px-2 py-1.5 text-xs text-finance-text outline-none shadow-[0_0_10px_rgba(0,212,255,0.1)]"
+                                                    value={editingCell.value}
+                                                    onChange={e => setEditingCell({ ...editingCell, value: e.target.value })}
+                                                    onKeyDown={e => {
+                                                        if (e.key === 'Enter') handleInlineSave(tx.id, 'description', editingCell.value);
+                                                        if (e.key === 'Escape') setEditingCell(null);
+                                                    }}
+                                                    onBlur={() => handleInlineSave(tx.id, 'description', editingCell.value)}
+                                                />
+                                            ) : (
+                                                <div 
+                                                    onClick={() => setEditingCell({ id: tx.id, field: 'description', value: tx.description || '' })}
+                                                    className="flex items-center gap-2 cursor-pointer hover:text-finance-primary transition-colors group/edit"
+                                                >
+                                                    <span className="text-sm font-bold truncate max-w-[160px]">
+                                                        {tx.description || '—'}
+                                                    </span>
+                                                    <Pencil size={10} className="text-finance-muted opacity-0 group-hover/edit:opacity-100 transition-opacity" />
+                                                </div>
+                                            )}
+                                        </td>
                                         <td className="p-3">
                                             <span
                                                 className="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider whitespace-nowrap border"
@@ -724,18 +856,41 @@ export default function ResumenFinanciero() {
                                                 {tx.categories?.name || t('no_category')}
                                             </span>
                                         </td>
-                                        <td className={`p-3 text-sm font-bold ${tx.type === 'income' ? 'text-emerald-400' : 'text-red-400'}`}>
-                                            {tx.type === 'income' ? '+' : '-'}<AnimatedCounter amount={Number(tx.amount)} className="inline" />
+                                        <td className="p-3 text-right">
+                                            {editingCell?.id === tx.id && editingCell?.field === 'amount' ? (
+                                                <input
+                                                    autoFocus
+                                                    type="number"
+                                                    step="0.01"
+                                                    className="w-24 bg-black/5 dark:bg-black/40 border border-finance-primary/40 rounded-lg px-2 py-1.5 text-xs font-mono font-bold text-finance-text outline-none text-right shadow-[0_0_10px_rgba(0,212,255,0.1)]"
+                                                    value={editingCell.value}
+                                                    onChange={e => setEditingCell({ ...editingCell, value: e.target.value })}
+                                                    onKeyDown={e => {
+                                                        if (e.key === 'Enter') handleInlineSave(tx.id, 'amount', editingCell.value);
+                                                        if (e.key === 'Escape') setEditingCell(null);
+                                                    }}
+                                                    onBlur={() => handleInlineSave(tx.id, 'amount', editingCell.value)}
+                                                />
+                                            ) : (
+                                                <div 
+                                                    onClick={() => setEditingCell({ id: tx.id, field: 'amount', value: tx.amount })}
+                                                    className={`flex items-center justify-end gap-1 cursor-pointer hover:text-finance-primary transition-colors group/edit ${tx.type === 'income' ? 'text-[#00FFFF] glow-cyan' : 'text-[#FF4DA6] glow-pink'}`}
+                                                >
+                                                    <span className="text-sm font-mono font-black">
+                                                        {tx.type === 'income' ? '+' : '-'}<AnimatedCounter amount={Number(tx.amount)} className="inline" />
+                                                    </span>
+                                                    <Pencil size={10} className="text-finance-muted opacity-0 group-hover/edit:opacity-100 transition-opacity" />
+                                                </div>
+                                            )}
                                         </td>
                                         <td className="p-3 text-right">
-                                            {/* Acciones siempre visibles */}
                                             <div className="flex gap-1 justify-end">
                                                 <button onClick={() => openEdit(tx)} aria-label={`${t('edit_label')} ${t('movement_type')}`}
                                                     className="text-finance-muted hover:text-finance-primary p-2 rounded-lg hover:bg-finance-primary/10 transition-colors">
                                                     <Pencil size={14} />
                                                 </button>
-                                                <button onClick={() => setShowDeleteConfirm(tx)} aria-label={`${t('delete_label')} ${t('movement_type')}`}
-                                                    className="text-finance-muted hover:text-red-500 p-2 rounded-lg hover:bg-red-500/10 transition-colors">
+                                                <button onClick={() => handleDelete(tx)} aria-label={`${t('delete_label')} ${t('movement_type')}`}
+                                                    className="text-finance-muted hover:text-[#FF4DA6] p-2 rounded-lg hover:bg-[#FF4DA6]/10 transition-colors">
                                                     <Trash2 size={14} />
                                                 </button>
                                             </div>
@@ -746,7 +901,7 @@ export default function ResumenFinanciero() {
                                     <tr>
                                         <td colSpan="5" className="p-10 text-center text-finance-muted">
                                             <Filter size={32} className="mx-auto mb-3 opacity-20" />
-                                            {search || filter !== 'all' || dateFilter !== 'all'
+                                            {searchTerm || filter !== 'all' || dateFilter !== 'all'
                                                 ? t('no_results_search')
                                                 : t('no_movements')}
                                         </td>
@@ -785,7 +940,7 @@ export default function ResumenFinanciero() {
                                 <span className="text-xs text-finance-muted">{t('monthly_income')}</span>
                                 <AnimatedCounter
                                     amount={stats?.summary?.totalIncome || 0}
-                                    className="font-bold text-emerald-400"
+                                    className="font-bold text-[#00FFFF]"
                                 />
                             </div>
 
@@ -793,7 +948,7 @@ export default function ResumenFinanciero() {
                                 <span className="text-xs text-finance-muted">{t('monthly_expenses')}</span>
                                 <AnimatedCounter
                                     amount={stats?.summary?.totalSpentThisMonth || 0}
-                                    className="font-bold text-red-400"
+                                    className="font-bold text-[#FF4DA6]"
                                 />
                             </div>
 
@@ -801,7 +956,7 @@ export default function ResumenFinanciero() {
                                 <span className="text-xs text-finance-muted font-bold">{t('liquid_balance').toUpperCase()}</span>
                                 <AnimatedCounter
                                     amount={stats.summary.liquidBalance}
-                                    className="font-black text-[#00fbff] drop-shadow-[0_0_8px_rgba(0,212,255,0.4)]"
+                                    className="font-black text-[#00FFFF] drop-shadow-[0_0_10px_var(--epic-cyan)]"
                                 />
                             </div>
 
@@ -810,7 +965,7 @@ export default function ResumenFinanciero() {
                                     <span className="text-xs font-bold text-finance-text dark:text-white uppercase tracking-wider">{t('monthly_savings')}</span>
                                     <AnimatedCounter
                                         amount={stats.summary.totalIncome - stats.summary.totalExpense}
-                                        className={`text-lg font-black ${(stats.summary.totalIncome - stats.summary.totalExpense) >= 0 ? 'text-emerald-400' : 'text-red-400'}`}
+                                        className={`text-lg font-black ${(stats.summary.totalIncome - stats.summary.totalExpense) >= 0 ? 'text-[#00FFFF]' : 'text-[#FF4DA6]'}`}
                                     />
                                 </div>
                             </div>
@@ -851,17 +1006,17 @@ export default function ResumenFinanciero() {
             {showDeleteConfirm && (
                 <div className="fixed inset-0 bg-black/40 dark:bg-black/70 backdrop-blur-sm flex justify-center items-center z-50 p-4 modal-overlay"
                     role="dialog" aria-modal="true" aria-labelledby="delete-modal-title">
-                    <div className="card p-6 w-full max-w-sm border border-black/5 dark:border-red-500/20 animate-scale-in">
+                    <div className="card p-6 w-full max-w-sm border border-black/5 dark:border-[#FF4DA6]/20 animate-scale-in">
                         <div className="flex items-center gap-3 mb-4">
-                            <div className="p-2.5 bg-red-500/15 rounded-xl">
-                                <Trash2 size={20} className="text-red-400" />
+                            <div className="p-2.5 bg-[#FF4DA6]/15 rounded-xl">
+                                <Trash2 size={20} className="text-[#FF4DA6]" />
                             </div>
                             <h2 id="delete-modal-title" className="text-lg font-bold">{t('delete_confirm')}</h2>
                         </div>
                         <p className="text-[#9EA3B0] text-sm mb-2">{t('delete_warning')}</p>
                         <div className="p-3 border border-black/5 dark:border-white/5 rounded-xl mb-5 text-sm">
                             <p className="font-semibold text-finance-text dark:text-white">{showDeleteConfirm.description || t('no_description')}</p>
-                            <p className={`font-bold mt-0.5 ${showDeleteConfirm.type === 'income' ? 'text-emerald-400' : 'text-red-400'}`}>
+                            <p className={`font-bold mt-0.5 ${showDeleteConfirm.type === 'income' ? 'text-[#00FFFF]' : 'text-[#FF4DA6]'}`}>
                                 {showDeleteConfirm.type === 'income' ? '+' : '-'}<AnimatedCounter amount={Number(showDeleteConfirm.amount)} className="inline" />
                             </p>
                         </div>
@@ -870,8 +1025,8 @@ export default function ResumenFinanciero() {
                                 className="flex-1 px-4 py-2.5 text-[#9EA3B0] hover:text-finance-text dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 rounded-xl transition-colors font-medium text-sm">
                                 {t('cancel')}
                             </button>
-                            <button onClick={() => handleDelete(showDeleteConfirm.id)}
-                                className="flex-1 px-4 py-2.5 bg-red-500 hover:bg-red-400 text-white rounded-xl font-bold text-sm transition-all active:scale-95">
+                            <button onClick={() => handleDelete(showDeleteConfirm)}
+                                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-[#FF4DA6] to-[#8C30F5] hover:opacity-90 text-white rounded-xl font-bold text-sm transition-all active:scale-95 shadow-lg shadow-pink-500/20">
                                 {t('delete_label')}
                             </button>
                         </div>

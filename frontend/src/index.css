@@ -42,52 +42,47 @@ body {
 
 /* ─── Neon SaaS Variables ─────────────────────────────────────────── */
 :root {
-  /* Paleta Principal - Dashboard Inspired */
-  --epic-purple: #cc208e;
-  --epic-deep-purple: #6713d2;
-  --epic-indigo: #2575fc;
-  --epic-blue: #2E6FF2;
-  --epic-cyan: #00fbff;
-  --epic-aqua: #00FFFF;
-  --epic-white: #FFFFFF;
+  /* Paleta Principal - Neon Vibrant Palette */
+  --epic-purple: #8C30F5;
+  --epic-deep-purple: #6A3DF0;
+  --epic-indigo: #4F46E5;
+  --epic-blue: #2F5BFF;
+  --epic-electric-blue: #00D4FF;
+  --epic-cyan: #00FFFF;
+  --epic-pink: #FF4DA6;
+  --epic-sparkle: #FFD166;
 
   /* Color Bindings for Tailwind */
-  --bg-main: #05011a;
-  --bg-card: #11111d;
+  --bg-main: #0a0523; /* Deep Indigo/Purple base */
+  --bg-card: rgba(20, 15, 60, 0.7);
   --text-main: #FFFFFF;
-  --text-muted: #818cf8;
+  --text-muted: #a5b4fc;
 
-  /* Colores Secundarios */
-  --epic-pink: #ff0099;
-  --epic-light-gray: #f8fafc;
-  --epic-muted-gray: #818cf8;
-
-  /* Glow & Effects */
-  --epic-magenta-glow: #ff00ff;
-  --epic-pink-glow: #ff4dff;
-  --epic-electric-blue: #00d2ff;
-  --epic-sparkle: #FFD166;
+  /* Colores Secundarios & Glows */
+  --epic-magenta-glow: #FF4DA6;
+  --epic-pink-glow: #FF4DA6;
+  --epic-glow-cyan: rgba(0, 255, 255, 0.5);
+  --epic-glow-purple: rgba(140, 48, 245, 0.5);
 
   /* Chart Variables (Dark) */
   --chart-text: #ffffff;
-  /* Blanco puro para máxima legibilidad */
-  --chart-grid: rgba(255, 255, 255, 0.5);
+  --chart-grid: rgba(255, 255, 255, 0.1);
   --chart-title: #FFFFFF;
-  --chart-tooltip-bg: rgba(11, 2, 45, 0.95);
-  --chart-border: #130B42;
+  --chart-tooltip-bg: rgba(15, 10, 50, 0.95);
+  --chart-border: #4F46E5;
 
-  /* Toast Variables (Dark) */
-  --toast-bg-success: rgba(6, 78, 59, 0.95);
-  --toast-text-success: #bbf7d0;
-  --toast-border-success: rgba(16, 185, 129, 0.4);
+  /* Toast Variables (Vibrant) */
+  --toast-bg-success: rgba(0, 212, 255, 0.2);
+  --toast-text-success: #00FFFF;
+  --toast-border-success: #00FFFF;
 
-  --toast-bg-error: rgba(127, 29, 29, 0.95);
-  --toast-text-error: #fecaca;
-  --toast-border-error: rgba(239, 68, 68, 0.4);
+  --toast-bg-error: rgba(255, 77, 166, 0.2);
+  --toast-text-error: #FF4DA6;
+  --toast-border-error: #FF4DA6;
 
-  --toast-bg-warning: rgba(120, 53, 15, 0.95);
-  --toast-text-warning: #fde68a;
-  --toast-border-warning: rgba(245, 158, 11, 0.4);
+  --toast-bg-warning: rgba(255, 209, 102, 0.2);
+  --toast-text-warning: #FFD166;
+  --toast-border-warning: #FFD166;
 
   /* Skeleton Variables (Dark) */
   --skeleton-bg: rgba(255, 255, 255, 0.03);
@@ -97,69 +92,65 @@ body {
   --neon-cyan: var(--epic-cyan);
   --neon-purple: var(--epic-purple);
   --neon-blue: var(--epic-blue);
-  --neon-glow: rgba(0, 251, 255, 0.5);
+  --neon-glow: rgba(0, 255, 255, 0.5);
 
   /* Scrollbar Variables (Dark) */
-  --scrollbar-track: #0B022D;
-  --scrollbar-thumb: rgba(255, 255, 255, 0.15);
-  --scrollbar-thumb-hover: rgba(0, 212, 255, 0.4);
+  --scrollbar-track: #0a0523;
+  --scrollbar-thumb: #4F46E5;
+  --scrollbar-thumb-hover: #00FFFF;
 }
 
 /* ─── Light Mode Overrides (Soft & Aesthetic) ────────────────────── */
 .light-mode {
-  --bg-main: #f1f5f9;
-  /* Slate-100: Soft blue-ish gray background */
-  --bg-card: #f8fafc;
-  /* Slate-50: Off-white cards */
-  --text-main: #334155;
-  /* Slate-700: Gentle contrast */
+  --bg-main: #f8fafc;
+  /* Light Slate background */
+  --bg-card: #ffffff;
+  /* White cards for crisp neon contrast */
+  --text-main: #0a0523;
+  /* Deep Indigo for strong contrast */
   --text-muted: #64748b;
-  /* Slate-500 */
+  /* Medium Slate */
 
-  --epic-purple: #7c3aed;
-  --epic-cyan: #0ea5e9;
-  --epic-indigo: #4f46e5;
-  --epic-white: #1e293b;
+  /* Maintain Neon Palette but adjust for light background if needed */
+  --epic-purple: #8C30F5;
+  --epic-deep-purple: #6A3DF0;
+  --epic-indigo: #4F46E5;
+  --epic-blue: #2F5BFF;
+  --epic-electric-blue: #00D4FF;
+  --epic-cyan: #00A3A3; /* Darker Cyan for better legibility on white */
+  --epic-pink: #FF4DA6;
+  --epic-sparkle: #D97706; /* Darker Yellow/Amber for legibility */
 
-  --neon-glow: rgba(14, 165, 233, 0.1);
+  --neon-glow: rgba(0, 212, 255, 0.1);
 
-  /* Scrollbar Variables (Light) - Global Cyan Style requested by User */
-  --scrollbar-track: rgba(0, 0, 0, 0.05);
-  /* Very subtle track */
-  --scrollbar-thumb: #00D4FF;
-  /* Vibrant Cyan */
-  --scrollbar-thumb-hover: #00fbff;
-  /* Brighter Cyan on hover */
+  /* Scrollbar Variables (Light) */
+  --scrollbar-track: #f1f5f9;
+  --scrollbar-thumb: #8C30F5; /* Purple thumb */
+  --scrollbar-thumb-hover: #00D4FF;
 
   /* Chart Variables (Light) */
-  --chart-text: #475569;
+  --chart-text: #1e293b;
   --chart-grid: rgba(0, 0, 0, 0.05);
-  --chart-title: #1e293b;
+  --chart-title: #0a0523;
   --chart-tooltip-bg: rgba(255, 255, 255, 0.98);
-  --chart-border: #f0f0f0;
+  --chart-border: #e2e8f0;
 
-  /* Toast Variables (Light) */
-  --toast-bg-success: #f0fdf4;
-  /* Softer Emerald/Green 50 */
-  --toast-text-success: #166534;
-  /* Green 800 */
-  --toast-border-success: rgba(22, 101, 52, 0.1);
+  /* Toast Variables (Light) - Use Neon Colors */
+  --toast-bg-success: rgba(0, 163, 163, 0.1);
+  --toast-text-success: #008080;
+  --toast-border-success: #00A3A3;
 
-  --toast-bg-error: #fef2f2;
-  /* Red 50 */
-  --toast-text-error: #991b1b;
-  /* Red 800 */
-  --toast-border-error: rgba(239, 68, 68, 0.15);
+  --toast-bg-error: rgba(255, 77, 166, 0.1);
+  --toast-text-error: #FF4DA6;
+  --toast-border-error: #FF4DA6;
 
-  --toast-bg-warning: #fffbeb;
-  /* Amber 50 */
+  --toast-bg-warning: rgba(217, 119, 6, 0.1);
   --toast-text-warning: #92400e;
-  /* Amber 800 */
-  --toast-border-warning: rgba(245, 158, 11, 0.15);
+  --toast-border-warning: #D97706;
 
   /* Skeleton Variables (Light) */
-  --skeleton-bg: rgba(0, 0, 0, 0.05);
-  --skeleton-shimmer: rgba(0, 0, 0, 0.1);
+  --skeleton-bg: rgba(0, 0, 0, 0.03);
+  --skeleton-shimmer: rgba(0, 0, 0, 0.06);
 }
 
 .light-mode body {
@@ -179,16 +170,46 @@ body {
 .light-mode aside,
 .light-mode header,
 .light-mode nav {
-  background-color: var(--bg-card);
+  background-color: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(24px) saturate(180%);
   border-color: rgba(0, 0, 0, 0.05);
+}
+
+.light-mode .bg-finance-900\/60 {
+  background-color: rgba(255, 255, 255, 0.82);
+}
+
+.light-mode aside .bg-white\/5 {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.light-mode aside a {
+  color: #64748b;
+}
+
+.light-mode aside a:hover {
+  background-color: rgba(140, 48, 245, 0.05);
+  color: var(--epic-purple);
+}
+
+.light-mode aside a.active,
+.light-mode aside .from-\[\#00FFFF\]\/30 {
+  background-image: linear-gradient(to right, rgba(0, 212, 255, 0.15), rgba(140, 48, 245, 0.05));
+  border-color: rgba(0, 212, 255, 0.3);
+  color: var(--epic-deep-purple);
 }
 
 /* Cards and specific containers */
 .light-mode .card {
-  background-color: var(--bg-card);
+  background: #ffffff;
   border-color: rgba(0, 0, 0, 0.05);
-  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.1), 0 0 15px rgba(140, 48, 245, 0.05);
   color: var(--text-main);
+}
+
+.light-mode .card:hover {
+  border-color: var(--epic-electric-blue);
+  box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.1), 0 0 20px rgba(0, 212, 255, 0.15);
 }
 
 .light-mode .epic-bg-animate {
@@ -299,25 +320,26 @@ body {
 
   .btn-primary {
     @apply px-6 py-4 rounded-2xl font-black transition-all duration-300 inline-flex items-center justify-center;
-    background: linear-gradient(90deg, var(--epic-cyan), var(--epic-blue));
-    color: #05011a;
-    box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+    background: linear-gradient(135deg, var(--epic-cyan) 0%, var(--epic-blue) 100%);
+    color: #0a0523;
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
   }
 
   .btn-primary:hover {
-    box-shadow: 0 0 35px rgba(0, 212, 255, 0.6);
+    box-shadow: 0 0 35px rgba(0, 255, 255, 0.6);
     transform: translateY(-2px);
-    filter: brightness(1.1);
+    background: linear-gradient(135deg, var(--epic-blue) 0%, var(--epic-cyan) 100%);
   }
 
   .btn-danger {
     @apply px-6 py-3.5 text-white rounded-2xl font-bold hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-300 inline-flex items-center justify-center;
-    background: linear-gradient(90deg, var(--epic-purple), var(--epic-deep-purple));
-    box-shadow: 0 0 15px rgba(140, 48, 245, 0.3);
+    background: linear-gradient(135deg, var(--epic-pink) 0%, var(--epic-purple) 100%);
+    box-shadow: 0 0 15px rgba(255, 77, 166, 0.3);
   }
 
   .btn-danger:hover {
-    box-shadow: 0 0 25px rgba(140, 48, 245, 0.5);
+    box-shadow: 0 0 25px rgba(255, 77, 166, 0.5);
+    background: linear-gradient(135deg, var(--epic-purple) 0%, var(--epic-pink) 100%);
   }
 
   .btn-ghost {
@@ -325,10 +347,15 @@ body {
   }
 
   .card {
-    @apply rounded-[2rem] border border-white/[0.03] p-8;
-    background: rgba(13, 13, 43, 0.7);
+    @apply rounded-[2rem] border border-white/[0.05] p-8;
+    background: linear-gradient(160deg, rgba(20, 15, 60, 0.8) 0%, rgba(10, 5, 35, 0.9) 100%);
     backdrop-filter: blur(40px);
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 15px rgba(0, 210, 255, 0.03);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 0 0 15px rgba(140, 48, 245, 0.05);
+  }
+
+  .card:hover {
+    border-color: rgba(0, 255, 255, 0.2);
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 0 0 25px rgba(0, 255, 255, 0.1);
   }
 
   .focus-ring {
@@ -337,12 +364,46 @@ body {
 
   /* Skeleton Loader */
   .skeleton {
-    @apply bg-finance-700 rounded-xl animate-pulse;
+    @apply bg-finance-700/50 rounded-xl animate-pulse;
   }
 
   /* Texto numérico financiero */
   .amount-text {
     @apply font-bold tabular-nums tracking-tight;
+  }
+
+  /* Custom Glow/Neon utilities */
+  .glow-cyan {
+    filter: drop-shadow(0 0 10px var(--epic-cyan));
+  }
+  .glow-pink {
+    filter: drop-shadow(0 0 10px var(--epic-pink));
+  }
+  .glow-purple {
+    filter: drop-shadow(0 0 10px var(--epic-purple));
+  }
+
+  /* Fluid Multi-color Gradients */
+  .bg-neon-cyan-pink {
+    background: linear-gradient(135deg, var(--epic-cyan) 0%, var(--epic-pink) 100%);
+  }
+  .bg-neon-purple-blue {
+    background: linear-gradient(135deg, var(--epic-purple) 0%, var(--epic-blue) 100%);
+  }
+  .bg-neon-indigo-cyan {
+    background: linear-gradient(135deg, var(--epic-indigo) 0%, var(--epic-cyan) 100%);
+  }
+
+  /* Section Transitions */
+  .section-transition-gradient {
+    background: linear-gradient(to bottom, transparent, rgba(140, 48, 245, 0.05), transparent);
+    height: 100px;
+    width: 100%;
+    margin: 2rem 0;
+  }
+
+  .glass-card {
+    @apply backdrop-blur-2xl bg-white/5 border border-white/10 rounded-[2rem] shadow-2xl;
   }
 }
 
@@ -523,9 +584,9 @@ body {
   height: 180%;
   background-image: conic-gradient(from 0deg,
       transparent 0deg,
-      #cc208e 90deg,
+      var(--epic-purple) 90deg,
       transparent 180deg,
-      #00fbff 270deg,
+      var(--epic-cyan) 270deg,
       transparent 360deg);
   animation: rotate 1.5s linear infinite;
   /* Increased speed to 1.5s */
@@ -679,9 +740,9 @@ body {
 /* ─── Epic Button Gradual ────────────────────────────────────────── */
 .btn-epic {
   @apply relative overflow-hidden px-6 py-4 rounded-2xl font-black transition-all duration-300 flex items-center justify-center;
-  background: linear-gradient(90deg, #00D4FF, #2E6FF2);
-  color: #05011a;
-  /* Dark text for contrast on cyan */
+  background: linear-gradient(135deg, var(--epic-electric-blue) 0%, var(--epic-blue) 100%);
+  color: #0a0523;
+  /* Dark text for contrast */
   border: none;
   box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
 }
@@ -689,7 +750,7 @@ body {
 .btn-epic:hover {
   box-shadow: 0 0 35px rgba(0, 212, 255, 0.6);
   transform: translateY(-2px);
-  filter: brightness(1.1);
+  background: linear-gradient(135deg, var(--epic-blue) 0%, var(--epic-electric-blue) 100%);
 }
 
 .btn-epic:active {
@@ -698,11 +759,13 @@ body {
 
 /* ─── Colores de Montos Financieros ────────────────────────────────── */
 .amount-income {
-  color: #34d399;
+  color: var(--epic-cyan);
+  filter: drop-shadow(0 0 5px rgba(0, 255, 255, 0.3));
 }
 
 .amount-expense {
-  color: #f87171;
+  color: var(--epic-pink);
+  filter: drop-shadow(0 0 5px rgba(255, 77, 166, 0.3));
 }
 
 .amount-balance-pos {
@@ -729,7 +792,7 @@ body {
 
 /* ─── Epic Background & Particles ────────────────────────────────── */
 .epic-bg-animate {
-  background: linear-gradient(-45deg, #030014, #0d0d2b, #05011a, #030014);
+  background: linear-gradient(-45deg, #0a0523, #1a0b42, #0f0a3c, #0a0523);
   background-size: 400% 400%;
   animation: gradientBG 120s ease infinite;
   /* Ultra-slow for premium feel */

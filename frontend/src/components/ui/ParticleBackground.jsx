@@ -21,7 +21,7 @@ const ParticleBackground = ({ count = 30 }) => {
             {particles.map((p) => (
                 <motion.div
                     key={p.id}
-                    className={`absolute rounded-full ${p.colorType === 'cyan' ? 'bg-[#00d4ff] shadow-[0_0_10px_#00d4ff]' : 'bg-[#cc208e] shadow-[0_0_10px_#cc208e]'}`}
+                    className={`absolute rounded-full ${p.colorType === 'cyan' ? 'bg-[#00FFFF] shadow-[0_0_12px_#00FFFF]' : 'bg-[#FF4DA6] shadow-[0_0_12px_#FF4DA6]'}`}
                     style={{
                         width: p.size,
                         height: p.size,
