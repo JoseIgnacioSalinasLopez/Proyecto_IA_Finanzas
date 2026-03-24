@@ -143,11 +143,11 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
     const handleSimulate = (item) => {
         if (!stats || !stats.summary) return;
         const { balance, bufferTime, dailyBurnRate } = stats.summary;
-        
+
         const currentMonthly = dailyBurnRate * 30;
         const newMonthly = Math.max(0, currentMonthly - item.amount);
         const newDaily = newMonthly / 30;
-        
+
         const newBuffer = newDaily > 0 ? (balance / newDaily) : 999;
         const impact = newBuffer - bufferTime;
 
@@ -316,8 +316,8 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
         manualEvents?.forEach(ev => {
             const lastPaidDate = ev.last_paid_at ? new Date(ev.last_paid_at) : null;
             const isPaidThisMonth = ev.status === 'paid' && lastPaidDate &&
-                                   (lastPaidDate.getMonth() === currentMonth) &&
-                                   (lastPaidDate.getFullYear() === currentYear);
+                (lastPaidDate.getMonth() === currentMonth) &&
+                (lastPaidDate.getFullYear() === currentYear);
 
             if (ev.is_recurring && ev.payment_day) {
                 const pDay = Number(ev.payment_day);
@@ -612,7 +612,7 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                                                                                 console.error('Error deleting associated transaction:', err);
                                                                             }
                                                                         }
-                                                                        
+
                                                                         await api.put(`/events/${item.id}`, {
                                                                             status: 'pending',
                                                                             last_paid_at: null,
@@ -651,10 +651,10 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                                                                     <Check size={12} strokeWidth={3} />
                                                                 </button>
                                                             )}
-                                                            <button 
+                                                            <button
                                                                 onClick={(e) => { e.stopPropagation(); handleSimulate(item); }}
                                                                 className="text-[#00FFFF] hover:bg-[#00FFFF]/20 p-1.5 rounded-lg transition-all"
-                                                                title={t('simulate_impact') || "Simular Impacto"}
+                                                                title={t('simulate_impact')}
                                                             >
                                                                 <Zap size={12} className={item.amount > 100 ? "animate-pulse" : ""} />
                                                             </button>
@@ -779,7 +779,7 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                                                 min="1" max="31"
                                                 required
                                                 className="input-field border-black/5 dark:border-white/5 bg-slate-200/50 dark:bg-white/5 focus:bg-slate-200 dark:focus:bg-white/10"
-                                                placeholder="Ej: 8"
+                                                placeholder={t('example_day').replace('{n}', 8)}
                                                 value={eventFormData.payment_day}
                                                 onChange={e => setEventFormData({ ...eventFormData, payment_day: e.target.value })}
                                             />
@@ -791,7 +791,7 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                                                 min="1" max="31"
                                                 required
                                                 className="input-field border-black/5 dark:border-white/5 bg-slate-200/50 dark:bg-white/5 focus:bg-slate-200 dark:focus:bg-white/10"
-                                                placeholder="Ej: 15"
+                                                placeholder={t('example_day').replace('{n}', 15)}
                                                 value={eventFormData.deadline_day}
                                                 onChange={e => setEventFormData({ ...eventFormData, deadline_day: e.target.value })}
                                             />
@@ -845,7 +845,7 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
             {/* Panel de Resultados de Simulación Flotante */}
             <AnimatePresence>
                 {simResult && (
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0, y: 50, scale: 0.9 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.8 }}
@@ -865,11 +865,11 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                                     <X size={16} />
                                 </button>
                             </div>
-                            
+
                             <p className="text-[11px] text-finance-muted mb-4 leading-relaxed">
                                 Si cancelaras <span className="text-white font-bold">{simResult.title}</span> (${simResult.amount}):
                             </p>
-                            
+
                             <div className="grid grid-cols-2 gap-3 mb-4">
                                 <div className="p-3 rounded-xl bg-white/5 border border-white/5 text-center">
                                     <p className="text-[10px] text-finance-muted uppercase mb-1">Buffer Actual</p>
@@ -880,7 +880,7 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                                     <p className="text-lg font-mono font-black text-finance-primary glow-cyan">{simResult.newBuffer}d</p>
                                 </div>
                             </div>
-                            
+
                             <div className="p-3 rounded-xl bg-[#00FFFF]/10 border border-[#00FFFF]/20 flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <TrendingUp size={14} className="text-[#00FFFF]" />
@@ -890,8 +890,8 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                                     +{simResult.impact} días
                                 </span>
                             </div>
-                            
-                            <button 
+
+                            <button
                                 onClick={() => setSimResult(null)}
                                 className="w-full mt-4 py-2.5 rounded-xl bg-finance-primary/20 hover:bg-finance-primary/30 text-finance-primary text-[11px] font-black uppercase tracking-widest transition-all border border-finance-primary/30"
                             >

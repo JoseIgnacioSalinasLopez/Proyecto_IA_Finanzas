@@ -5,21 +5,17 @@ import { useLanguage } from '../../context/LanguageContext';
 export default function NotificationsDropdown({ notifications, onClose, onClear }) {
     const { t, language } = useLanguage();
 
-    const formatRelativeTime = (dateString) => {
-        const date = new Date(dateString);
+    const formatTimeAgo = (dateStr) => {
+        const date = new Date(dateStr);
         const now = new Date();
-        const diffInSeconds = Math.floor((now - date) / 1000);
+        const diffInMinutes = Math.floor((now - date) / 60000);
 
-        if (diffInSeconds < 60) return language === 'en' ? 'JUST NOW' : 'JUSTO AHORA';
-
-        const diffInMinutes = Math.floor(diffInSeconds / 60);
-        if (diffInMinutes < 60) return language === 'en' ? `${diffInMinutes} MIN AGO` : `HACE ${diffInMinutes} MIN`;
-
+        if (diffInMinutes < 1) return t('just_now');
+        if (diffInMinutes < 60) return t('min_ago').replace('{n}', diffInMinutes);
         const diffInHours = Math.floor(diffInMinutes / 60);
-        if (diffInHours < 24) return language === 'en' ? `${diffInHours} HOURS AGO` : `HACE ${diffInHours} HORAS`;
-
+        if (diffInHours < 24) return t('hours_ago').replace('{n}', diffInHours);
         const diffInDays = Math.floor(diffInHours / 24);
-        return language === 'en' ? `${diffInDays} DAYS AGO` : `HACE ${diffInDays} DÍAS`;
+        return t('days_ago').replace('{n}', diffInDays);
     };
 
     return (
@@ -58,7 +54,7 @@ export default function NotificationsDropdown({ notifications, onClose, onClear 
                                         <p className="text-sm font-bold text-finance-text mb-0.5 leading-tight">{n.title}</p>
                                         <p className="text-[11px] text-finance-muted leading-normal">{n.message}</p>
                                         <p className="text-[9px] text-finance-muted/70 mt-2 font-mono uppercase">
-                                            {formatRelativeTime(n.created_at)}
+                                            {formatTimeAgo(n.created_at)}
                                         </p>
                                     </div>
                                 </div>

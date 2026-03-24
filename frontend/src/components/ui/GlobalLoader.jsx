@@ -13,10 +13,8 @@ const GlobalLoader = ({ fullScreen = true }) => {
         return () => clearInterval(interval);
     }, []);
 
-    const getTranslation = () => {
-        const val = t('processing_fortune');
-        if (!val || val.includes('PROCESSING_FORTUNE')) return 'Procesando Fortuna';
-        return val;
+    const getTranslation = (key) => {
+        return t(key);
     };
 
     return (
@@ -33,10 +31,10 @@ const GlobalLoader = ({ fullScreen = true }) => {
                 <svg viewBox="0 0 120 160" className="w-64 h-72 relative z-10 filter drop-shadow-neon">
                     <defs>
                         <filter id="glow">
-                            <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+                            <feGaussianBlur stdDeviation="2.5" result="coloredBlur" />
                             <feMerge>
-                                <feMergeNode in="coloredBlur"/>
-                                <feMergeNode in="SourceGraphic"/>
+                                <feMergeNode in="coloredBlur" />
+                                <feMergeNode in="SourceGraphic" />
                             </feMerge>
                         </filter>
                     </defs>

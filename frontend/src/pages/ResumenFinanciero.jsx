@@ -99,9 +99,9 @@ function TransactionForm({ formData, setFormData, categories, onSubmit, onClose,
                 <label className="block text-sm text-finance-muted font-medium uppercase tracking-wide">
                     {t('category_label')}
                 </label>
-                
+
                 <div className="relative">
-                    <input 
+                    <input
                         type="text"
                         placeholder={t('search_category')}
                         className="w-full bg-black/5 dark:bg-black/20 border border-black/10 dark:border-white/5 rounded-xl px-4 py-2.5 text-xs text-finance-text focus:outline-none focus:border-finance-primary/50 transition-all placeholder:text-finance-muted/40"
@@ -121,13 +121,13 @@ function TransactionForm({ formData, setFormData, categories, onSubmit, onClose,
                                 type="button"
                                 onClick={() => setFormData({ ...formData, category_id: c.id })}
                                 className={`flex items-center gap-2.5 p-2 rounded-xl text-[11px] font-bold border transition-all truncate
-                                    ${formData.category_id === c.id 
-                                        ? 'bg-finance-primary/10 border-finance-primary/50 text-finance-primary shadow-[0_0_15px_rgba(0,212,255,0.1)]' 
+                                    ${formData.category_id === c.id
+                                        ? 'bg-finance-primary/10 border-finance-primary/50 text-finance-primary shadow-[0_0_15px_rgba(0,212,255,0.1)]'
                                         : 'bg-black/5 dark:bg-white/5 border-black/5 dark:border-white/5 text-finance-muted hover:border-finance-primary/30 hover:bg-finance-primary/5'}`}
                             >
-                                <div 
-                                    className="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm" 
-                                    style={{ backgroundColor: c.color || '#00D4FF' }} 
+                                <div
+                                    className="w-2.5 h-2.5 rounded-full shrink-0 shadow-sm"
+                                    style={{ backgroundColor: c.color || '#00D4FF' }}
                                 />
                                 <span className="truncate">{c.name}</span>
                             </button>
@@ -390,7 +390,7 @@ export default function ResumenFinanciero() {
         const id = tx.id;
         const previousTransactions = [...transactions];
         const previousStats = { ...stats };
-        
+
         // 1. Optimistic UI: Eliminar localmente de inmediato
         setTransactions(prev => prev.filter(t => t.id !== id));
         setShowDeleteConfirm(null);
@@ -419,7 +419,7 @@ export default function ResumenFinanciero() {
     const handleInlineSave = async (id, field, value) => {
         const originalTx = transactions.find(t => t.id === id);
         if (!originalTx) return;
-        
+
         // Si el valor no cambió, solo cerrar
         if (String(originalTx[field]) === String(value)) {
             setEditingCell(null);
@@ -428,20 +428,20 @@ export default function ResumenFinanciero() {
 
         try {
             const numericValue = field === 'amount' ? parseFloat(value) : value;
-            
+
             // Optimistic Update
             setTransactions(prev => prev.map(t => t.id === id ? { ...t, [field]: numericValue } : t));
             setEditingCell(null);
 
-            const payload = { 
-                ...originalTx, 
+            const payload = {
+                ...originalTx,
                 [field]: numericValue,
                 amount: parseFloat(field === 'amount' ? value : originalTx.amount)
             };
-            
+
             // Limpiar campos que el backend no espera en el body plano
-            delete payload.categories; 
-            
+            delete payload.categories;
+
             await api.put(`/transactions/${id}`, payload);
             showToast(t('movement_updated'));
             window.dispatchEvent(new CustomEvent('refresh-data'));
@@ -790,7 +790,7 @@ export default function ResumenFinanciero() {
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                         {searchTerm && (
-                            <button 
+                            <button
                                 onClick={() => setSearchTerm('')}
                                 className="absolute inset-y-0 right-0 pr-4 flex items-center text-finance-muted hover:text-finance-text transition-colors"
                             >
@@ -833,7 +833,7 @@ export default function ResumenFinanciero() {
                                                     onBlur={() => handleInlineSave(tx.id, 'description', editingCell.value)}
                                                 />
                                             ) : (
-                                                <div 
+                                                <div
                                                     onClick={() => setEditingCell({ id: tx.id, field: 'description', value: tx.description || '' })}
                                                     className="flex items-center gap-2 cursor-pointer hover:text-finance-primary transition-colors group/edit"
                                                 >
@@ -872,7 +872,7 @@ export default function ResumenFinanciero() {
                                                     onBlur={() => handleInlineSave(tx.id, 'amount', editingCell.value)}
                                                 />
                                             ) : (
-                                                <div 
+                                                <div
                                                     onClick={() => setEditingCell({ id: tx.id, field: 'amount', value: tx.amount })}
                                                     className={`flex items-center justify-end gap-1 cursor-pointer hover:text-finance-primary transition-colors group/edit ${tx.type === 'income' ? 'text-[#00FFFF] glow-cyan' : 'text-[#FF4DA6] glow-pink'}`}
                                                 >

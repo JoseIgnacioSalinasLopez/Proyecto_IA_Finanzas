@@ -61,12 +61,12 @@ export default function Login() {
         e.stopPropagation();
         e.preventDefault();
         if (!fullName.trim()) {
-            setError(language === 'en' ? 'Please enter your full name' : 'Por favor ingresa tu nombre completo');
+            setError(t('enter_full_name'));
             return;
         }
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!email.trim() || !emailRegex.test(email)) {
-            setError(language === 'en' ? 'Enter a valid email address' : 'Ingresa un correo electrónico válido');
+            setError(t('enter_valid_email'));
             return;
         }
         setError('');
@@ -76,11 +76,11 @@ export default function Login() {
     const handleRegister = async (e) => {
         e.preventDefault();
         if (password.length < 6) {
-            setError(language === 'en' ? 'Password must be at least 6 characters' : 'La contraseña debe tener al menos 6 caracteres');
+            setError(t('password_len'));
             return;
         }
         if (password !== confirmPassword) {
-            setError(language === 'en' ? 'Passwords do not match' : 'Las contraseñas no coinciden');
+            setError(t('passwords_mismatch'));
             return;
         }
         setError('');
@@ -90,7 +90,7 @@ export default function Login() {
             setRegisterSuccess(true);
             setTimeout(() => navigate('/'), 1500);
         } catch (err) {
-            setError(err.response?.data?.message || (language === 'en' ? 'Registration error' : 'Error al registrarse'));
+            setError(err.response?.data?.message || t('registration_err'));
         } finally {
             setLoading(false);
         }
@@ -259,7 +259,7 @@ export default function Login() {
 
                                             <div className="relative py-4">
                                                 <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/5"></div></div>
-                                                <div className="relative flex justify-center text-[8px] uppercase tracking-[0.3em] font-black text-slate-600"><span className="bg-finance-900 px-4">{language === 'en' ? 'Or continue with' : 'O continuar con'}</span></div>
+                                                <div className="relative flex justify-center text-[8px] uppercase tracking-[0.3em] font-black text-slate-600"><span className="bg-finance-900 px-4">{t('continue_with')}</span></div>
                                             </div>
 
                                             <div className="grid grid-cols-1 gap-3">
@@ -267,14 +267,14 @@ export default function Login() {
                                                     type="button"
                                                     onClick={() => loginWithGoogle()}
                                                     className={`flex items-center justify-center gap-3 w-full py-3 rounded-2xl transition-all group ${isLight
-                                                            ? 'bg-white border border-slate-200 shadow-sm hover:bg-slate-50'
-                                                            : 'bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/20'
+                                                        ? 'bg-white border border-slate-200 shadow-sm hover:bg-slate-50'
+                                                        : 'bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/20'
                                                         }`}
                                                 >
                                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" className={`${isLight ? '' : 'text-white'} group-hover:text-blue-400 transition-colors`}><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" /><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" /><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05" /><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" /></svg>
                                                     <span className={`text-[10px] font-black uppercase tracking-widest transition-colors ${isLight ? 'text-slate-600' : 'text-slate-300'
                                                         }`}>
-                                                        {language === 'en' ? 'Sign in with Google' : 'Iniciar sesión con Google'}
+                                                        {t('google_sign_in')}
                                                     </span>
                                                 </button>
                                             </div>
@@ -299,12 +299,12 @@ export default function Login() {
                                                 <div className="w-14 h-14 rounded-full bg-[#00FFFF]/20 flex items-center justify-center mx-auto mb-4">
                                                     <svg className="text-[#00FFFF]" width="28" height="28" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                                                 </div>
-                                                <p className="text-[#00FFFF] font-black text-sm uppercase tracking-widest">{language === 'en' ? 'Account created!' : '¡Cuenta creada!'}</p>
-                                                <p className="text-slate-500 text-xs mt-1">{language === 'en' ? 'Entering your dashboard...' : 'Ingresando a tu panel...'}</p>
+                                                <p className="text-[#00FFFF] font-black text-sm uppercase tracking-widest">{t('account_created')}</p>
+                                                <p className="text-slate-500 text-xs mt-1">{t('entering_dashboard')}</p>
                                             </div>
                                         ) : registerStep === 1 ? (
                                             <div className="space-y-5">
-                                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest text-center">{language === 'en' ? 'Step 1 of 2 — Personal Info' : 'Paso 1 de 2 — Info Personal'}</p>
+                                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest text-center">{t('step_1_personal')}</p>
                                                 <div className="floating-label-group">
                                                     <input
                                                         type="text"
@@ -337,7 +337,7 @@ export default function Login() {
                                             </div>
                                         ) : (
                                             <form onSubmit={handleRegister} className="space-y-5">
-                                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest text-center">{language === 'en' ? 'Step 2 of 2 — Set Password' : 'Paso 2 de 2 — Crea tu Contraseña'}</p>
+                                                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest text-center">{t('step_2_password')}</p>
                                                 <div className="floating-label-group relative">
                                                     <input
                                                         type={showPassword ? 'text' : 'password'}
@@ -349,7 +349,7 @@ export default function Login() {
                                                         minLength={6}
                                                         autoFocus
                                                     />
-                                                    <label className="text-finance-muted">{language === 'en' ? 'Password' : 'Contraseña'}</label>
+                                                    <label className="text-finance-muted">{t('password_field')}</label>
                                                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors" tabIndex="-1">
                                                         {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
                                                     </button>
@@ -368,7 +368,7 @@ export default function Login() {
                                                         onChange={(e) => setConfirmPassword(e.target.value)}
                                                         required
                                                     />
-                                                    <label className="text-finance-muted">{language === 'en' ? 'Confirm Password' : 'Confirmar Contraseña'}</label>
+                                                    <label className="text-finance-muted">{t('confirm_password_field')}</label>
                                                     <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors" tabIndex="-1">
                                                         {showConfirmPassword ? <EyeOff size={17} /> : <Eye size={17} />}
                                                     </button>
@@ -379,14 +379,14 @@ export default function Login() {
                                                         onClick={(e) => { e.stopPropagation(); setRegisterStep(1); setError(''); }}
                                                         className="flex-1 py-4 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-white border border-white/5 rounded-2xl hover:border-white/20 transition-all"
                                                     >
-                                                        {language === 'en' ? 'Back' : 'Atrás'}
+                                                        {t('back_action')}
                                                     </button>
                                                     <button
                                                         type="submit"
                                                         disabled={loading}
                                                         className="flex-[2] btn-epic py-4 text-[#00D4FF] font-black rounded-2xl uppercase tracking-[0.15em] text-xs flex items-center justify-center gap-2"
                                                     >
-                                                        {loading ? <RefreshCw className="animate-spin" size={16} /> : (language === 'en' ? 'Create Account' : 'Crear Cuenta')}
+                                                        {loading ? <RefreshCw className="animate-spin" size={16} /> : t('create_account_action')}
                                                     </button>
                                                 </div>
                                             </form>
