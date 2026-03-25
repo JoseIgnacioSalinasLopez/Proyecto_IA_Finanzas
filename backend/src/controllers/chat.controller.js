@@ -1,6 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import * as statsService from '../services/stats.service.js';
 import * as transactionService from '../services/transaction.service.js';
+import * as profileService from '../services/profile.service.js';
 import { supabase } from '../config/supabaseClient.js';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -100,8 +101,11 @@ export const chat = async (req, res, next) => {
         // Moví este insert para abajo, para guardarlo al mismo tiempo que la respuesta de la IA.
         // Así evitamos el problema del "mensaje fantasma" en caso de que Gemini falle.
 
-        // 2. Extraer contexto financiero
-        const stats = await statsService.getStats(userId);
+        // 2. Extraer contexto financiero y de perfil
+        const [stats, userProfile] = await Promise.all([
+            statsService.getStats(userId),
+            profileService.getProfile(userId)
+        ]);
         const topCategory = stats?.expensesByCategory?.[0];
         const savingsRate = stats?.summary?.totalIncome > 0
             ? ((stats.summary.balance / stats.summary.totalIncome) * 100).toFixed(1) : 0;
@@ -112,7 +116,7 @@ export const chat = async (req, res, next) => {
 
         // 3. EL CEREBRO DE LA IA
         const systemPrompt = `
-Eres el Asistente IA de MenteBillete. Tu misión es explicar las finanzas de forma tan sencilla, casual y amigable que hasta un niño o un adulto mayor puedan entenderlo sin dudar.
+Eres el Asistente IA de LanaTrix. Tu misión es explicar las finanzas de forma tan sencilla, casual y amigable que hasta un niño o un adulto mayor puedan entenderlo sin dudar.
 
 TUS 10 REGLAS DE ORO DE COMUNICACIÓN:
 1. Divide la información usando títulos claros.
@@ -132,6 +136,13 @@ DATOS FINANCIEROS DEL USUARIO:
 - Categoría con más gastos: ${topCategory ? `${topCategory.name}` : 'N/A'}
 - Presupuesto diario seguro actual: $${stats?.summary?.dailyBurnRate?.toFixed(2) || 0}
 - Días restantes del mes: ${daysLeftInMonth}
+
+PERFIL Y ADN FINANCIERO DEL USUARIO:
+- Nombre: ${userProfile?.name || 'Usuario'}
+- Biografía/Metas: ${userProfile?.bio || 'No definida'}
+- Tipo de cuenta: ${userProfile?.account_type || 'Básico'}
+
+(IMPORTANTE: Usa la Biografía para personalizar tus consejos. Si el usuario menciona metas en su bio, relaciónalas con sus gastos actuales).
 
 INSTRUCCIONES DE OPERACIÓN (Devuelve SOLO un JSON válido):
 

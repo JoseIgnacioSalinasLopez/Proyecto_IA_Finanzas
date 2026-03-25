@@ -7,8 +7,8 @@ export const generateICS = (transactions) => {
     let icsContent = [
         'BEGIN:VCALENDAR',
         'VERSION:2.0',
-        'PRODID:-//MenteBillete//Financial Tracking//ES',
-        'X-WR-CALNAME:MenteBillete: Finanzas',
+        'PRODID:-//LanaTrix//Financial Tracking//ES',
+        'X-WR-CALNAME:LanaTrix: Finanzas',
         'X-WR-TIMEZONE:America/Mexico_City',
         'CALSCALE:GREGORIAN',
         'METHOD:PUBLISH'
@@ -19,7 +19,7 @@ export const generateICS = (transactions) => {
         const dateStr = date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
         
         icsContent.push('BEGIN:VEVENT');
-        icsContent.push(`UID:${tx.id}@mentebillete.com`);
+        icsContent.push(`UID:${tx.id}@lanatrix.com`);
         icsContent.push(`DTSTAMP:${dateStr}`);
         icsContent.push(`DTSTART:${dateStr}`);
         icsContent.push(`DURATION:PT1H`);

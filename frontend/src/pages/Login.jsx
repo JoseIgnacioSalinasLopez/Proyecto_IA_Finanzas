@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
-import appLogo from '../assets/logo.png';
-import appLogoLight from '../assets/logo claro.png';
+import appLogo from '../assets/lanatrix.png';
+import appLogoLight from '../assets/lanatrix claro.png';
 import { useTheme } from '../context/ThemeContext';
 import fondoLogin from '../assets/fondo-login.png';
 import fondoLoginLight from '../assets/fondo-login-claro.png';

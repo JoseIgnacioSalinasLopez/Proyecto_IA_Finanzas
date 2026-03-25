@@ -45,7 +45,7 @@ app.use('/api/activity', activityRoutes);
 // Healthcheck Route (Intacta)
 app.get('/api/health', (req, res) => {
     console.log('[DEBUG] Healthcheck pinged');
-    res.status(200).json({ status: 'ok', message: 'Mente Billete API is running' });
+    res.status(200).json({ status: 'ok', message: 'LanaTrix API is running' });
 });
 
 app.get('/api/test', (req, res) => {

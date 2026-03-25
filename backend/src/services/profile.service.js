@@ -35,3 +35,14 @@ export const updateProfile = async (userId, dataPayload) => {
 
     return data;
 };
+
+export const getProfile = async (userId) => {
+    const { data, error } = await supabase
+        .from('users')
+        .select('id, name, email, phone, bio, avatar_url, account_type, created_at')
+        .eq('id', userId)
+        .single();
+
+    if (error) throw new Error(error.message);
+    return data;
+};

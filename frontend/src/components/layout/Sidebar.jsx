@@ -3,8 +3,8 @@ import { LayoutDashboard, Wallet, BarChart3, Tags, User, Bot, LogOut, Target, X,
 import { useAuth } from '../../hooks/useAuth';
 import { useLanguage } from '../../context/LanguageContext';
 import { useTheme } from '../../context/ThemeContext';
-import appLogo from '../../assets/logo.png';
-import appLogoLight from '../../assets/logo claro.png';
+import appLogo from '../../assets/lanatrix.png';
+import appLogoLight from '../../assets/lanatrix claro.png';
 import bolsaIcon from '../../assets/bolsa.png';
 import bolsaIconLight from '../../assets/bolsa claro.png';
 

@@ -118,7 +118,7 @@ export default function Reportes() {
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(26);
             doc.setTextColor(255, 255, 255);
-            doc.text('MENTE BILLETE', 15, 22);
+            doc.text('LANATRIX', 15, 22);
 
             doc.setFontSize(10);
             doc.setFont('helvetica', 'normal');

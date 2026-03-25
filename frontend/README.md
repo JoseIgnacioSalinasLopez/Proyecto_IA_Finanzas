@@ -1,6 +1,6 @@
-# Mente Billete - Gestor Financiero Personal
+# LanaTrix - Gestor Financiero Personal
 
-Mente Billete es una aplicación web Full-Stack diseñada para ayudar a los usuarios a tomar el control de sus finanzas personales. Permite registrar ingresos y gastos, crear categorías personalizadas, visualizar estadísticas en un dashboard interactivo.
+LanaTrix es una aplicación web Full-Stack diseñada para ayudar a los usuarios a tomar el control de sus finanzas personales. Permite registrar ingresos y gastos, crear categorías personalizadas, visualizar estadísticas en un dashboard interactivo.
 
 Características Principales
 

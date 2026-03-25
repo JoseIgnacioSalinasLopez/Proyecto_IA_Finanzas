@@ -102,7 +102,7 @@ const GlobalLoader = ({ fullScreen = true }) => {
 
                 <div className="mt-6 text-center">
                     <h2 className="loading-text">
-                        {getTranslation()}
+                        {getTranslation('loading')}
                         <span className="dot">.</span>
                         <span className="dot">.</span>
                         <span className="dot">.</span>

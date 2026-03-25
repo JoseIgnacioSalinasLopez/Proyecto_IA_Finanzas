@@ -1,5 +1,5 @@
 -- ==========================================
--- MENTE BILLETE - ESQUEMA DE BASE DE DATOS
+-- LANATRIX - ESQUEMA DE BASE DE DATOS
 -- ==========================================
 
 -- 1. EXTENSIONES

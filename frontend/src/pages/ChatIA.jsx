@@ -628,7 +628,7 @@ export default function ChatIA() {
                     </div>
 
                     <p className={`text-center text-[11px] mt-4 font-medium tracking-widest uppercase ${theme === 'light' ? 'text-[#00D4FF]' : 'text-[#00D4FF]/60 drop-shadow-[0_0_5px_rgba(0,212,255,0.3)]'}`}>
-                        Mente Billete AI puede cometer errores. Verifica las transacciones.
+                        LanaTrix AI puede cometer errores. Verifica las transacciones.
                     </p>
                 </div>
             </div>

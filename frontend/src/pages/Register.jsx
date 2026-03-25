@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
-import appLogo from '../assets/logo.png';
-import appLogoLight from '../assets/logo claro.png';
+import appLogo from '../assets/lanatrix.png';
+import appLogoLight from '../assets/lanatrix claro.png';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../hooks/useAuth';
 import { Eye, EyeOff } from 'lucide-react';
@@ -39,7 +39,7 @@ export default function Register() {
             <div className="card w-full max-w-md bg-white/5">
                 <div className="text-center mb-8">
                     <div className="flex justify-center mb-4">
-                        <img src={isLight ? appLogoLight : appLogo} alt="Mente Billete Logo" className="h-20 w-auto object-contain" />
+                        <img src={isLight ? appLogoLight : appLogo} alt="LanaTrix Logo" className="h-20 w-auto object-contain" />
                     </div>
                     <p className="text-finance-muted mt-4">{t('register_title')}</p>
                 </div>
