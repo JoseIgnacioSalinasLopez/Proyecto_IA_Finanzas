@@ -130,7 +130,7 @@ export default function Dashboard() {
                 <button
                     onClick={toggleBalances}
                     className="p-2 mb-1 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 hover:border-[#00FFFF]/30 text-finance-muted hover:text-[#00FFFF] transition-all shadow-sm flex items-center gap-2 group"
-                    title={showBalances ? 'Ocultar saldos' : 'Mostrar saldos'}
+                    title={showBalances ? t('hide_balances') : t('show_balances')}
                 >
                     {showBalances ? <EyeOff size={20} className="group-hover:scale-110 transition-transform" /> : <Eye size={20} className="group-hover:scale-110 transition-transform" />}
                 </button>

@@ -2,6 +2,7 @@ import { useMemo, useRef } from 'react';
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler } from 'chart.js';
 import { Line } from 'react-chartjs-2';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, Filler);
 
@@ -30,8 +31,11 @@ const glowPlugin = {
 };
 
 export default function LineChart({ data, title = 'Evolución' }) {
+    const { t, language } = useLanguage();
     const chartRef = useRef(null);
     const { theme } = useTheme();
+
+    const chartTitleLabel = title === 'Evolución' ? t('evolution_label') : title;
     const isDark = theme === 'dark';
 
     const tickColor = isDark ? 'rgba(255, 255, 255, 0.5)' : 'rgba(30, 30, 60, 0.6)';
@@ -96,8 +100,8 @@ export default function LineChart({ data, title = 'Evolución' }) {
                 }
             },
             title: {
-                display: !!title,
-                text: title,
+                display: !!chartTitleLabel,
+                text: chartTitleLabel,
                 color: titleColor,
                 align: 'start',
                 font: { family: "'Inter', sans-serif", size: 16, weight: 'bold' },
@@ -117,7 +121,7 @@ export default function LineChart({ data, title = 'Evolución' }) {
                         let label = context.dataset.label || '';
                         if (label) label += ': ';
                         if (context.parsed.y !== null) {
-                            label += new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(context.parsed.y);
+                            label += new Intl.NumberFormat(language === 'en' ? 'en-US' : 'es-MX', { style: 'currency', currency: 'MXN' }).format(context.parsed.y);
                         }
                         return label;
                     }
@@ -130,7 +134,7 @@ export default function LineChart({ data, title = 'Evolución' }) {
                 ticks: {
                     color: tickColor,
                     font: { family: "'Inter', sans-serif", weight: '600' },
-                    callback: function (value) { return '$' + value; }
+                    callback: function (value) { return (language === 'en' ? '$' : '$') + value; }
                 },
                 beginAtZero: true
             },

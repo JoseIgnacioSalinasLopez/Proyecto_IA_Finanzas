@@ -123,11 +123,11 @@ export default function Reportes() {
             doc.setFontSize(10);
             doc.setFont('helvetica', 'normal');
             doc.setTextColor(0, 212, 255);
-            doc.text('PLATAFORMA DE GESTIÓN PATRIMONIAL ELITE', 15, 30);
+            doc.text(t('pdf_platform_subtitle'), 15, 30);
 
             doc.setTextColor(158, 163, 176);
             doc.text(`${t('pdf_generated_at')}: ${now.toLocaleDateString(locale)} | ${now.toLocaleTimeString(locale)}`, pageW - 15, 25, { align: 'right' });
-            doc.text(`ID DE REPORTE: TX-${Math.random().toString(36).substr(2, 9).toUpperCase()}`, pageW - 15, 30, { align: 'right' });
+            doc.text(`${t('pdf_report_id')}: MB-${Math.random().toString(36).substr(2, 9).toUpperCase()}`, pageW - 15, 30, { align: 'right' });
 
             // ── Bloque 1: Resumen Ejecutivo ────────────────────────────────
             let y = 65;
@@ -139,9 +139,9 @@ export default function Reportes() {
             y += 8;
             const summaryTable = [
                 [t('net_balance_report'), `$${stats.summary.balance.toLocaleString(locale, { minimumFractionDigits: 2 })}`],
-                [t('total_expense') || 'GASTOS TOTALES', `$${stats.summary.totalExpense.toLocaleString(locale, { minimumFractionDigits: 2 })}`],
-                [t('daily_burn_rate') || 'TASA DE QUEMADO DIARIO', `$${stats.summary.dailyBurnRate.toLocaleString(locale, { minimumFractionDigits: 2 })}`],
-                [t('reserve_days') || 'DÍAS DE RESERVA', `${stats.summary.bufferTime} ${t('days').toLowerCase()}`],
+                [t('total_expense'), `$${stats.summary.totalExpense.toLocaleString(locale, { minimumFractionDigits: 2 })}`],
+                [t('daily_burn_rate'), `$${stats.summary.dailyBurnRate.toLocaleString(locale, { minimumFractionDigits: 2 })}`],
+                [t('reserve_days'), `${stats.summary.bufferTime} ${t('days').toLowerCase()}`],
                 [t('risk_level_label'), stats.summary.riskLevel]
             ];
 
@@ -157,7 +157,7 @@ export default function Reportes() {
             });
 
             // ── Bloque 1.5: Auditoría Fiscal Inteligente (Auditor IQ) ──────
-            const deductibleCategories = [t('salud') || 'Salud', t('educacion') || 'Educación', t('inversiones') || 'Inversiones'];
+            const deductibleCategories = [t('health_label'), t('education_label'), t('investments_label')];
             const deductibleTotal = stats.expensesByCategory
                 .filter(c => deductibleCategories.some(dc => c.name.toLowerCase().includes(dc.toLowerCase())))
                 .reduce((sum, item) => sum + item.amount, 0);
@@ -171,12 +171,12 @@ export default function Reportes() {
                 doc.setFontSize(10);
                 doc.setTextColor(11, 2, 45);
                 doc.setFont('helvetica', 'bold');
-                doc.text('AUDITOR IQ: POTENCIAL DEDUCIBLE', 20, y + 8);
+                doc.text(t('pdf_auditor_iq_title'), 20, y + 8);
 
                 doc.setFontSize(9);
                 doc.setFont('helvetica', 'normal');
                 doc.setTextColor(30, 41, 59);
-                doc.text(`He identificado $${deductibleTotal.toLocaleString(locale)} en gastos que podrían ser deducibles de impuestos.`, 20, y + 14);
+                doc.text(t('pdf_auditor_iq_msg').replace('${amount}', deductibleTotal.toLocaleString(locale)), 20, y + 14);
             }
 
             // ── Bloque 2: Distribución de Activos ───────────────────────────
@@ -215,8 +215,8 @@ export default function Reportes() {
             doc.rect(0, pageH - 15, pageW, 15, 'F');
             doc.setFontSize(8);
             doc.setTextColor(158, 163, 176);
-            doc.text('CONIDENCIALIDAD NIVEL 4 | MENTE BILLETE DIGITAL ASSET MANAGEMENT', 15, pageH - 7);
-            doc.text(`PÁGINA 1 DE 1`, pageW - 15, pageH - 7, { align: 'right' });
+            doc.text(t('pdf_confidentiality'), 15, pageH - 7);
+            doc.text(`${t('pdf_page_prefix')} 1 ${t('pdf_of_suffix')} 1`, pageW - 15, pageH - 7, { align: 'right' });
 
             doc.save(`MB_ELITE_REPORT_${new Date().toISOString().split('T')[0]}.pdf`);
             showToast(t('pdf_generated') || 'Reporte generado con éxito');

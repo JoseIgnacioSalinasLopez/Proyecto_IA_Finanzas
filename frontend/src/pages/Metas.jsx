@@ -241,7 +241,7 @@ export default function Metas() {
                                 <div className="flex items-start gap-2 mt-2 px-3 py-2 bg-finance-primary/5 border border-white/5 rounded-xl">
                                     <Lightbulb size={13} className="text-finance-primary flex-shrink-0 mt-0.5" />
                                     <p className="text-[11px] text-finance-muted">
-                                        {t('monthly_suggested')}: <AnimatedCounter amount={monthlySavings} className="text-finance-primary font-bold" suffix={`/${language === 'en' ? 'mo' : 'mes'}`} />
+                                        {t('monthly_suggested')}: <AnimatedCounter amount={monthlySavings} className="text-finance-primary font-bold" suffix={t('monthly_suffix')} />
                                     </p>
                                 </div>
                             )}

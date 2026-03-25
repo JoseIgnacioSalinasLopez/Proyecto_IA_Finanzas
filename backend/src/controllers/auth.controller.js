@@ -1,7 +1,9 @@
-import { registerUser, loginUser } from '../services/auth.service.js';
+import { registerUser, loginUser, updatePassword } from '../services/auth.service.js';
+import * as profileService from '../services/profile.service.js';
 import { generateToken } from '../utils/generateToken.js';
 import { supabase } from '../config/supabaseClient.js';
 import { seedDefaultCategories } from '../services/category.service.js';
+import { logActivity } from '../services/activity.service.js';
 
 export const register = async (req, res, next) => {
     try {
@@ -12,14 +14,12 @@ export const register = async (req, res, next) => {
         }
 
         const user = await registerUser(name, email, password);
-
+        await logActivity(user.id, 'REGISTER', 'User created account', req.ip);
+        const { password: _, ...userWithoutPassword } = user;
         res.status(201).json({
             success: true,
             data: {
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                account_type: user.account_type,
+                ...userWithoutPassword,
                 token: generateToken(user.id),
             },
         });
@@ -37,14 +37,12 @@ export const login = async (req, res, next) => {
         }
 
         const user = await loginUser(email, password);
-
+        await logActivity(user.id, 'LOGIN', 'User logged in', req.ip);
+        const { password: _, ...userWithoutPassword } = user;
         res.status(200).json({
             success: true,
             data: {
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                account_type: user.account_type,
+                ...userWithoutPassword,
                 token: generateToken(user.id),
             },
         });
@@ -77,7 +75,7 @@ export const googleLogin = async (req, res, next) => {
         let user = existingUser;
 
         if (!user) {
-            console.log(`[GoogleLogin] Creating new Google user: ${email}`);
+            console.log(`[GoogleLogin] Creating new Google user: ${email} `);
             // Crear usuario con password placeholder
             const { data: newUser, error: insertError } = await supabase
                 .from('users')
@@ -112,17 +110,33 @@ export const googleLogin = async (req, res, next) => {
             }
         }
 
+        await logActivity(user.id, 'LOGIN_GOOGLE', 'User logged in via Google', req.ip);
+        const { password: _, ...userWithoutPassword } = user;
         res.status(200).json({
             success: true,
             data: {
-                id: user.id,
-                name: user.name,
-                email: user.email,
+                ...userWithoutPassword,
                 token: generateToken(user.id),
             },
         });
     } catch (error) {
         console.error('[GoogleLogin] Fatal error:', error);
+        next({ status: 400, message: error.message });
+    }
+};
+
+export const changePassword = async (req, res, next) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ success: false, message: 'Please provide current and new password' });
+        }
+
+        await updatePassword(req.user.id, currentPassword, newPassword);
+        await logActivity(req.user.id, 'PASSWORD_CHANGE', 'Password updated', req.ip);
+
+        res.status(200).json({ success: true, message: 'Password updated successfully' });
+    } catch (error) {
         next({ status: 400, message: error.message });
     }
 };

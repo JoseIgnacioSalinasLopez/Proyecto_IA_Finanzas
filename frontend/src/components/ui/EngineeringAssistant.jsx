@@ -858,7 +858,7 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                                         <Zap size={18} />
                                     </div>
                                     <h4 className="text-sm font-black uppercase tracking-tighter text-white">
-                                        Modo Simulación
+                                        {t('simulation_mode')}
                                     </h4>
                                 </div>
                                 <button onClick={() => setSimResult(null)} className="text-finance-muted hover:text-white transition-colors">
@@ -867,27 +867,27 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                             </div>
 
                             <p className="text-[11px] text-finance-muted mb-4 leading-relaxed">
-                                Si cancelaras <span className="text-white font-bold">{simResult.title}</span> (${simResult.amount}):
+                                {t('if_you_cancel').replace('{name}', <span className="text-white font-bold">{simResult.title}</span>).replace('{amount}', simResult.amount)}
                             </p>
 
                             <div className="grid grid-cols-2 gap-3 mb-4">
                                 <div className="p-3 rounded-xl bg-white/5 border border-white/5 text-center">
-                                    <p className="text-[10px] text-finance-muted uppercase mb-1">Buffer Actual</p>
-                                    <p className="text-lg font-mono font-black text-white">{simResult.oldBuffer}d</p>
+                                    <p className="text-[10px] text-finance-muted uppercase mb-1">{t('current_buffer')}</p>
+                                    <p className="text-lg font-mono font-black text-white">{simResult.oldBuffer}{t('days').substring(0, 1)}</p>
                                 </div>
                                 <div className="p-3 rounded-xl bg-finance-primary/10 border border-finance-primary/20 text-center">
-                                    <p className="text-[10px] text-finance-primary uppercase mb-1">Nuevo Buffer</p>
-                                    <p className="text-lg font-mono font-black text-finance-primary glow-cyan">{simResult.newBuffer}d</p>
+                                    <p className="text-[10px] text-finance-primary uppercase mb-1">{t('new_buffer')}</p>
+                                    <p className="text-lg font-mono font-black text-finance-primary glow-cyan">{simResult.newBuffer}{t('days').substring(0, 1)}</p>
                                 </div>
                             </div>
 
                             <div className="p-3 rounded-xl bg-[#00FFFF]/10 border border-[#00FFFF]/20 flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <TrendingUp size={14} className="text-[#00FFFF]" />
-                                    <span className="text-xs font-bold text-white">Impacto Positivo:</span>
+                                    <span className="text-xs font-bold text-white">{t('positive_impact')}</span>
                                 </div>
                                 <span className="text-sm font-mono font-black text-[#00FFFF]">
-                                    +{simResult.impact} días
+                                    +{simResult.impact} {t('days')}
                                 </span>
                             </div>
 
@@ -895,7 +895,7 @@ export default function EngineeringAssistant({ stats, onRefresh }) {
                                 onClick={() => setSimResult(null)}
                                 className="w-full mt-4 py-2.5 rounded-xl bg-finance-primary/20 hover:bg-finance-primary/30 text-finance-primary text-[11px] font-black uppercase tracking-widest transition-all border border-finance-primary/30"
                             >
-                                Entendido
+                                {t('understood')}
                             </button>
                         </div>
                     </motion.div>

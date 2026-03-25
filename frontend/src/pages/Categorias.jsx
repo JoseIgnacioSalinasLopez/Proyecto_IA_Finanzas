@@ -165,7 +165,7 @@ export default function Categorias() {
                             <div className="flex flex-col min-w-0">
                                 <span className="font-medium text-finance-text truncate text-sm">{cat.name}</span>
                                 {cat.is_editable === false && (
-                                    <span className="text-[10px] text-finance-muted uppercase font-bold tracking-wider">Sistema</span>
+                                    <span className="text-[10px] text-finance-muted uppercase font-bold tracking-wider">{t('system_label')}</span>
                                 )}
                             </div>
                         </div>
@@ -197,7 +197,7 @@ export default function Categorias() {
                     <div className="col-span-full text-center py-12 text-finance-muted border-2 border-dashed border-finance-700 rounded-2xl">
                         <Tags size={40} className="mx-auto mb-3 opacity-20" />
                         <p className="font-medium mb-1">
-                            {search ? `${t('no_results_for')} "${search}"` : `No hay categorías de ${activeTab === 'expense' ? 'gastos' : 'ingresos'} todavía`}
+                            {search ? `${t('no_results_for')} "${search}"` : t('no_categories_yet').replace('{type}', activeTab === 'expense' ? t('expenses_lower') : t('income_lower'))}
                         </p>
                         <button onClick={openCreate} className="text-finance-primary hover:underline font-semibold text-sm">
                             {t('add_category')}

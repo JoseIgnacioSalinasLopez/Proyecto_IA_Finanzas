@@ -2,6 +2,7 @@ import { useMemo, useRef } from 'react';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import { Bar } from 'react-chartjs-2';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -29,8 +30,11 @@ const glowPlugin = {
 };
 
 export default function BarChart({ data, title = 'Comparativa' }) {
+    const { t, language } = useLanguage();
     const chartRef = useRef(null);
     const { theme } = useTheme();
+
+    const chartTitleLabel = title === 'Comparativa' ? t('comparative_label') : title;
     const isDark = theme === 'dark';
 
     // Theme-adaptive colors
@@ -91,8 +95,8 @@ export default function BarChart({ data, title = 'Comparativa' }) {
                 }
             },
             title: {
-                display: !!title,
-                text: title,
+                display: !!chartTitleLabel,
+                text: chartTitleLabel,
                 color: titleColor,
                 align: 'start',
                 font: { family: "'Inter', sans-serif", size: 16, weight: 'bold' },
@@ -113,7 +117,7 @@ export default function BarChart({ data, title = 'Comparativa' }) {
                         let label = context.dataset.label || '';
                         if (label) label += ': ';
                         if (context.parsed.y !== null) {
-                            label += new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(context.parsed.y);
+                            label += new Intl.NumberFormat(language === 'en' ? 'en-US' : 'es-MX', { style: 'currency', currency: 'MXN' }).format(context.parsed.y);
                         }
                         return label;
                     }

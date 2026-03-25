@@ -79,14 +79,14 @@ export default function Navbar({ onMenuClick }) {
     };
 
     return (
-        <header className="bg-finance-900/80 backdrop-blur-xl border-b border-white/5 h-16 flex items-center justify-between px-4 md:px-6 sticky top-0 z-20 flex-shrink-0">
+        <header className="bg-finance-900/80 backdrop-blur-xl border-b border-white/5 h-16 flex items-center justify-between px-4 md:px-6 sticky top-0 z-50 flex-shrink-0">
             <div className="flex items-center gap-3">
                 {/* Botón hamburger — FUNCIONAL en móvil */}
                 <button
                     className="md:hidden text-finance-muted hover:text-finance-text hover:bg-white/5 p-2 rounded-lg transition-all"
                     onClick={onMenuClick}
-                    aria-label="Abrir menú de navegación"
-                    title="Abrir menú"
+                    aria-label={t('main_navigation')}
+                    title={t('open_menu')}
                 >
                     <Menu size={22} />
                 </button>
@@ -133,11 +133,17 @@ export default function Navbar({ onMenuClick }) {
                         <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{user?.email?.split('@')[0]}</p>
                     </div>
 
-                    {/* Avatar con inicial Elite */}
+                    {/* Avatar con inicial o imagen Elite */}
                     <div
-                        className="w-10 h-10 rounded-full bg-gradient-to-tr from-[var(--epic-purple)] via-[var(--epic-blue)] to-[var(--epic-cyan)] flex items-center justify-center text-white font-black text-sm shadow-[0_0_20px_rgba(0,255,255,0.3)] flex-shrink-0 cursor-pointer select-none ring-2 ring-white/10"
+                        className="w-10 h-10 rounded-full flex items-center justify-center text-white font-black text-sm shadow-[0_0_20px_rgba(0,255,255,0.3)] flex-shrink-0 cursor-pointer select-none ring-2 ring-white/10 overflow-hidden"
                     >
-                        {user?.name?.charAt(0).toUpperCase()}
+                        {user?.avatar_url ? (
+                            <img src={user.avatar_url} alt="User Avatar" className="w-full h-full object-cover" />
+                        ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-gradient-to-tr from-[var(--epic-purple)] via-[var(--epic-blue)] to-[var(--epic-cyan)]">
+                                {user?.name?.charAt(0).toUpperCase()}
+                            </div>
+                        )}
                     </div>
                 </NavLink>
             </div>

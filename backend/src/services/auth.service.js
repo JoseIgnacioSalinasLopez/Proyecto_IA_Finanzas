@@ -51,3 +51,24 @@ export const loginUser = async (email, password) => {
 
     return user;
 };
+export const updatePassword = async (userId, currentPassword, newPassword) => {
+    const { data: user, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+    if (error || !user) throw new Error('User not found');
+
+    const isMatch = await matchPassword(currentPassword, user.password);
+    if (!isMatch) throw new Error('Incorrect current password');
+
+    const hashedPassword = await hashPassword(newPassword);
+    const { error: updateError } = await supabase
+        .from('users')
+        .update({ password: hashedPassword })
+        .eq('id', userId);
+
+    if (updateError) throw new Error('Error updating password');
+    return true;
+};

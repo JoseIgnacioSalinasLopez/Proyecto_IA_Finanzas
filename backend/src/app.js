@@ -12,6 +12,7 @@ import chatRoutes from './routes/chat.routes.js';
 import budgetRoutes from './routes/budget.routes.js';
 import preferenceRoutes from './routes/preference.routes.js';
 import notificationRoutes from './routes/notification.routes.js';
+import activityRoutes from './routes/activity.routes.js';
 
 
 const app = express();
@@ -38,11 +39,18 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/budgets', budgetRoutes);
 app.use('/api/preferences', preferenceRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/activity', activityRoutes);
 
 
 // Healthcheck Route (Intacta)
 app.get('/api/health', (req, res) => {
+    console.log('[DEBUG] Healthcheck pinged');
     res.status(200).json({ status: 'ok', message: 'Mente Billete API is running' });
+});
+
+app.get('/api/test', (req, res) => {
+    console.log('[DEBUG] Test route hit');
+    res.status(200).json({ success: true, message: 'Backend is accessible' });
 });
 
 // Centralized Error Handling Middlewares (Intacto)

@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, Title } from 'chart.js';
 import { Doughnut } from 'react-chartjs-2';
 import { useTheme } from '../../context/ThemeContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 ChartJS.register(ArcElement, Tooltip, Legend, Title);
 
@@ -13,13 +14,15 @@ const centerTextPlugin = {
         const chartArea = chart.chartArea;
         if (!chartArea) return;
 
+        const language = chart.options.lang || 'es'; // Get current language
+
         ctx.restore();
         const centerX = (chartArea.left + chartArea.right) / 2;
         const centerY = (chartArea.top + chartArea.bottom) / 2;
 
         const dataset = chart.data.datasets[0];
         const sum = dataset.data.reduce((a, b) => a + Number(b), 0);
-        const formattedTotal = '$' + sum.toLocaleString('es-MX', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+        const formattedTotal = sum.toLocaleString(language === 'en' ? 'en-US' : 'es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
         const style = getComputedStyle(document.documentElement);
         const titleColor = style.getPropertyValue('--chart-title').trim() || '#1e1e3c';
@@ -33,7 +36,7 @@ const centerTextPlugin = {
 
         ctx.font = '500 13px Inter, sans-serif';
         ctx.fillStyle = textColor;
-        const labelText = 'Total';
+        const labelText = chart.options.totalLabel || 'Total';
         const labelWidth = ctx.measureText(labelText).width;
         ctx.fillText(labelText, centerX - labelWidth / 2, centerY - 15);
         ctx.save();
@@ -55,7 +58,7 @@ const pieGlowPlugin = {
 };
 
 export default function PieChart({ data, title = 'Distribución' }) {
-    const { theme } = useTheme();
+    const { t, language } = useLanguage();
     const isDark = theme === 'dark';
 
     const legendColor = isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(30, 30, 60, 0.75)';
@@ -64,6 +67,8 @@ export default function PieChart({ data, title = 'Distribución' }) {
     const tooltipTitle = isDark ? '#FFFFFF' : '#1e1e3c';
     const tooltipBody = isDark ? 'rgba(255,255,255,0.8)' : 'rgba(30,30,60,0.8)';
     const tooltipBorder = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.1)';
+
+    const chartTitleLabel = title === 'Distribución' ? t('distribution_label') : title;
 
     const styledData = useMemo(() => {
         if (!data || !data.datasets) return data;
@@ -92,6 +97,8 @@ export default function PieChart({ data, title = 'Distribución' }) {
         maintainAspectRatio: false,
         cutout: '72%',
         layout: { padding: { right: 10 } },
+        lang: language,
+        totalLabel: t('total_label'),
         plugins: {
             legend: {
                 position: 'right',
@@ -105,8 +112,8 @@ export default function PieChart({ data, title = 'Distribución' }) {
                 }
             },
             title: {
-                display: !!title,
-                text: title,
+                display: !!chartTitleLabel,
+                text: chartTitleLabel,
                 color: titleColor,
                 align: 'start',
                 font: { family: "'Inter', sans-serif", size: 14, weight: 'bold' },
@@ -127,7 +134,8 @@ export default function PieChart({ data, title = 'Distribución' }) {
                         const value = context.parsed;
                         const total = context.dataset.data.reduce((a, b) => a + Number(b), 0);
                         const percentage = ((value / total) * 100).toFixed(1);
-                        return ` ${context.label}: $${value.toFixed(2)} (${percentage}%)`;
+                        const formattedValue = value.toLocaleString(language === 'en' ? 'en-US' : 'es-MX', { style: 'currency', currency: 'MXN' });
+                        return ` ${context.label}: ${formattedValue} (${percentage}%)`;
                     }
                 }
             },

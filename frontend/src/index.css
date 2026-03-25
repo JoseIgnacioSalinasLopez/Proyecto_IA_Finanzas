@@ -53,7 +53,8 @@ body {
   --epic-sparkle: #FFD166;
 
   /* Color Bindings for Tailwind */
-  --bg-main: #0a0523; /* Deep Indigo/Purple base */
+  --bg-main: #0a0523;
+  /* Deep Indigo/Purple base */
   --bg-card: rgba(20, 15, 60, 0.7);
   --text-main: #FFFFFF;
   --text-muted: #a5b4fc;
@@ -117,15 +118,18 @@ body {
   --epic-indigo: #4F46E5;
   --epic-blue: #2F5BFF;
   --epic-electric-blue: #00D4FF;
-  --epic-cyan: #00A3A3; /* Darker Cyan for better legibility on white */
+  --epic-cyan: #00A3A3;
+  /* Darker Cyan for better legibility on white */
   --epic-pink: #FF4DA6;
-  --epic-sparkle: #D97706; /* Darker Yellow/Amber for legibility */
+  --epic-sparkle: #D97706;
+  /* Darker Yellow/Amber for legibility */
 
   --neon-glow: rgba(0, 212, 255, 0.1);
 
   /* Scrollbar Variables (Light) */
   --scrollbar-track: #f1f5f9;
-  --scrollbar-thumb: #8C30F5; /* Purple thumb */
+  --scrollbar-thumb: #8C30F5;
+  /* Purple thumb */
   --scrollbar-thumb-hover: #00D4FF;
 
   /* Chart Variables (Light) */
@@ -364,7 +368,7 @@ body {
 
   /* Skeleton Loader */
   .skeleton {
-    @apply bg-finance-700/50 rounded-xl animate-pulse;
+    @apply bg-white/5 rounded-xl animate-pulse;
   }
 
   /* Texto numérico financiero */
@@ -376,9 +380,11 @@ body {
   .glow-cyan {
     filter: drop-shadow(0 0 10px var(--epic-cyan));
   }
+
   .glow-pink {
     filter: drop-shadow(0 0 10px var(--epic-pink));
   }
+
   .glow-purple {
     filter: drop-shadow(0 0 10px var(--epic-purple));
   }
@@ -387,9 +393,11 @@ body {
   .bg-neon-cyan-pink {
     background: linear-gradient(135deg, var(--epic-cyan) 0%, var(--epic-pink) 100%);
   }
+
   .bg-neon-purple-blue {
     background: linear-gradient(135deg, var(--epic-purple) 0%, var(--epic-blue) 100%);
   }
+
   .bg-neon-indigo-cyan {
     background: linear-gradient(135deg, var(--epic-indigo) 0%, var(--epic-cyan) 100%);
   }
@@ -404,6 +412,19 @@ body {
 
   .glass-card {
     @apply backdrop-blur-2xl bg-white/5 border border-white/10 rounded-[2rem] shadow-2xl;
+  }
+
+  .card-elite {
+    @apply relative overflow-hidden rounded-[2.5rem] bg-black/40 backdrop-blur-xl border border-white/10 p-10 shadow-2xl;
+  }
+
+  .input-field-elite {
+    @apply w-full p-5 rounded-[1.2rem] bg-white/5 border border-white/10 text-finance-text focus:outline-none focus:border-finance-primary focus:ring-4 focus:ring-cyan-500/20 transition-all duration-300 placeholder:text-slate-400/50 font-bold;
+    backdrop-filter: blur(10px);
+  }
+
+  .light-mode .input-field-elite {
+    @apply bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:ring-cyan-600/10;
   }
 }
 
@@ -868,16 +889,18 @@ body {
   :root {
     --text-scale: 1.1;
   }
-  
+
   html {
-    font-size: 18px; /* Escala base para mejor legibilidad en proyectores */
+    font-size: 18px;
+    /* Escala base para mejor legibilidad en proyectores */
   }
 
   .card {
     padding: 2.5rem !important;
   }
 
-  .btn-epic, .btn-primary {
+  .btn-epic,
+  .btn-primary {
     padding-left: 2rem !important;
     padding-right: 2rem !important;
     font-size: 1.1rem !important;
