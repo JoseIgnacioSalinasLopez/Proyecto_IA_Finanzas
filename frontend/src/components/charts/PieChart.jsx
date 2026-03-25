@@ -59,6 +59,7 @@ const pieGlowPlugin = {
 
 export default function PieChart({ data, title = 'Distribución' }) {
     const { t, language } = useLanguage();
+    const { theme } = useTheme();
     const isDark = theme === 'dark';
 
     const legendColor = isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(30, 30, 60, 0.75)';
